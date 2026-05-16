@@ -24,6 +24,13 @@ const hoisted = vi.hoisted(() => ({
     logout: vi.fn(),
     showToast: vi.fn(),
     setCurrentProject: vi.fn(),
+    refreshProjects: vi.fn(),
+    projectState: {
+      currentProject: undefined as any,
+      projects: undefined as any,
+      isLoadingProjects: undefined as boolean | undefined,
+    },
+    createProject: vi.fn(),
     updateEntry: vi.fn(),
     updateCollectionsConfig: vi.fn(),
     deleteCollection: vi.fn(),
@@ -219,15 +226,19 @@ vi.mock('../contexts/useProject', () => {
     updatedAt: '2026-01-01T00:00:00.000Z',
     role: 'owner',
   };
-  const value = {
-    currentProject,
-    projects: [currentProject],
-    setCurrentProject: hoisted.mocks.setCurrentProject,
-    isLoadingProjects: false,
-  };
+  const buildValue = () => ({
+    currentProject: hoisted.mocks.projectState.currentProject === undefined ? currentProject : hoisted.mocks.projectState.currentProject,
+    projects: hoisted.mocks.projectState.projects === undefined ? [currentProject] : hoisted.mocks.projectState.projects,
+    setCurrentProject: (project: typeof currentProject | null) => {
+      hoisted.mocks.projectState.currentProject = project;
+      hoisted.mocks.setCurrentProject(project);
+    },
+    isLoadingProjects: hoisted.mocks.projectState.isLoadingProjects ?? false,
+    refreshProjects: hoisted.mocks.refreshProjects,
+  });
 
   return {
-    useProject: () => value,
+    useProject: () => buildValue(),
     useProjectPermissions: () => ({
       hasPermission: (resource: string, action: string) => hoisted.mocks.permissionMap[`${resource}:${action}`] ?? false,
     }),
@@ -424,7 +435,7 @@ vi.mock('../lib/api/projects', () => ({
     updateMemberRole: vi.fn(),
     removeMember: vi.fn(),
     addAgentMember: vi.fn(),
-    create: vi.fn(),
+    create: (...args: unknown[]) => hoisted.mocks.createProject(...args),
     delete: vi.fn(),
   },
 }));
@@ -477,6 +488,25 @@ export function setupWorkspaceTestHarness() {
     });
     window.dispatchEvent(new Event('resize'));
     hoisted.gitState.currentBranch = 'main';
+    hoisted.mocks.projectState.currentProject = undefined;
+    hoisted.mocks.projectState.projects = undefined;
+    hoisted.mocks.projectState.isLoadingProjects = undefined;
+    hoisted.mocks.refreshProjects.mockResolvedValue(undefined);
+    hoisted.mocks.createProject.mockResolvedValue({
+      project: {
+        id: 'project-created',
+        name: 'My First Project',
+        slug: 'my-first-project',
+        repoUrl: null,
+        repoProvider: 'local',
+        defaultBranch: 'main',
+        description: null,
+        avatarUrl: null,
+        settings: { contentRoot: 'content', environments: [], collections: [] },
+        createdAt: '2026-01-01T00:00:00.000Z',
+        updatedAt: '2026-01-01T00:00:00.000Z',
+      },
+    });
     hoisted.mocks.permissionMap = {
       'collections:read': true,
       'collections:create': true,
