@@ -1,0 +1,30 @@
+{
+  "name": "@oricms/client",
+  "version": "0.1.0",
+  "description": "TypeScript client SDK for OriCMS collections APIs",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "lint": "tsc --noEmit",
+    "test": "npm run build && node --test test/*.test.mjs"
+  },
+  "dependencies": {
+    "@ori/shared": "file:../shared"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}

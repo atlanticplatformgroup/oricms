@@ -1,0 +1,31 @@
+{
+  "name": "oricms",
+  "private": true,
+  "version": "2.0.0",
+  "type": "module",
+  "packageManager": "npm@10",
+  "engines": {
+    "node": ">=20",
+    "npm": ">=10"
+  },
+  "workspaces": [
+    "packages/*",
+    "packages/adapters/*"
+  ],
+  "scripts": {
+    "dev": "npx --yes concurrently -k -n api,web -c cyan,green \"npm run dev:api\" \"npm run dev:web\"",
+    "dev:web": "npm run dev -w @ori/web",
+    "prelint": "npm run build -w @ori/shared",
+    "verify": "npm run lint && npm run build:all && npm run type-check -w @ori/api && npm run db:verify-migrations -w @ori/api && npm run build:check -w @ori/web && npm run test",
+    "build": "npm run build -w @ori/shared && npm run build -w @ori/web",
+    "build:all": "npm run build --workspaces",
+    "test": "npm run test --workspaces",
+    "lint": "npm run lint --workspaces",
+    "dev:api": "npm run dev -w @ori/api"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.2.1",
+    "tsx": "^4.21.0",
+    "typescript": "~5.9.3"
+  }
+}

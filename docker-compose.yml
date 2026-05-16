@@ -1,0 +1,63 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: oricms-postgres
+    environment:
+      POSTGRES_USER: oricms
+      POSTGRES_PASSWORD: oricms
+      POSTGRES_DB: oricms
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U oricms -d oricms"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: ./packages/api/Dockerfile.dev
+    container_name: oricms-api
+    working_dir: /app/packages/api
+    environment:
+      DATABASE_URL: postgresql://oricms:oricms@postgres:5432/oricms
+      JWT_SECRET: dev-jwt-secret-change-in-production-min-32-chars
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890}
+      NODE_ENV: development
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./packages/api/src:/app/packages/api/src
+      - ./packages/api/prisma:/app/packages/api/prisma
+      - ./packages/shared/src:/app/packages/shared/src
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: >
+      sh -c "cd /app/packages/api && npx prisma migrate dev --name init && npx tsx src/index.ts"
+
+  web:
+    build:
+      context: .
+      dockerfile: ./packages/web/Dockerfile.dev
+    container_name: oricms-web
+    working_dir: /app/packages/web
+    environment:
+      DOCKER_ENV: 'true'
+      VITE_API_URL: http://oricms-api:3001
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./packages/web/src:/app/packages/web/src
+      - ./packages/web/public:/app/packages/web/public
+      - ./packages/web/index.html:/app/packages/web/index.html
+      - ./packages/web/vite.config.ts:/app/packages/web/vite.config.ts
+      - ./packages/shared/src:/app/packages/shared/src
+    depends_on:
+      - api
+
+volumes:
+  postgres_data:

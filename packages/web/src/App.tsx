@@ -1,0 +1,326 @@
+import { useEffect, useMemo, useState } from 'react';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
+import { Center, Loader } from '@mantine/core';
+import { useAuth } from './contexts/useAuth';
+import { useProject, useProjectPermissions } from './contexts/useProject';
+import { WorkspaceRouterProvider, useWorkspaceRouterContext } from './contexts/workspace/WorkspaceRouterContext';
+import { useToast } from './contexts/ToastContext';
+import { useGitStatus } from './hooks/useGitStatus';
+import { useCollectionBrowseModel } from './hooks/useCollectionBrowseModel';
+import { SECONDARY_RAIL_STORAGE_KEY } from './lib/workspace/constants';
+import { workspaceExtensionRegistry } from './lib/workspace/registry';
+import { buildWorkspacePath } from './lib/workspace/routing';
+import { useWorkspaceData } from './hooks/useWorkspaceData';
+import { useCollectionConfigPersistence } from './hooks/useCollectionConfigPersistence';
+import { useWorkspaceBranchSync } from './hooks/useWorkspaceBranchSync';
+import { useWorkspaceCapabilities } from './hooks/useWorkspaceCapabilities';
+import { useWorkspaceRouteNormalization } from './hooks/useWorkspaceRouteNormalization';
+import { WorkspaceAppContent } from './components/workspace/WorkspaceAppContent';
+
+function AppWithRouter() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { user, logout } = useAuth();
+  const { showToast } = useToast();
+  const { currentProject, projects, setCurrentProject, isLoadingProjects } = useProject();
+  const { hasPermission } = useProjectPermissions();
+  const { status: gitStatus, refresh: refreshGitStatus } = useGitStatus();
+  const queryClient = useQueryClient();
+
+  const {
+    activeEntryId,
+    activeHistoryView,
+    activeCollectionSettingsView,
+    activeBranchName,
+    activeProjectSlug,
+    activeSchemaMode,
+    activeSecondaryId,
+    activeSection,
+    redirectTo,
+  } = useWorkspaceRouterContext();
+
+  const [secondaryRailCollapsed, setSecondaryRailCollapsed] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.localStorage.getItem(SECONDARY_RAIL_STORAGE_KEY) === 'true';
+  });
+
+  const availableSections = useMemo(
+    () => workspaceExtensionRegistry.getSections().filter((config) => hasPermission(config.permission.resource, config.permission.action)),
+    [hasPermission],
+  );
+  const capabilities = useWorkspaceCapabilities(hasPermission);
+  const navigateTo = (to: string, replace = false) => navigate(to, replace ? { replace: true } : undefined);
+
+  const { currentBranchName, isBranchSyncing, dataBranchName } = useWorkspaceBranchSync({
+    projectId: currentProject?.id ?? null,
+    projectDefaultBranch: currentProject?.defaultBranch ?? null,
+    activeProjectSlug,
+    activeBranchName,
+    activeSection,
+    activeSecondaryId,
+    activeEntryId,
+    activeSchemaMode,
+    activeHistoryView,
+    activeCollectionSettingsView,
+    gitBranchName: gitStatus?.branch,
+    queryClient,
+    refreshGitStatus,
+    showToast,
+    navigate,
+  });
+
+  const {
+    collectionsQuery,
+    contentTypes,
+    collections,
+    componentSchemaMap,
+    assetOptions,
+    assetMap,
+    secondaryOptions,
+    selectedSecondaryOption,
+    selectedCollection,
+    selectedContentType,
+    primaryField,
+    secondaryField,
+    tableAssetMap,
+    selectedEntryQuery,
+    selectedEntryRevision,
+    selectedSchema,
+    selectedSchemaDocument,
+    schemaSecondaryOptions,
+    assetsQuery,
+    globalAssetsQuery,
+    globalAssetRecords,
+    componentSchemasQuery,
+  } = useWorkspaceData({
+    projectId: currentProject?.id ?? null,
+    activeSection,
+    activeSecondaryId,
+    activeEntryId,
+    activeSchemaMode,
+    branchName: dataBranchName,
+    canManageGlobalMedia: capabilities.canManageGlobalMedia,
+  });
+
+  const collectionBrowse = useCollectionBrowseModel({
+    projectId: currentProject?.id ?? null,
+    branchName: dataBranchName,
+    activeSecondaryId,
+    selectedCollection,
+    selectedContentType,
+    collections,
+    contentTypes,
+    tableAssetMap,
+  });
+
+  const selectedEntry = useMemo(
+    () => collectionBrowse.entries.find((entry) => entry.$id === activeEntryId) ?? selectedEntryQuery.data?.entry ?? null,
+    [activeEntryId, collectionBrowse.entries, selectedEntryQuery.data],
+  );
+  const selectedEntryLoading = selectedEntryQuery.isLoading && !selectedEntry;
+  const selectedEntryError = selectedEntryQuery.isError && !selectedEntry;
+
+  const {
+    updateCollectionsConfigMutation,
+    deleteCollectionMutation,
+  } = useCollectionConfigPersistence({
+    projectId: currentProject?.id ?? null,
+    activeProjectSlug,
+    activeBranchName: currentBranchName,
+    activeSection,
+    showToast,
+    queryClient,
+    navigate,
+  });
+
+  const activeSectionLabel = workspaceExtensionRegistry.getSection(activeSection)?.label ?? 'Workspace';
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    window.localStorage.setItem(SECONDARY_RAIL_STORAGE_KEY, String(secondaryRailCollapsed));
+  }, [secondaryRailCollapsed]);
+
+  useWorkspaceRouteNormalization({
+    activeProjectSlug,
+    currentProjectSlug: currentProject?.slug ?? null,
+    pathname: location.pathname,
+    navigate,
+    availableSections,
+    activeSection,
+    activeSecondaryId,
+    currentBranchName,
+    activeSchemaMode,
+    collections,
+    collectionsLoading: collectionsQuery.isLoading,
+    schemaSecondaryOptions,
+    secondaryOptions,
+    isBranchSyncing,
+  });
+
+  if (redirectTo) {
+    return <Navigate to={redirectTo} replace />;
+  }
+
+  if (!currentProject || isBranchSyncing) {
+    return (
+      <Center py="xl">
+        <Loader size="sm" />
+      </Center>
+    );
+  }
+
+  return (
+    <WorkspaceAppContent
+      activeProjectSlug={activeProjectSlug}
+      currentBranchName={currentBranchName}
+      collectionManagerProps={{
+        selectedCollection,
+        collections,
+        contentTypes,
+        selectedCollectionEntryCount: collectionBrowse.selectedCollectionEntryCount,
+        showToast,
+        onPersistCreate: async (nextCollection, headers) => {
+          await updateCollectionsConfigMutation.mutateAsync({
+            nextCollections: [...collections, nextCollection],
+            nextCollectionId: nextCollection.id,
+            action: 'save',
+            headers,
+          });
+        },
+        onPersistSaveSettings: async (nextCollections, nextCollectionId, headers) => {
+          await updateCollectionsConfigMutation.mutateAsync({
+            nextCollections,
+            nextCollectionId,
+            action: 'save',
+            headers,
+          });
+        },
+        onPersistDelete: async (collectionId, nextCollectionId, headers) => {
+          await deleteCollectionMutation.mutateAsync({
+            collectionId,
+            nextCollectionId,
+            headers,
+          });
+        },
+      }}
+      editorProps={{
+        projectId: currentProject.id,
+        selectedCollection,
+        selectedContentType,
+        selectedEntry,
+        selectedEntryRevision,
+        entries: collectionBrowse.entries,
+        primaryField,
+        collections,
+        contentTypes,
+        componentSchemaMap,
+        assetOptions,
+        assetMap,
+        assetsLoading: assetsQuery.isLoading || globalAssetsQuery.isLoading,
+        assetRecords: assetsQuery.data?.assets ?? [],
+        globalAssetRecords,
+        canCreateEntries: capabilities.canCreateEntries,
+        canUpdateEntries: capabilities.canUpdateEntries,
+        canDeleteEntries: capabilities.canDeleteEntries,
+        showToast,
+        queryClient,
+        onNavigateToEntry: (entryId: string) => {
+          if (!activeProjectSlug || !selectedCollection) return;
+          navigateTo(buildWorkspacePath(activeProjectSlug, 'collections', selectedCollection.id, { entryId, branchName: currentBranchName }));
+        },
+        onNavigateToCollection: () => {
+          if (!activeProjectSlug || !selectedCollection) return;
+          navigateTo(buildWorkspacePath(activeProjectSlug, 'collections', selectedCollection.id, { branchName: currentBranchName }), true);
+        },
+      }}
+      entryHistoryProps={{
+        projectId: currentProject.id,
+        selectedCollection,
+        selectedEntry,
+        activeHistoryView,
+        canUpdateEntries: capabilities.canUpdateEntries,
+        currentBranchName,
+      }}
+      schemaEditorProps={{
+        projectId: currentProject.id,
+        activeSchemaMode,
+        selectedSchema,
+        selectedSchemaDocument,
+        showToast,
+        queryClient,
+      }}
+      navigateTo={navigateTo}
+      workspaceShellProps={{
+        currentProject,
+        projects,
+        setCurrentProject,
+        isLoadingProjects,
+        user,
+        logout,
+        gitStatus,
+        availableSections,
+        activeSection,
+        activeSectionLabel,
+        secondaryRailCollapsed,
+        setSecondaryRailCollapsed,
+        canCreateCollections: capabilities.canCreateCollections,
+        activeSchemaMode,
+        componentSchemaData: componentSchemasQuery.data ?? [],
+        contentTypes,
+        collections,
+        activeProjectSlug,
+        navigateTo,
+        secondaryOptions,
+        activeSecondaryId,
+        selectedSecondaryOption,
+        showToast,
+        refreshGitStatus,
+        canCreateAssets: capabilities.canCreateAssets,
+        canUpdateAssets: capabilities.canUpdateAssets,
+        canDeleteAssets: capabilities.canDeleteAssets,
+        canManageGlobalMedia: capabilities.canManageGlobalMedia,
+        currentBranchName,
+        selectedCollection,
+        activeEntryId,
+        activeHistoryView,
+        activeCollectionSettingsView,
+        selectedEntry,
+        primaryField,
+        secondaryField,
+        collectionBrowse,
+        canCreateEntries: capabilities.canCreateEntries,
+        canUpdateEntries: capabilities.canUpdateEntries,
+        canDeleteEntries: capabilities.canDeleteEntries,
+        canUpdateCollections: capabilities.canUpdateCollections,
+        canDeleteCollections: capabilities.canDeleteCollections,
+        selectedEntryLoading,
+        selectedEntryError,
+        retrySelectedEntry: () => {
+          collectionBrowse.retryEntries();
+          void selectedEntryQuery.refetch();
+        },
+        selectedSchemaDocument,
+        updateCollectionsConfigPending: updateCollectionsConfigMutation.isPending,
+        assetsQueryLoading: assetsQuery.isLoading || globalAssetsQuery.isLoading,
+      }}
+    />
+  );
+}
+
+function App() {
+  const { currentProject, projects, setCurrentProject, isLoadingProjects } = useProject();
+
+  return (
+    <WorkspaceRouterProvider
+      projects={projects}
+      currentProject={currentProject}
+      setCurrentProject={setCurrentProject}
+      isLoadingProjects={isLoadingProjects}
+    >
+      <AppWithRouter />
+    </WorkspaceRouterProvider>
+  );
+}
+
+export default App;
