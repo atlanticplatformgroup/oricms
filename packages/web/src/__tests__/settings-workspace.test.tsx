@@ -139,7 +139,25 @@ describe('Settings workspace', () => {
     expect(await screen.findByRole('heading', { name: 'Global Media' })).toBeInTheDocument();
     expect(screen.getByText('Curate shared brand assets and reusable files for the organization.')).toBeInTheDocument();
     expect(await screen.findByRole('button', { name: 'Upload global asset' })).toBeInTheDocument();
+    expect(screen.getByLabelText('Search global assets')).toHaveAttribute('placeholder', 'Search assets');
+    expect(screen.getByRole('radio', { name: 'Docs' })).toBeInTheDocument();
     expect(screen.getAllByText('logo-primary.png').length).toBeGreaterThan(0);
+  });
+
+  it('uses a focused empty state instead of disabled global media filters before assets exist', async () => {
+    setViewportWidth(1440);
+    mocks.permissionMap['settings:update'] = true;
+    mocks.listGlobalAssets.mockResolvedValueOnce({ assets: [] });
+
+    renderApp('/project-one/b/main/settings/global-media');
+
+    expect(await screen.findByText('No global assets yet')).toBeInTheDocument();
+    expect(screen.getByText('Upload approved logos, brand photography, documents, or other reusable files before editors need to select them across projects.')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Upload global asset' })).toBeInTheDocument();
+    expect(screen.queryByLabelText('Search global assets')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Global media tag')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Global media sort')).not.toBeInTheDocument();
+    expect(screen.queryByText('Inspector')).not.toBeInTheDocument();
   });
 
   it('hides global media management from settings navigation for non-managers', async () => {

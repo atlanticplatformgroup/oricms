@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Alert, Badge, Button, Select, SegmentedControl, Stack } from '@mantine/core';
+import { Alert, Badge, Button, Group, Select, SegmentedControl, Stack, Text } from '@mantine/core';
 import { getAssetTags, type AssetMetadata } from '@ori/shared';
 import { globalAssetsApi, type GlobalAssetDetail, type GlobalAssetListItem } from '../../../lib/api/assets';
 import { useAssetBrowseState } from '../../../hooks/useAssetBrowseState';
@@ -35,6 +35,9 @@ export function GlobalMediaSettingsView({
     enabled: Boolean(projectId),
   });
 
+  const allGlobalAssets = globalAssetsQuery.data?.assets ?? [];
+  const hasGlobalAssets = allGlobalAssets.length > 0;
+
   const {
     search,
     setSearch,
@@ -51,9 +54,11 @@ export function GlobalMediaSettingsView({
     filteredAssets,
     tagOptions,
   } = useAssetBrowseState({
-    assets: globalAssetsQuery.data?.assets ?? [],
+    assets: allGlobalAssets,
     getAssetId: (asset) => asset.assetId,
   });
+
+  const hasTagFilter = tagOptions.length > 1;
 
   const selectedListAsset = useMemo(
     () => filteredAssets.find((asset) => asset.assetId === selectedAssetId) ?? null,
@@ -152,128 +157,142 @@ export function GlobalMediaSettingsView({
       <WorkspaceSection
         title="Global Media Library"
         description="Curate brand assets and reusable files that editors can select across projects."
-        badge={<WorkspaceMetricBadge>{`${filteredAssets.length} of ${globalAssetsQuery.data?.assets.length ?? 0} shown`}</WorkspaceMetricBadge>}
-        actions={canCreateAssets ? <Button onClick={() => setUploadOpened(true)}>Upload global asset</Button> : undefined}
+        badge={<WorkspaceMetricBadge>{hasGlobalAssets ? `${filteredAssets.length} of ${allGlobalAssets.length} shown` : 'No assets yet'}</WorkspaceMetricBadge>}
       >
         <Stack gap="sm">
-          <WorkspaceToolbar
-            controls={(
-              <WorkspaceFieldGrid cols={{ base: 1, md: 4 }}>
-                <WorkspaceSearchField
-                  ariaLabel="Search global assets"
-                  placeholder="Search name, alt text, caption, or tag"
-                  value={search}
-                  onChange={setSearch}
-                />
-                <Select
-                  aria-label="Global media tag"
-                  data={tagOptions}
-                  value={selectedTag}
-                  onChange={(value) => setSelectedTag(value || 'all')}
-                />
-                <SegmentedControl
-                  aria-label="Global media type"
-                  data={[
-                    { value: 'all', label: 'All' },
-                    { value: 'images', label: 'Images' },
-                    { value: 'documents', label: 'Documents' },
-                  ]}
-                  value={selectedType}
-                  onChange={(value) => setSelectedType((value as 'all' | 'images' | 'documents') || 'all')}
-                  fullWidth
-                  style={{ minWidth: 280 }}
-                />
-                <Select
-                  aria-label="Global media sort"
-                  data={[
-                    { value: 'newest', label: 'Newest first' },
-                    { value: 'oldest', label: 'Oldest first' },
-                    { value: 'name', label: 'Name' },
-                    { value: 'size', label: 'Size' },
-                  ]}
-                  value={selectedSort}
-                  onChange={(value) => setSelectedSort((value as 'newest' | 'oldest' | 'name' | 'size') || 'newest')}
-                />
-              </WorkspaceFieldGrid>
-            )}
-            actions={(
-              <SegmentedControl
-                aria-label="Global media view"
-                data={[
-                  { value: 'list', label: 'List' },
-                  { value: 'grid', label: 'Grid' },
-                ]}
-                value={viewMode}
-                onChange={(value) => setViewMode((value as 'list' | 'grid') || 'list')}
-              />
-            )}
-          />
-
-          <WorkspaceSplitMain
-            primary={filteredAssets.length ? (
-              viewMode === 'grid' ? (
-                <WorkspaceFieldGrid cols={{ base: 1, sm: 2, md: 2, xl: 3 }}>
-                  {filteredAssets.map((asset) => (
-                    <AssetGridItem
-                      key={asset.assetId}
-                      asset={asset}
-                      selected={asset.assetId === selectedAssetId}
-                      onClick={() => setSelectedAssetId(asset.assetId)}
+          {!hasGlobalAssets ? (
+            <Alert color="gray" title="No global assets yet">
+              <Group justify="space-between" align="center" wrap="wrap" gap="md">
+                <Text size="sm">
+                  Upload approved logos, brand photography, documents, or other reusable files before editors need to select them across projects.
+                </Text>
+                {canCreateAssets ? <Button onClick={() => setUploadOpened(true)}>Upload global asset</Button> : null}
+              </Group>
+            </Alert>
+          ) : (
+            <>
+              <WorkspaceToolbar
+                controls={(
+                  <>
+                    <WorkspaceSearchField
+                      ariaLabel="Search global assets"
+                      placeholder="Search assets"
+                      value={search}
+                      onChange={setSearch}
+                      maw={360}
                     />
-                  ))}
-                </WorkspaceFieldGrid>
-              ) : (
-                <Stack gap="sm">
-                  {filteredAssets.map((asset) => (
-                    <AssetListItem
-                      key={asset.assetId}
-                      asset={asset}
-                      selected={asset.assetId === selectedAssetId}
-                      density="compact"
-                      action={<Badge variant="outline" color="teal">Global</Badge>}
-                      onClick={() => setSelectedAssetId(asset.assetId)}
+                    {hasTagFilter ? (
+                      <Select
+                        aria-label="Global media tag"
+                        data={tagOptions}
+                        value={selectedTag}
+                        onChange={(value) => setSelectedTag(value || 'all')}
+                        w={180}
+                      />
+                    ) : null}
+                    <SegmentedControl
+                      aria-label="Global media type"
+                      data={[
+                        { value: 'all', label: 'All' },
+                        { value: 'images', label: 'Images' },
+                        { value: 'documents', label: 'Docs' },
+                      ]}
+                      value={selectedType}
+                      onChange={(value) => setSelectedType((value as 'all' | 'images' | 'documents') || 'all')}
                     />
-                  ))}
-                </Stack>
-              )
-            ) : (
-              <WorkspaceEmptyState
-                title="No global assets match"
-                message="Adjust the filters or upload a shared asset to start curating the global library."
+                    <Select
+                      aria-label="Global media sort"
+                      data={[
+                        { value: 'newest', label: 'Newest' },
+                        { value: 'oldest', label: 'Oldest' },
+                        { value: 'name', label: 'Name' },
+                        { value: 'size', label: 'Size' },
+                      ]}
+                      value={selectedSort}
+                      onChange={(value) => setSelectedSort((value as 'newest' | 'oldest' | 'name' | 'size') || 'newest')}
+                      w={150}
+                    />
+                  </>
+                )}
+                actions={(
+                  <>
+                    <SegmentedControl
+                      aria-label="Global media view"
+                      data={[
+                        { value: 'list', label: 'List' },
+                        { value: 'grid', label: 'Grid' },
+                      ]}
+                      value={viewMode}
+                      onChange={(value) => setViewMode((value as 'list' | 'grid') || 'list')}
+                    />
+                    {canCreateAssets ? <Button onClick={() => setUploadOpened(true)}>Upload global asset</Button> : null}
+                  </>
+                )}
               />
-            )}
-            secondary={(
-              <MediaInspector
-                selectedAsset={selectedAsset}
-                usageDetailLoading={selectedAssetQuery.isLoading}
-                usageTitle="Global usage"
-                usageDescription="Cross-project usage reporting for global assets will appear here."
-                emptyUsageMessage="Cross-project usage reporting is not available for this global asset yet."
-                metadataDraft={metadataDraft}
-                onMetadataDraftChange={setMetadataDraft}
-                hasUnsavedMetadata={hasUnsavedMetadata}
-                canUpdateAssets={canUpdateAssets}
-                canDeleteAssets={canDeleteAssets}
-                metadataSaving={updateMetadataMutation.isPending}
-                deletePending={deleteAssetMutation.isPending}
-                onSaveMetadata={() => updateMetadataMutation.mutate()}
-                onDeleteAsset={() => deleteAssetMutation.mutate()}
-                onCopyPath={() => {
-                  if (!selectedAsset) return;
-                  void navigator.clipboard.writeText(selectedAsset.assetId);
-                  showToast('Global asset identifier copied', 'success');
-                }}
-                onOpenAsset={() => {
-                  if (!selectedAsset) return;
-                  window.open(selectedAsset.url, '_blank', 'noopener,noreferrer');
-                }}
-              />
-            )}
-          />
 
-          <Alert color="teal" title="Shared across projects">
-            Editors can select these assets from supported media pickers. Changes here affect the shared global library rather than a single project branch.
-          </Alert>
+              <WorkspaceSplitMain
+                primary={filteredAssets.length ? (
+                  viewMode === 'grid' ? (
+                    <WorkspaceFieldGrid cols={{ base: 1, sm: 2, md: 2, xl: 3 }}>
+                      {filteredAssets.map((asset) => (
+                        <AssetGridItem
+                          key={asset.assetId}
+                          asset={asset}
+                          selected={asset.assetId === selectedAssetId}
+                          onClick={() => setSelectedAssetId(asset.assetId)}
+                        />
+                      ))}
+                    </WorkspaceFieldGrid>
+                  ) : (
+                    <Stack gap="sm">
+                      {filteredAssets.map((asset) => (
+                        <AssetListItem
+                          key={asset.assetId}
+                          asset={asset}
+                          selected={asset.assetId === selectedAssetId}
+                          density="compact"
+                          action={<Badge variant="outline" color="teal">Global</Badge>}
+                          onClick={() => setSelectedAssetId(asset.assetId)}
+                        />
+                      ))}
+                    </Stack>
+                  )
+                ) : (
+                  <WorkspaceEmptyState
+                    title="No global assets match"
+                    message="Adjust or clear the current filters to return to the full global library."
+                  />
+                )}
+                secondary={(
+                  <MediaInspector
+                    selectedAsset={selectedAsset}
+                    usageDetailLoading={selectedAssetQuery.isLoading}
+                    usageTitle="Global usage"
+                    usageDescription="Cross-project usage reporting for global assets will appear here."
+                    emptyUsageMessage="Cross-project usage reporting is not available for this global asset yet."
+                    metadataDraft={metadataDraft}
+                    onMetadataDraftChange={setMetadataDraft}
+                    hasUnsavedMetadata={hasUnsavedMetadata}
+                    canUpdateAssets={canUpdateAssets}
+                    canDeleteAssets={canDeleteAssets}
+                    metadataSaving={updateMetadataMutation.isPending}
+                    deletePending={deleteAssetMutation.isPending}
+                    onSaveMetadata={() => updateMetadataMutation.mutate()}
+                    onDeleteAsset={() => deleteAssetMutation.mutate()}
+                    onCopyPath={() => {
+                      if (!selectedAsset) return;
+                      void navigator.clipboard.writeText(selectedAsset.assetId);
+                      showToast('Global asset identifier copied', 'success');
+                    }}
+                    onOpenAsset={() => {
+                      if (!selectedAsset) return;
+                      window.open(selectedAsset.url, '_blank', 'noopener,noreferrer');
+                    }}
+                  />
+                )}
+              />
+            </>
+          )}
         </Stack>
       </WorkspaceSection>
 
