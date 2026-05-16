@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
-import { Center, Loader } from '@mantine/core';
+import { Alert, Button, Center, Container, Group, Loader, Paper, Stack, Text, TextInput, Title } from '@mantine/core';
 import { useAuth } from './contexts/useAuth';
 import { useProject, useProjectPermissions } from './contexts/useProject';
 import { WorkspaceRouterProvider, useWorkspaceRouterContext } from './contexts/workspace/WorkspaceRouterContext';
@@ -17,13 +17,100 @@ import { useWorkspaceBranchSync } from './hooks/useWorkspaceBranchSync';
 import { useWorkspaceCapabilities } from './hooks/useWorkspaceCapabilities';
 import { useWorkspaceRouteNormalization } from './hooks/useWorkspaceRouteNormalization';
 import { WorkspaceAppContent } from './components/workspace/WorkspaceAppContent';
+import { projectsApi } from './lib/api/projects';
+
+function slugifyProjectName(name: string) {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+    .slice(0, 64);
+}
+
+function FirstProjectOnboarding({
+  setCurrentProject,
+  refreshProjects,
+}: {
+  setCurrentProject: ReturnType<typeof useProject>['setCurrentProject'];
+  refreshProjects: ReturnType<typeof useProject>['refreshProjects'];
+}) {
+  const [projectName, setProjectName] = useState('My First Project');
+  const [isCreating, setIsCreating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const { showToast } = useToast();
+
+  const createProject = async (event: FormEvent) => {
+    event.preventDefault();
+    const name = projectName.trim() || 'Untitled Project';
+    const slug = slugifyProjectName(name) || `project-${Date.now().toString().slice(-6)}`;
+
+    setIsCreating(true);
+    setError(null);
+
+    try {
+      const { project } = await projectsApi.create({ name, slug });
+      setCurrentProject({ ...project, role: 'owner' });
+      await refreshProjects();
+      showToast('Project created. Welcome to your workspace.', 'success');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to create project');
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
+  return (
+    <Container size="sm" py="xl">
+      <Paper withBorder p="xl" radius="lg">
+        <Stack gap="lg">
+          <Stack gap="xs" align="center">
+            <Text size="sm" c="dimmed" tt="uppercase" fw={700}>
+              No projects yet
+            </Text>
+            <Title order={1} ta="center">
+              Create your first project
+            </Title>
+            <Text c="dimmed" ta="center" maw={560}>
+              Start with a managed Git-backed project. You can connect a remote repository, refine schemas,
+              and invite teammates after the workspace opens.
+            </Text>
+          </Stack>
+
+          {error ? (
+            <Alert color="red" title="Project creation failed">
+              {error}
+            </Alert>
+          ) : null}
+
+          <form onSubmit={createProject}>
+            <Stack gap="md">
+              <TextInput
+                label="Project name"
+                description="OriCMS will use this to create a clean workspace URL slug."
+                value={projectName}
+                required
+                onChange={(event) => setProjectName(event.currentTarget.value)}
+                placeholder="Marketing site"
+              />
+              <Group justify="flex-end">
+                <Button type="submit" disabled={isCreating} leftSection={isCreating ? <Loader size="xs" /> : undefined}>
+                  Create project
+                </Button>
+              </Group>
+            </Stack>
+          </form>
+        </Stack>
+      </Paper>
+    </Container>
+  );
+}
 
 function AppWithRouter() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
   const { showToast } = useToast();
-  const { currentProject, projects, setCurrentProject, isLoadingProjects } = useProject();
+  const { currentProject, projects, setCurrentProject, isLoadingProjects, refreshProjects } = useProject();
   const { hasPermission } = useProjectPermissions();
   const { status: gitStatus, refresh: refreshGitStatus } = useGitStatus();
   const queryClient = useQueryClient();
@@ -160,6 +247,10 @@ function AppWithRouter() {
 
   if (redirectTo) {
     return <Navigate to={redirectTo} replace />;
+  }
+
+  if (!isLoadingProjects && projects.length === 0 && !currentProject) {
+    return <FirstProjectOnboarding setCurrentProject={setCurrentProject} refreshProjects={refreshProjects} />;
   }
 
   if (!currentProject || isBranchSyncing) {

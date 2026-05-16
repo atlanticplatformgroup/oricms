@@ -1,4 +1,4 @@
-import { fireEvent, screen } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { mocks, renderApp, setupWorkspaceTestHarness, waitForCollectionsHeading } from '../test-utils/workspaceTestHarness';
 import { request } from '../lib/api/core';
@@ -19,6 +19,35 @@ function setViewportWidth(width: number) {
 }
 
 describe('Workspace shell', () => {
+  it('renders first-project onboarding instead of an endless loader when the user has no projects', async () => {
+    mocks.projectState.currentProject = null;
+    mocks.projectState.projects = [];
+    mocks.projectState.isLoadingProjects = false;
+
+    renderApp('/');
+
+    expect(await screen.findByRole('heading', { name: 'Create your first project' })).toBeInTheDocument();
+    expect(screen.getByRole('textbox', { name: /project name/i })).toHaveValue('My First Project');
+    expect(screen.getByRole('button', { name: 'Create project' })).toBeInTheDocument();
+  });
+
+  it('creates a managed project from the first-project onboarding state', async () => {
+    mocks.projectState.currentProject = null;
+    mocks.projectState.projects = [];
+    mocks.projectState.isLoadingProjects = false;
+
+    renderApp('/');
+
+    fireEvent.change(await screen.findByRole('textbox', { name: /project name/i }), { target: { value: 'Launch Site' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Create project' }));
+
+    await waitFor(() => {
+      expect(mocks.createProject).toHaveBeenCalledWith({ name: 'Launch Site', slug: 'launch-site' });
+    });
+    expect(mocks.setCurrentProject).toHaveBeenCalledWith(expect.objectContaining({ id: 'project-created', role: 'owner' }));
+    expect(mocks.refreshProjects).toHaveBeenCalled();
+  });
+
   it('renders catalog-driven collection groups in the secondary rail', async () => {
     setViewportWidth(1440);
     vi.mocked(request).mockImplementation(async (endpoint: string) => {
