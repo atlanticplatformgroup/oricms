@@ -1,0 +1,462 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserType {
+  HUMAN
+  AGENT
+}
+
+model User {
+  id            String         @id @default(uuid())
+  email         String         @unique
+  name          String
+  type          UserType       @default(HUMAN)
+  avatarUrl     String?
+  githubId      String?        @unique
+  password      String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  preferences   Json           @default("{}")
+  agentConsents AgentConsent[]
+  agentTokens   AgentToken[]
+  auditLogs     AuditLog[]
+  sessions      Session[]
+  invitesSent   ProjectInvite[] @relation("InvitedBy")
+  memberships   ProjectMember[]
+
+  @@map("users")
+}
+
+model Project {
+  id             String          @id @default(uuid())
+  name           String
+  slug           String          @unique
+  repoUrl        String?
+  repoProvider   String          @default("github")
+  defaultBranch  String          @default("main")
+  description    String?
+  avatarUrl      String?
+  settings       Json            @default("{}")
+  webhookSecret  String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  workspaceDir   String          @default("")
+  agentAccess    AgentAccess?
+  agentAuditLogs AgentAuditLog[]
+  agentConsents  AgentConsent[]
+  agentTokens    AgentToken[]
+  auditLogs      AuditLog[]
+  builds         Build[]
+  cdnConfig      CdnConfig?
+  cdnExports     CdnExport[]
+  deliveryProjectionRecords DeliveryProjectionRecord[]
+  deliveryProjectionStates  DeliveryProjectionState[]
+  gitConfig      ProjectGitConfig?
+  invites        ProjectInvite[]
+  members        ProjectMember[]
+
+  @@map("projects")
+}
+
+model DeliveryProjectionState {
+  id              String   @id @default(uuid())
+  projectId       String
+  branch          String
+  revision        String
+  recordCount     Int      @default(0)
+  lastProjectedAt DateTime @default(now())
+  lastAttemptedAt DateTime @default(now())
+  lastError       String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  project         Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, branch])
+  @@index([projectId, branch, revision])
+  @@map("delivery_projection_states")
+}
+
+model DeliveryProjectionRecord {
+  id              String   @id @default(uuid())
+  projectId       String
+  branch          String
+  collectionId    String
+  entryId         String
+  contentType     String?
+  slug            String?
+  publishedAt     String?
+  updatedAtSource String?
+  data            Json
+  projectedAt     DateTime @default(now())
+  project         Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, branch, collectionId, entryId])
+  @@index([projectId, branch, collectionId])
+  @@index([projectId, branch, collectionId, slug])
+  @@map("delivery_projection_records")
+}
+
+model ProjectMember {
+  id        String      @id @default(uuid())
+  role      ProjectRole @default(viewer)
+  userType  UserType    @default(HUMAN)
+  userId    String
+  projectId    String
+  createdAt DateTime    @default(now())
+  project      Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, projectId])
+  @@map("project_members")
+}
+
+model ProjectInvite {
+  id          String      @id @default(uuid())
+  email       String
+  role        ProjectRole @default(editor)
+  token       String      @unique
+  expiresAt   DateTime
+  usedAt      DateTime?
+  projectId      String
+  invitedById String
+  createdAt   DateTime    @default(now())
+  invitedBy   User        @relation("InvitedBy", fields: [invitedById], references: [id], onDelete: Cascade)
+  project        Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("project_invites")
+}
+
+model ProjectGitConfig {
+  id             String   @id @default(uuid())
+  encryptedToken String
+  tokenProvider  String   @default("github")
+  projectId         String   @unique
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  project           Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("project_git_configs")
+}
+
+model Session {
+  id            String    @id @default(uuid())
+  tokenHash     String    @unique
+  expiresAt     DateTime
+  userId        String
+  createdAt     DateTime  @default(now())
+  family        String?
+  parentHash    String?
+  revokedAt     DateTime?
+  revokedReason String?
+  rotatedAt     DateTime?
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([family])
+  @@map("sessions")
+}
+
+model AuditLog {
+  id           String   @id @default(uuid())
+  action       String
+  resourceType String
+  resourceId   String?
+  oldValue     Json?
+  newValue     Json?
+  ipAddress    String?
+  userAgent    String?
+  projectId       String
+  userId       String?
+  createdAt    DateTime @default(now())
+  project         Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user         User?    @relation(fields: [userId], references: [id])
+
+  @@index([projectId, createdAt])
+  @@index([userId, createdAt])
+  @@map("audit_logs")
+}
+
+model Build {
+  id            String      @id @default(uuid())
+  status        BuildStatus @default(pending)
+  branch        String
+  commit        String
+  commitMessage String
+  commitAuthor  String
+  triggeredBy   String
+  startedAt     DateTime?
+  completedAt   DateTime?
+  duration      Int?
+  logs          String?
+  outputUrl     String?
+  outputPath    String?
+  projectId        String
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  project          Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  cdnExports    CdnExport[]
+
+  @@index([projectId, createdAt])
+  @@index([projectId, status])
+  @@map("builds")
+}
+
+model CdnConfig {
+  id                 String   @id @default(uuid())
+  provider           String
+  bucket             String
+  region             String?
+  endpoint           String?
+  baseUrl            String?
+  encryptedAccessKey String
+  encryptedSecretKey String
+  projectId             String   @unique
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  project               Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("cdn_configs")
+}
+
+model CdnExport {
+  id                String          @id @default(uuid())
+  status            CdnExportStatus @default(pending)
+  sourcePath        String
+  destinationPrefix String
+  totalFiles        Int             @default(0)
+  uploadedFiles     Int             @default(0)
+  failedFiles       Int             @default(0)
+  errors            String[]        @default([])
+  urls              String[]        @default([])
+  startedAt         DateTime
+  completedAt       DateTime?
+  projectId            String
+  buildId           String?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  build             Build?          @relation(fields: [buildId], references: [id])
+  project              Project            @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, createdAt])
+  @@index([projectId, status])
+  @@map("cdn_exports")
+}
+
+model AgentAccess {
+  id                 String   @id @default(uuid())
+  enabled            Boolean  @default(false)
+  allowedBranches    String[] @default(["main"])
+  allowedCollections String[] @default([])
+  historyDepth       Int      @default(30)
+  historyDays        Int      @default(14)
+  deploymentMode     String   @default("cloud")
+  cloudProvider      String?
+  onPremiseEndpoint  String?
+  onPremiseModel     String?
+  projectId             String   @unique
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  createdBy          String?
+  project               Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("agent_access")
+}
+
+model AgentConsent {
+  id                 String    @id @default(uuid())
+  allowedCollections String[]  @default([])
+  allowedBranches    String[]  @default(["main"])
+  deploymentMode     String
+  termsVersion       String
+  termsAcceptedAt    DateTime
+  canRevokeAt        DateTime
+  revokedAt          DateTime?
+  revokedBy          String?
+  projectId             String
+  userId             String
+  createdAt          DateTime  @default(now())
+  project               Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, termsAcceptedAt])
+  @@map("agent_consent")
+}
+
+model AgentAuditLog {
+  id               String   @id @default(uuid())
+  timestamp        DateTime @default(now())
+  agentSessionId   String
+  filePath         String
+  branch           String
+  projectRole      String?
+  contentRead      Boolean  @default(false)
+  wasRedacted      Boolean  @default(false)
+  piiPatternsFound String[] @default([])
+  queryType        String?
+  diagnosisId      String?
+  projectId           String
+  project             Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, timestamp])
+  @@index([agentSessionId])
+  @@index([projectId, filePath])
+  @@map("agent_audit_logs")
+}
+
+model AgentToken {
+  id             String               @id @default(uuid())
+  token          String               @unique
+  name           String
+  description    String?
+  sessionId      String?
+  projectId         String
+  userId         String?
+  createdAt      DateTime             @default(now())
+  lastUsedAt     DateTime?
+  expiresAt      DateTime?
+  revokedAt      DateTime?
+  revokedBy      String?
+  changeRequests AgentChangeRequest[]
+  project           Project                 @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user           User?                @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([projectId])
+  @@index([userId])
+  @@index([token])
+  @@map("agent_tokens")
+}
+
+model AgentWriteConfig {
+  id                 String         @id @default(uuid())
+  projectId             String
+  collectionName     String
+  mode               AgentWriteMode @default(HUMAN_REVIEW)
+  targetBranch       String         @default("agent/updates")
+  autoMerge          Boolean        @default(false)
+  canCreate          Boolean        @default(true)
+  canUpdate          Boolean        @default(true)
+  canDelete          Boolean        @default(false)
+  allowedFields      String[]       @default([])
+  blockedFields      String[]       @default([])
+  maxWritesPerHour   Int            @default(10)
+  reviewerIds        String[]       @default([])
+  requireValidation  Boolean        @default(true)
+  maxFieldsPerChange Int            @default(5)
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+
+  @@unique([projectId, collectionName])
+  @@map("agent_write_configs")
+}
+
+model AgentChangeRequest {
+  id                     String       @id @default(uuid())
+  projectId              String
+  agentTokenId           String
+  collectionName         String
+  entryId                String?
+  action                 String
+  before                 Json?
+  after                  Json
+  baseCommitSha          String?
+  sourceBranch           String
+  targetBranch           String
+  status                 ChangeStatus @default(PENDING)
+  requestedAt            DateTime     @default(now())
+  reviewedAt             DateTime?
+  reviewedBy             String?
+  reviewComment          String?
+  commitSha              String?
+  pullRequestUrl         String?
+  idempotencyKey         String?
+  payloadFingerprint     String?
+  resultData             Json?
+  confirmationRequired   Boolean      @default(false)
+  confirmationExpiresAt  DateTime?
+  confirmedAt            DateTime?
+  confirmedByPrincipalId String?
+  agentToken             AgentToken   @relation(fields: [agentTokenId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, status])
+  @@index([agentTokenId])
+  @@index([projectId, agentTokenId, action, idempotencyKey])
+  @@map("agent_change_requests")
+}
+
+model ResourceLock {
+  id           String   @id @default(uuid())
+  projectId    String
+  branch       String?
+  resourceType String
+  resourceId   String
+  mode         String
+  holderType   String
+  holderId     String
+  holderName   String
+  sessionId    String
+  reason       String
+  lockTokenHash String?
+  acquiredAt   DateTime @default(now())
+  expiresAt    DateTime
+
+  @@index([projectId, branch, resourceType, resourceId, expiresAt])
+  @@index([projectId, holderId, sessionId, expiresAt])
+  @@map("resource_locks")
+}
+
+model BranchEnvironmentMapping {
+  id            String   @id @default(uuid())
+  projectId        String
+  branchPattern String
+  environmentId String?
+  autoDeploy    Boolean  @default(false)
+  deployOnMerge Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([projectId, branchPattern])
+  @@map("branch_environment_mappings")
+}
+
+enum ProjectRole {
+  owner
+  admin
+  editor
+  viewer
+}
+
+enum BuildStatus {
+  pending
+  running
+  success
+  failed
+  cancelled
+}
+
+enum CdnExportStatus {
+  pending
+  uploading
+  invalidating
+  completed
+  failed
+}
+
+enum AgentWriteMode {
+  HUMAN_REVIEW
+  AUTO_PUBLISH
+  BRANCH_BASED
+}
+
+enum ChangeStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  MERGED
+  AUTO_PUBLISHED
+}

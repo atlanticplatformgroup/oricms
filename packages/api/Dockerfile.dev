@@ -1,0 +1,34 @@
+FROM node:20-alpine
+
+# Install dependencies for Prisma (OpenSSL and other required libs)
+# Install git for repository operations
+RUN apk add --no-cache openssl libc6-compat git
+
+# Configure git for commits
+RUN git config --global user.email "oricms@localhost" && \
+    git config --global user.name "OriCMS"
+
+WORKDIR /app
+
+# Copy root package files for workspace setup
+COPY package*.json ./
+COPY packages/api/package*.json ./packages/api/
+COPY packages/shared/package*.json ./packages/shared/
+
+# Install dependencies (this will also link the shared package)
+RUN npm install
+
+# Copy source code
+COPY packages/api/src ./packages/api/src
+COPY packages/api/prisma ./packages/api/prisma
+COPY packages/shared/src ./packages/shared/src
+
+# Generate Prisma client
+WORKDIR /app/packages/api
+RUN npx prisma generate
+
+# Expose port
+EXPOSE 3001
+
+# Default command
+CMD ["sh", "-c", "npx prisma migrate dev --name init && npx tsx src/index.ts"]
