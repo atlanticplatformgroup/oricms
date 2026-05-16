@@ -50,7 +50,6 @@ npm run build -w @ori/shared
 npm run db:generate -w @ori/api
 npm run db:migrate -w @ori/api
 npm run db:verify-migrations -w @ori/api
-npm run db:seed -w @ori/api
 ```
 
 ## Run the App
