@@ -141,8 +141,13 @@ describe('Media workspace', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Inspector')).toBeInTheDocument();
-      expect(screen.getByLabelText('Alt text')).toBeInTheDocument();
-      expect(screen.getByDisplayValue('Current hero image')).toBeInTheDocument();
+      expect(screen.getByText('current-hero.jpg')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getAllByText('current-hero.jpg')[0]);
+
+    await waitFor(() => {
+      expect(screen.getByLabelText('Alt text')).toHaveValue('Current hero image');
     });
 
     fireEvent.change(screen.getByLabelText('Alt text'), { target: { value: 'Updated alt copy' } });
