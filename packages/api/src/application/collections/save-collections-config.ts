@@ -1,6 +1,7 @@
 import type { CollectionConfig } from '@ori/shared';
 import { CollectionService } from '../../collections/service';
 import { dispatchLifecycleEvent } from '../../plugins/dispatcher';
+import { seedAgentWriteConfigsForProjectAgents } from '../../projects/agent-write-configs';
 import type { CollectionMutationContext, SaveCollectionsResult } from './types';
 
 function getAuthor(actor: CollectionMutationContext['actor']): { name: string; email: string } {
@@ -34,6 +35,13 @@ export async function saveCollectionsConfig(
   }
 
   await service.saveCollections(collections, getAuthor(context.actor));
+
+  await seedAgentWriteConfigsForProjectAgents({
+    projectId: context.projectId,
+    collectionNames: createdCollections.map((collection) => collection.id),
+    existingCollectionNames: existingCollections.map((collection) => collection.id),
+    targetBranch: context.branch,
+  });
 
   for (const collection of createdCollections) {
     await dispatchLifecycleEvent('collection.afterCreate', {
