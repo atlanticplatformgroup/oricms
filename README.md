@@ -2,6 +2,32 @@
 
 OriCMS is a Git-backed CMS built around projects, collections, and explicit publishing workflows. The repository is the source of truth for schemas, entries, assets, and collection configuration; OriCMS provides the admin app, APIs, preview flow, delivery hooks, and agent controls around that repository.
 
+## Project Status
+
+OriCMS is in early public preview. The current repository is intended for technical review, architecture feedback, and early contributor interest while the core product surfaces continue to harden.
+
+What works today:
+
+- project-based content workspace with collections, schemas, assets, members, and settings surfaces
+- Express + Prisma management API and delivery routes
+- React + Vite admin app backed by shared TypeScript contracts
+- governed Agent Gateway for bootstrap-first context, preflight checks, and permission-aware agent operations
+- package-local verification scripts for API, web, shared contracts, client, CLI, and adapters
+
+Still in progress:
+
+- production deployment guidance and release packaging
+- deeper contributor onboarding and issue triage
+- additional examples, screenshots, and integration recipes
+- continued polish of first-run and empty-state experiences
+
+Feedback wanted:
+
+- Git-backed CMS architecture and repository layout
+- project, collection, and workflow model clarity
+- agent gateway design, safety boundaries, and developer ergonomics
+- local setup friction or missing contributor documentation
+
 ## Repository Layout
 
 ```text
@@ -38,7 +64,6 @@ npm run build -w @ori/shared
 npm run db:generate -w @ori/api
 npm run db:migrate -w @ori/api
 npm run db:verify-migrations -w @ori/api
-npm run db:seed -w @ori/api
 ```
 
 Use the compose stack for Postgres in local development, then run the API and web app with `npm run dev`. Starting the compose `api` and `web` services at the same time will conflict on ports `3001` and `5173`.
@@ -89,3 +114,7 @@ Start here:
 - [docs/getting-started/README.md](./docs/getting-started/README.md)
 - [docs/reference/api-overview.md](./docs/reference/api-overview.md)
 - [docs/contributor/README.md](./docs/contributor/README.md)
+
+## License
+
+OriCMS is licensed under the [MIT License](./LICENSE).

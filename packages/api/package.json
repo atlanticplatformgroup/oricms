@@ -15,7 +15,6 @@
     "db:generate": "prisma generate",
     "db:verify-migrations": "node scripts/verify-migrations.mjs",
     "db:studio": "prisma studio",
-    "db:seed": "tsx src/db/seed.ts",
     "lint": "eslint src/**/*.ts",
     "test": "vitest run"
   },
