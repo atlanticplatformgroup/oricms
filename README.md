@@ -2,11 +2,6 @@
 
 OriCMS is a Git-backed CMS built around projects, collections, and explicit publishing workflows. The repository is the source of truth for schemas, entries, assets, and collection configuration; OriCMS provides the admin app, APIs, preview flow, delivery hooks, and agent controls around that repository.
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="./docs/assets/oricms-workspace-preview.svg">
-  <img src="./docs/assets/oricms-workspace-preview.svg" alt="OriCMS workspace preview showing collections, entries, and agent controls" width="100%">
-</picture>
-
 ## Project Status
 
 OriCMS is in early public preview. The current repository is intended for technical review, architecture feedback, and early contributor interest while the core product surfaces continue to harden.
