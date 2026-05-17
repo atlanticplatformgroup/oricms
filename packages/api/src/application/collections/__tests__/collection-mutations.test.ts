@@ -8,6 +8,7 @@ const {
   dispatchLifecycleEventMock,
   dispatchPluginHookMock,
   lifecycleHookErrorClass,
+  seedAgentWriteConfigsForProjectAgentsMock,
 } = vi.hoisted(() => ({
   initMock: vi.fn(),
   listCollectionsMock: vi.fn(),
@@ -16,6 +17,7 @@ const {
   dispatchLifecycleEventMock: vi.fn(),
   dispatchPluginHookMock: vi.fn(),
   lifecycleHookErrorClass: class LifecycleHookError extends Error {},
+  seedAgentWriteConfigsForProjectAgentsMock: vi.fn(),
 }));
 
 vi.mock('../../../collections/service', () => ({
@@ -34,6 +36,10 @@ vi.mock('../../../plugins/dispatcher', () => ({
 
 vi.mock('../../../plugins/hook-dispatcher', () => ({
   dispatchPluginHook: (...args: unknown[]) => dispatchPluginHookMock(...args),
+}));
+
+vi.mock('../../../projects/agent-write-configs', () => ({
+  seedAgentWriteConfigsForProjectAgents: (...args: unknown[]) => seedAgentWriteConfigsForProjectAgentsMock(...args),
 }));
 
 import { saveCollectionsConfig } from '../save-collections-config';
@@ -59,6 +65,7 @@ describe('collection application services', () => {
     deleteCollectionMock.mockResolvedValue(undefined);
     dispatchLifecycleEventMock.mockResolvedValue(undefined);
     dispatchPluginHookMock.mockResolvedValue(undefined);
+    seedAgentWriteConfigsForProjectAgentsMock.mockResolvedValue(0);
   });
 
   it('dispatches create lifecycle events for newly added collections', async () => {
@@ -72,6 +79,12 @@ describe('collection application services', () => {
       collectionId: 'pages',
     }));
     expect(saveCollectionsMock).toHaveBeenCalled();
+    expect(seedAgentWriteConfigsForProjectAgentsMock).toHaveBeenCalledWith({
+      projectId: 'project-1',
+      collectionNames: ['pages'],
+      existingCollectionNames: ['posts'],
+      targetBranch: 'main',
+    });
     expect(dispatchLifecycleEventMock).toHaveBeenCalledWith('collection.afterCreate', expect.objectContaining({
       collectionId: 'pages',
     }));
