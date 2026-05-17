@@ -35,7 +35,19 @@ npm run build -w @ori/shared
 npm run db:generate -w @ori/api
 npm run db:migrate -w @ori/api
 npm run db:verify-migrations -w @ori/api
-npm run db:seed -w @ori/api
+```
+
+If `docker-compose up -d postgres` reports that `oricms-postgres` already exists, inspect the existing container before deleting anything:
+
+```bash
+docker ps -a --filter name=oricms-postgres
+```
+
+If it is an old stopped local container that you no longer need, remove it and start Postgres again:
+
+```bash
+docker rm oricms-postgres
+docker-compose up -d postgres
 ```
 
 For normal local development, do not start the compose `api` or `web` services if you also plan to run `npm run dev`. They use the same local ports.

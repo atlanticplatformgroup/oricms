@@ -3,6 +3,17 @@
 Date: 2026-05-16
 Branch: `polish/initial-product-qa-audit`
 
+## Status note
+
+This document is a historical audit snapshot from the first product-readiness pass. Some findings have since been addressed in follow-up branches; keep the original observations for traceability, but verify current `main` before treating any item below as still open.
+
+Resolved or partially addressed after this audit:
+
+- zero-project first-run onboarding now has an explicit create-project path
+- global media empty-state polish has been tightened
+- the broken seed step has been removed from current setup docs and package scripts
+- local Docker container-name recovery guidance has been added to the developer setup guide
+
 ## Scope
 
 This audit is intentionally read-only. It captures the first polish backlog before changing behavior.
