@@ -1,7 +1,8 @@
-import type { AgentWriteMode, PrismaClient } from '@prisma/client';
-import { ROLE_PERMISSION_MATRIX, type ProjectRole } from '@ori/shared';
+import type { PrismaClient } from '@prisma/client';
+import type { ProjectRole } from '@ori/shared';
 import { CollectionService } from '../collections/service';
 import { prisma } from '../lib/prisma';
+import { seedAgentWriteConfigsForRoles } from './agent-write-configs';
 
 type BootstrapPrismaClient = Pick<PrismaClient, 'project' | 'agentAccess' | 'agentWriteConfig'>;
 
@@ -78,52 +79,13 @@ export async function bootstrapAgentProjectDefaults(params: {
     },
   });
 
-  const collectionPermissions = ROLE_PERMISSION_MATRIX[role].collections;
-  const canCreate = Boolean(collectionPermissions.create);
-  const canUpdate = Boolean(collectionPermissions.update);
-  const canDelete = Boolean(collectionPermissions.delete);
-
-  if (!canCreate && !canUpdate && !canDelete) {
-    return {
-      defaultBranch,
-      allowedCollections,
-      writeConfigsCreated: 0,
-    };
-  }
-
-  let writeConfigsCreated = 0;
-  for (const collectionId of collectionIds) {
-    const existingWriteConfig = await prismaClient.agentWriteConfig.findUnique({
-      where: {
-        projectId_collectionName: {
-          projectId,
-          collectionName: collectionId,
-        },
-      },
-    });
-
-    if (existingWriteConfig) {
-      continue;
-    }
-
-    await prismaClient.agentWriteConfig.create({
-      data: {
-        projectId,
-        collectionName: collectionId,
-        mode: 'AUTO_PUBLISH' satisfies AgentWriteMode,
-        targetBranch: defaultBranch,
-        canCreate,
-        canUpdate,
-        canDelete,
-        allowedFields: [],
-        blockedFields: [],
-        maxWritesPerHour: 50,
-        maxFieldsPerChange: 25,
-        requireValidation: true,
-      },
-    });
-    writeConfigsCreated += 1;
-  }
+  const writeConfigsCreated = await seedAgentWriteConfigsForRoles({
+    projectId,
+    collectionNames: collectionIds,
+    roles: [role],
+    targetBranch: defaultBranch,
+    prismaClient,
+  });
 
   return {
     defaultBranch,
