@@ -12,6 +12,7 @@ function normalizeResource(resource: string): Resource | null {
     case 'content_types':
       return 'contentTypes';
     case 'schemas':
+    case 'entries':
     case 'assets':
     case 'settings':
     case 'members':

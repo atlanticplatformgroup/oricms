@@ -25,17 +25,17 @@ Current public agent routes include:
 - `GET /schemas/:id`
 - `GET /structure`
 - `GET /history`
-- `GET /collections/:name/entries`
-- `GET /collections/:name/entries/:id`
+- `GET /schemas/:name/entries`
+- `GET /schemas/:name/entries/:id`
 - `GET /files/*`
 - `POST /diagnose`
 - `POST /preflight`
 - `POST /schemas`
 - `PUT /schemas/:name`
-- `POST /collections/:name/entries`
-- `PUT /collections/:name/entries/:id`
-- `POST /collections/:name/entries/:id/transition`
-- `DELETE /collections/:name/entries/:id`
+- `POST /schemas/:name/entries`
+- `PUT /schemas/:name/entries/:id`
+- `POST /schemas/:name/entries/:id/transition`
+- `DELETE /schemas/:name/entries/:id`
 
 ## Admin Surface
 

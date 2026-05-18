@@ -87,9 +87,9 @@ describe('Workspace shell', () => {
   it('shows section rail based on permissions', () => {
     setViewportWidth(1440);
     mocks.permissionMap = {
-      'collections:read': true,
-      'collections:create': true,
-      'collections:update': true,
+      'entries:read': true,
+      'entries:create': true,
+      'entries:update': true,
       'schemas:read': false,
       'assets:read': false,
       'members:read': false,

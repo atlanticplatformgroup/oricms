@@ -264,6 +264,7 @@ export interface CollectionDisplayConfig {
 
 export type Resource =
   | 'schemas'
+  | 'entries'
   | 'assets'
   | 'settings'
   | 'members'
@@ -313,6 +314,7 @@ export interface ExtendedPermissionSet extends PermissionSet {
 export const ROLE_PERMISSION_MATRIX: Record<ProjectRole, Record<Resource, Partial<Record<Action, boolean>>>> = {
   owner: {
     schemas: { create: true, read: true, update: true, delete: true },
+    entries: { create: true, read: true, update: true, delete: true, publish: true },
     assets: { create: true, read: true, update: true, delete: true },
     settings: { read: true, update: true },
     members: { create: true, read: true, update: true, delete: true },
@@ -322,6 +324,7 @@ export const ROLE_PERMISSION_MATRIX: Record<ProjectRole, Record<Resource, Partia
   },
   admin: {
     schemas: { create: true, read: true, update: true, delete: true },
+    entries: { create: true, read: true, update: true, delete: true, publish: true },
     assets: { create: true, read: true, update: true, delete: true },
     settings: { read: true, update: true },
     members: { create: true, read: true, update: true, delete: true },
@@ -331,6 +334,7 @@ export const ROLE_PERMISSION_MATRIX: Record<ProjectRole, Record<Resource, Partia
   },
   editor: {
     schemas: {},
+    entries: { create: true, read: true, update: true, delete: false, publish: true },
     assets: { create: true, read: true, update: true, delete: false },
     settings: { read: false, update: false },
     members: {},
@@ -340,6 +344,7 @@ export const ROLE_PERMISSION_MATRIX: Record<ProjectRole, Record<Resource, Partia
   },
   viewer: {
     schemas: {},
+    entries: {},
     assets: { read: true },
     settings: { read: false, update: false },
     members: {},
@@ -355,6 +360,13 @@ export const RESOURCE_ACTION_PERMISSION_MAP: Record<Resource, Partial<Record<Act
     read: 'canEditSchemas',
     update: 'canEditSchemas',
     delete: 'canEditSchemas',
+  },
+  entries: {
+    create: 'canCreateEntries',
+    read: 'canEditEntries',
+    update: 'canEditEntries',
+    delete: 'canDeleteEntries',
+    publish: 'canPublishEntries',
   },
   assets: {
     create: 'canCreateAssets',
@@ -407,10 +419,10 @@ function buildLegacyPermissionSet(role: ProjectRole): ExtendedPermissionSet {
     canManageMembers: hasRolePermission(role, 'members', 'read'),
     canDeleteProject: role === 'owner',
     canEditContentTypes: hasRolePermission(role, 'contentTypes', 'read'),
-    canCreateEntries: hasRolePermission(role, 'collections', 'create'),
-    canEditEntries: hasRolePermission(role, 'collections', 'read'),
-    canDeleteEntries: hasRolePermission(role, 'collections', 'delete'),
-    canPublishEntries: hasRolePermission(role, 'collections', 'publish'),
+    canCreateEntries: hasRolePermission(role, 'entries', 'create'),
+    canEditEntries: hasRolePermission(role, 'entries', 'read'),
+    canDeleteEntries: hasRolePermission(role, 'entries', 'delete'),
+    canPublishEntries: hasRolePermission(role, 'entries', 'publish'),
     canCreateAssets: hasRolePermission(role, 'assets', 'create'),
     canReadAssets: hasRolePermission(role, 'assets', 'read'),
     canUpdateAssets: hasRolePermission(role, 'assets', 'update'),

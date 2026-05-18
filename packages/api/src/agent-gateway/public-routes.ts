@@ -24,11 +24,11 @@ router.get('/v1/bootstrap', authenticateAgentToken, async (req, res) => {
   await getAgentBootstrap(req, res);
 });
 
-router.get('/v1/schemas', authenticateAgentToken, requirePermission('collections', 'read'), async (req, res) => {
+router.get('/v1/schemas', authenticateAgentToken, requirePermission('schemas', 'read'), async (req, res) => {
   await listAgentSchemas(req, res);
 });
 
-router.get('/v1/schemas/:id', authenticateAgentToken, requirePermission('collections', 'read'), async (req, res) => {
+router.get('/v1/schemas/:id', authenticateAgentToken, requirePermission('schemas', 'read'), async (req, res) => {
   await getAgentSchema(req, res);
 });
 
@@ -44,7 +44,15 @@ router.get('/v1/collections/:name/entries', authenticateAgentToken, requirePermi
   await listAgentCollectionEntries(req, res);
 });
 
+router.get('/v1/schemas/:name/entries', authenticateAgentToken, requirePermission('entries', 'read'), async (req, res) => {
+  await listAgentCollectionEntries(req, res);
+});
+
 router.get('/v1/collections/:name/entries/:id', authenticateAgentToken, requirePermission('collections', 'read'), async (req, res) => {
+  await getAgentCollectionEntry(req, res);
+});
+
+router.get('/v1/schemas/:name/entries/:id', authenticateAgentToken, requirePermission('entries', 'read'), async (req, res) => {
   await getAgentCollectionEntry(req, res);
 });
 

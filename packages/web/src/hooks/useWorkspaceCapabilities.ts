@@ -3,12 +3,12 @@ import type { useProjectPermissions } from '../contexts/useProject';
 type PermissionChecker = ReturnType<typeof useProjectPermissions>['hasPermission'];
 
 export function useWorkspaceCapabilities(hasPermission: PermissionChecker) {
-  const canCreateEntries = hasPermission('collections', 'create');
-  const canUpdateEntries = hasPermission('collections', 'update');
-  const canDeleteEntries = hasPermission('collections', 'delete');
-  const canCreateCollections = hasPermission('collections', 'create');
-  const canUpdateCollections = hasPermission('collections', 'update');
-  const canDeleteCollections = hasPermission('collections', 'delete');
+  const canCreateEntries = hasPermission('entries', 'create');
+  const canUpdateEntries = hasPermission('entries', 'update');
+  const canDeleteEntries = hasPermission('entries', 'delete');
+  const canCreateCollections = hasPermission('schemas', 'create');
+  const canUpdateCollections = hasPermission('schemas', 'update');
+  const canDeleteCollections = hasPermission('schemas', 'delete');
   const canCreateAssets = hasPermission('assets', 'create');
   const canUpdateAssets = hasPermission('assets', 'update');
   const canDeleteAssets = hasPermission('assets', 'delete');

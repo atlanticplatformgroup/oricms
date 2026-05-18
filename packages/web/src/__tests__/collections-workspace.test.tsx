@@ -18,14 +18,14 @@ describe('Collections workspace', () => {
   it('supports collection creation from the collections workspace', async () => {
     renderApp('/project-one/b/main/collections/posts');
 
-    fireEvent.click(screen.getByText('New collection'));
-    await waitFor(() => expect(screen.getByLabelText('Collection id')).toBeInTheDocument());
+    fireEvent.click(screen.getByText('New schema'));
+    await waitFor(() => expect(screen.getByLabelText('Schema id')).toBeInTheDocument());
 
-    fireEvent.change(screen.getByLabelText('Collection id'), { target: { value: 'newsroom' } });
+    fireEvent.change(screen.getByLabelText('Schema id'), { target: { value: 'newsroom' } });
     fireEvent.change(screen.getByLabelText('Label'), { target: { value: 'Newsroom' } });
     fireEvent.change(screen.getByLabelText('Singular label'), { target: { value: 'News item' } });
     fireEvent.change(screen.getByLabelText('Path'), { target: { value: 'content/newsroom' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Create collection' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Create schema' }));
 
     await waitFor(() => expect(mocks.updateCollectionsConfig).toHaveBeenCalledTimes(1));
   });
@@ -33,22 +33,22 @@ describe('Collections workspace', () => {
   it('blocks collection creation when the path duplicates an existing collection', async () => {
     renderApp('/project-one/b/main/collections/posts');
 
-    fireEvent.click(screen.getByText('New collection'));
-    await waitFor(() => expect(screen.getByLabelText('Collection id')).toBeInTheDocument());
+    fireEvent.click(screen.getByText('New schema'));
+    await waitFor(() => expect(screen.getByLabelText('Schema id')).toBeInTheDocument());
 
-    fireEvent.change(screen.getByLabelText('Collection id'), { target: { value: 'newsroom' } });
+    fireEvent.change(screen.getByLabelText('Schema id'), { target: { value: 'newsroom' } });
     fireEvent.change(screen.getByLabelText('Path'), { target: { value: 'content/posts' } });
 
     expect(screen.getByText('Collection path is already in use')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Create collection' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Create schema' })).toBeDisabled();
     expect(mocks.updateCollectionsConfig).not.toHaveBeenCalled();
   });
 
   it('deletes a collection through the dedicated collection API', async () => {
     renderApp('/project-one/b/main/collections/posts');
 
-    fireEvent.click(screen.getByLabelText('Collection settings'));
-    await waitFor(() => expect(screen.getByRole('heading', { name: /posts collection settings/i })).toBeInTheDocument());
+    fireEvent.click(screen.getByLabelText('Schema settings'));
+    await waitFor(() => expect(screen.getByRole('heading', { name: /posts schema settings/i })).toBeInTheDocument());
     fireEvent.click(screen.getByRole('button', { name: 'Delete collection' }));
 
     await waitFor(() => expect(mocks.deleteCollection).toHaveBeenCalledWith(
@@ -62,25 +62,25 @@ describe('Collections workspace', () => {
     expect(mocks.listEntries).not.toHaveBeenCalled();
   });
 
-  it('blocks collection settings save when the path duplicates another collection', async () => {
+  it('blocks schema settings save when the path duplicates another collection', async () => {
     renderApp('/project-one/b/main/collections/posts');
 
-    fireEvent.click(screen.getByLabelText('Collection settings'));
-    await waitFor(() => expect(screen.getByRole('heading', { name: /posts collection settings/i })).toBeInTheDocument());
+    fireEvent.click(screen.getByLabelText('Schema settings'));
+    await waitFor(() => expect(screen.getByRole('heading', { name: /posts schema settings/i })).toBeInTheDocument());
 
     fireEvent.change(screen.getByLabelText('Path'), { target: { value: 'content/pages' } });
 
     expect(screen.getByText('Collection path is already in use')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Save collection settings' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Save schema settings' })).toBeDisabled();
     expect(mocks.updateCollectionsConfig).not.toHaveBeenCalled();
   });
 
-  it('supports direct navigation to the collection settings route', async () => {
+  it('supports direct navigation to the schema settings route', async () => {
     renderApp('/project-one/b/main/collections/posts/settings');
 
-    await waitFor(() => expect(screen.getByRole('heading', { name: /posts collection settings/i })).toBeInTheDocument());
-    expect(screen.getByLabelText('Collection id')).toHaveValue('posts');
-    expect(screen.getByRole('button', { name: 'Save collection settings' })).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByRole('heading', { name: /posts schema settings/i })).toBeInTheDocument());
+    expect(screen.getByLabelText('Schema id')).toHaveValue('posts');
+    expect(screen.getByRole('button', { name: 'Save schema settings' })).toBeInTheDocument();
   });
 
   it('renders schema-defined editor sections instead of heuristic field buckets', async () => {

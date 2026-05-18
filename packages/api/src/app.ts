@@ -13,6 +13,7 @@ import webhooksRoutes from './webhooks/routes';
 import cdnRoutes from './cdn/routes';
 import contentTypeRoutes from './content-types/routes';
 import collectionRoutes from './collections/routes';
+import schemaAliasRoutes from './collections/schema-alias-routes';
 import lockRoutes from './locks/routes';
 import resourceRoutes from './resources/routes';
 import publicCollectionRoutes from './collections/public-routes';
@@ -129,6 +130,7 @@ export async function createApiRuntime(options: ApiAppOptions = {}): Promise<Api
   projectSubRouter.use('/cdn', cdnRoutes);
   projectSubRouter.use(['/content-types', '/content-types/'], contentTypeRoutes);
   projectSubRouter.use(['/collections', '/collections/'], collectionRoutes);
+  projectSubRouter.use(['/schemas', '/schemas/'], schemaAliasRoutes);
   projectSubRouter.use('/resources', resourceRoutes);
   projectSubRouter.use('/locks', lockRoutes);
   projectSubRouter.use('/graphql', graphqlRoutes);

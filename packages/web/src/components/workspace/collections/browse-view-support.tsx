@@ -43,7 +43,7 @@ export function CollectionBrowseHeaderActions(props: {
         </Fragment>
       ))}
       {(props.canUpdateCollections || props.canDeleteCollections) ? (
-        <WorkspaceHeaderActionIcon ariaLabel="Collection settings" onClick={props.onGoToCollectionSettings}>
+        <WorkspaceHeaderActionIcon ariaLabel="Schema settings" onClick={props.onGoToCollectionSettings}>
           <Cog6ToothIcon width={16} height={16} />
         </WorkspaceHeaderActionIcon>
       ) : null}
