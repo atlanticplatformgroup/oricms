@@ -32,10 +32,10 @@ export function CreateCollectionModal({
   onCreate,
 }: CreateCollectionModalProps) {
   return (
-    <Modal opened={opened} onClose={onClose} title="Create collection" centered>
+    <Modal opened={opened} onClose={onClose} title="Create schema" centered>
       <Stack gap="sm">
         <TextInput
-          label="Collection id"
+          label="Schema id"
           value={newCollection.id}
           onChange={(event) => setNewCollection((previous) => ({ ...previous, id: event.currentTarget.value }))}
         />
@@ -83,14 +83,14 @@ export function CreateCollectionModal({
           onChange={(event) => setNewCollection((previous) => ({ ...previous, description: event.currentTarget.value }))}
         />
         <Text size="xs" c="dimmed">
-          Creating a collection adds a new collection config tied to an existing content type. It does not create or delete schemas.
+          Creating a schema defines an entry set tied to an existing content type.
         </Text>
         <Group justify="flex-end">
           <Button variant="default" onClick={onClose}>
             Cancel
           </Button>
           <Button onClick={onCreate} loading={loading} disabled={Boolean(newCollection.path) && Boolean(pathError)}>
-            Create collection
+            Create schema
           </Button>
         </Group>
       </Stack>

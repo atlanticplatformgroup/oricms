@@ -8,7 +8,7 @@ describe('workspace extension registry', () => {
     const firstCount = registry.getSections().length;
     registry.initBuiltins();
     expect(registry.getSections()).toHaveLength(firstCount);
-    expect(registry.getSection('collections')?.label).toBe('Collections');
+    expect(registry.getSection('collections')?.label).toBe('Entries');
   });
 
   it('defines builtin sections and static sidebar options in registry order', () => {

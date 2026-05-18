@@ -23,6 +23,7 @@ export type WorkspaceRouteState = {
   historyView: boolean;
   collectionSettingsView: boolean;
   schemaMode: SchemaMode;
+  legacyCollectionRoute?: boolean;
 };
 
 export type RelationFieldTarget = {

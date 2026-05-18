@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildWorkspaceCompatibilityRedirect, normalizeWorkspaceCompatibilityRoute, parseLegacyWorkspacePath, parseWorkspacePath } from '../routing';
+import { buildWorkspaceCompatibilityRedirect, buildWorkspacePath, normalizeWorkspaceCompatibilityRoute, parseLegacyWorkspacePath, parseWorkspacePath } from '../routing';
 
 describe('workspace routing', () => {
   it('parses only canonical branch-aware workspace routes as current-state paths', () => {
@@ -43,6 +43,28 @@ describe('workspace routing', () => {
       secondaryId: 'environments',
     });
     expect(buildWorkspaceCompatibilityRedirect(canonicalAliasRoute!, 'main')).toBe('/project-one/b/main/settings/environments');
+  });
+
+  it('uses content as the canonical route segment for entry browsing', () => {
+    expect(buildWorkspacePath('project-one', 'collections', 'posts', { branchName: 'main' })).toBe('/project-one/b/main/content/posts');
+    expect(buildWorkspacePath('project-one', 'collections', 'posts', {
+      branchName: 'main',
+      entryId: 'post-1',
+    })).toBe('/project-one/b/main/content/posts/entries/post-1');
+
+    expect(parseWorkspacePath('/project-one/b/main/content/posts')).toMatchObject({
+      projectSlug: 'project-one',
+      branchName: 'main',
+      section: 'collections',
+      secondaryId: 'posts',
+    });
+  });
+
+  it('redirects legacy collections routes to canonical content routes', () => {
+    const legacyCollectionRoute = parseWorkspacePath('/project-one/b/main/collections/posts');
+
+    expect(legacyCollectionRoute).not.toBeNull();
+    expect(buildWorkspaceCompatibilityRedirect(legacyCollectionRoute!, 'main')).toBe('/project-one/b/main/content/posts');
   });
 
   it('does not redirect canonical branch-aware routes that already match the contract', () => {

@@ -93,6 +93,7 @@ vi.mock('../../resources/service', () => ({
 }));
 
 import router from '../routes';
+import schemaAliasRouter from '../schema-alias-routes';
 
 const app = express();
 app.use(express.json());
@@ -105,6 +106,7 @@ app.use((req, _res, next) => {
   next();
 });
 app.use('/api/v1/projects/:projectId/collections', router);
+app.use('/api/v1/projects/:projectId/schemas', schemaAliasRouter);
 
 describe('Collections routes', () => {
   const projectId = '11111111-1111-4111-8111-111111111111';
@@ -191,6 +193,27 @@ describe('Collections routes', () => {
       collectionType: 'user',
       isSystem: false,
     });
+  });
+
+  it('exposes schema-first aliases for schema config and entries', async () => {
+    listCollectionsMock.mockResolvedValueOnce([
+      { id: 'posts', label: 'Posts', contentType: 'post', path: 'content/posts' },
+    ]);
+
+    const configResponse = await request(app).get(`/api/v1/projects/${projectId}/schemas`);
+
+    expect(configResponse.status).toBe(200);
+    expect(configResponse.body.data.collections[0]).toMatchObject({ id: 'posts' });
+
+    const entryResponse = await request(app)
+      .post(`/api/v1/projects/${projectId}/schemas/posts/entries`)
+      .send({ title: 'Schema Entry' });
+
+    expect(entryResponse.status).toBe(201);
+    expect(createEntryServiceMock).toHaveBeenCalledWith(expect.objectContaining({
+      projectId,
+      collectionId: 'posts',
+    }), { title: 'Schema Entry' }, expect.any(Object));
   });
 
   it('lists collection entries with parsed query params', async () => {

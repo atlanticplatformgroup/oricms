@@ -123,7 +123,7 @@ export function WorkspaceShellMainContent(props: {
     <>
       <Suspense fallback={<Center py="xl"><Loader size="sm" /></Center>}>
         {layout.activeSection === 'collections' ? (
-          <WorkspaceFeatureBoundary title={layout.activeEntryId ? 'Entry editor' : layout.activeCollectionSettingsView ? 'Collection settings' : 'Entries'}>
+          <WorkspaceFeatureBoundary title={layout.activeEntryId ? 'Entry editor' : layout.activeCollectionSettingsView ? 'Schema settings' : 'Entries'}>
             <CollectionsSection
               emptySecondaryId={EMPTY_SECONDARY}
               selectedCollection={layout.selectedCollection}

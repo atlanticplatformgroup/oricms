@@ -40,14 +40,14 @@ export function useCollectionConfigPersistence({
       return { nextCollectionId: nextCollectionId ?? null, action };
     },
     onSuccess: ({ nextCollectionId, action }) => {
-      showToast(action === 'delete' ? 'Collection deleted' : 'Collection settings saved', 'success');
+      showToast(action === 'delete' ? 'Schema deleted' : 'Schema settings saved', 'success');
       void queryClient.invalidateQueries({ queryKey: collectionQueryKeys.lists(projectId!) });
       if (activeProjectSlug && activeSection === 'collections') {
         navigate(buildWorkspacePath(activeProjectSlug, 'collections', nextCollectionId, { branchName: activeBranchName }), { replace: true });
       }
     },
     onError: () => {
-      showToast('Failed to update collection settings', 'error');
+      showToast('Failed to update schema settings', 'error');
     },
   });
 
@@ -65,7 +65,7 @@ export function useCollectionConfigPersistence({
       return { nextCollectionId: nextCollectionId ?? null };
     },
     onSuccess: ({ nextCollectionId }) => {
-      showToast('Collection deleted', 'success');
+      showToast('Schema deleted', 'success');
       void queryClient.invalidateQueries({ queryKey: collectionQueryKeys.lists(projectId!) });
       if (activeProjectSlug && activeSection === 'collections') {
         navigate(buildWorkspacePath(activeProjectSlug, 'collections', nextCollectionId, { branchName: activeBranchName }), { replace: true });

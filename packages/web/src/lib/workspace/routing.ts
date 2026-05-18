@@ -30,6 +30,76 @@ function parseWorkspacePathWithMatcher(
   pathname: string,
   matchWorkspacePath: (pathname: string, suffix: string) => { params: Record<string, string | undefined>; branchName: string | null } | null,
 ): WorkspaceRouteState | null {
+  const contentEntryHistory = matchWorkspacePath(pathname, '/content/:collectionId/entries/:entryId/history');
+  if (contentEntryHistory?.params.projectSlug && contentEntryHistory.params.collectionId && contentEntryHistory.params.entryId) {
+    return {
+      projectSlug: contentEntryHistory.params.projectSlug,
+      branchName: contentEntryHistory.branchName,
+      section: 'collections',
+      secondaryId: contentEntryHistory.params.collectionId,
+      entryId: contentEntryHistory.params.entryId,
+      historyView: true,
+      collectionSettingsView: false,
+      schemaMode: DEFAULT_SCHEMA_MODE,
+    };
+  }
+
+  const contentEntry = matchWorkspacePath(pathname, '/content/:collectionId/entries/:entryId');
+  if (contentEntry?.params.projectSlug && contentEntry.params.collectionId && contentEntry.params.entryId) {
+    return {
+      projectSlug: contentEntry.params.projectSlug,
+      branchName: contentEntry.branchName,
+      section: 'collections',
+      secondaryId: contentEntry.params.collectionId,
+      entryId: contentEntry.params.entryId,
+      historyView: false,
+      collectionSettingsView: false,
+      schemaMode: DEFAULT_SCHEMA_MODE,
+    };
+  }
+
+  const contentSettings = matchWorkspacePath(pathname, '/content/:collectionId/settings');
+  if (contentSettings?.params.projectSlug && contentSettings.params.collectionId) {
+    return {
+      projectSlug: contentSettings.params.projectSlug,
+      branchName: contentSettings.branchName,
+      section: 'collections',
+      secondaryId: contentSettings.params.collectionId,
+      entryId: null,
+      historyView: false,
+      collectionSettingsView: true,
+      schemaMode: DEFAULT_SCHEMA_MODE,
+    };
+  }
+
+  const content = matchWorkspacePath(pathname, '/content/:collectionId');
+  if (content?.params.projectSlug && content.params.collectionId) {
+    return {
+      projectSlug: content.params.projectSlug,
+      branchName: content.branchName,
+      section: 'collections',
+      secondaryId: content.params.collectionId,
+      entryId: null,
+      historyView: false,
+      collectionSettingsView: false,
+      schemaMode: DEFAULT_SCHEMA_MODE,
+    };
+  }
+
+  const contentRoot = matchWorkspacePath(pathname, '/content');
+  if (contentRoot?.params.projectSlug) {
+    return {
+      projectSlug: contentRoot.params.projectSlug,
+      branchName: contentRoot.branchName,
+      section: 'collections',
+      secondaryId: null,
+      entryId: null,
+      historyView: false,
+      collectionSettingsView: false,
+      schemaMode: DEFAULT_SCHEMA_MODE,
+    };
+  }
+
   const collectionEntryHistory = matchWorkspacePath(pathname, '/collections/:collectionId/entries/:entryId/history');
   if (collectionEntryHistory?.params.projectSlug && collectionEntryHistory.params.collectionId && collectionEntryHistory.params.entryId) {
     return {
@@ -41,6 +111,7 @@ function parseWorkspacePathWithMatcher(
       historyView: true,
       collectionSettingsView: false,
       schemaMode: DEFAULT_SCHEMA_MODE,
+      legacyCollectionRoute: true,
     };
   }
 
@@ -55,6 +126,7 @@ function parseWorkspacePathWithMatcher(
       historyView: false,
       collectionSettingsView: false,
       schemaMode: DEFAULT_SCHEMA_MODE,
+      legacyCollectionRoute: true,
     };
   }
 
@@ -69,6 +141,7 @@ function parseWorkspacePathWithMatcher(
       historyView: false,
       collectionSettingsView: true,
       schemaMode: DEFAULT_SCHEMA_MODE,
+      legacyCollectionRoute: true,
     };
   }
 
@@ -83,6 +156,7 @@ function parseWorkspacePathWithMatcher(
       historyView: false,
       collectionSettingsView: false,
       schemaMode: DEFAULT_SCHEMA_MODE,
+      legacyCollectionRoute: true,
     };
   }
 
@@ -180,8 +254,9 @@ export function buildWorkspaceCompatibilityRedirect(
   const nextSecondaryId = nextRoute.secondaryId;
   const needsBranchRedirect = !route.branchName;
   const needsSettingsAliasRedirect = nextSecondaryId !== route.secondaryId;
+  const needsCollectionSegmentRedirect = route.legacyCollectionRoute === true;
 
-  if (!needsBranchRedirect && !needsSettingsAliasRedirect) {
+  if (!needsBranchRedirect && !needsSettingsAliasRedirect && !needsCollectionSegmentRedirect) {
     return null;
   }
 
@@ -212,15 +287,15 @@ export function buildWorkspacePath(
     const collectionId = secondaryId || null;
     if (opts?.entryId) {
       if (opts.historyView) {
-        return `${basePath}/collections/${collectionId}/entries/${opts.entryId}/history`;
+        return `${basePath}/content/${collectionId}/entries/${opts.entryId}/history`;
       }
-      return `${basePath}/collections/${collectionId}/entries/${opts.entryId}`;
+      return `${basePath}/content/${collectionId}/entries/${opts.entryId}`;
     }
-    if (!collectionId) return `${basePath}/collections`;
+    if (!collectionId) return `${basePath}/content`;
     if (opts?.collectionSettingsView) {
-      return `${basePath}/collections/${collectionId}/settings`;
+      return `${basePath}/content/${collectionId}/settings`;
     }
-    return `${basePath}/collections/${collectionId}`;
+    return `${basePath}/content/${collectionId}`;
   }
 
   if (section === 'schemas') {
