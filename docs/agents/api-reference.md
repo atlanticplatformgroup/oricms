@@ -42,6 +42,8 @@ Authorization: Bearer YOUR_AGENT_TOKEN
 ### Mutation APIs
 
 - `POST /preflight`
+- `POST /schemas`
+- `PUT /schemas/:name`
 - `POST /collections/:name/entries`
 - `PUT /collections/:name/entries/:id`
 - `POST /collections/:name/entries/:id/transition`
@@ -204,11 +206,30 @@ Request shape:
 }
 ```
 
+Schema-definition preflight uses the schema-centric structural actions:
+
+```json
+{
+  "action": "createSchema",
+  "schemaName": "landing-pages",
+  "branch": "main",
+  "data": {
+    "schema": {
+      "id": "landing-pages",
+      "label": "Landing Pages",
+      "contentType": "landing-page",
+      "path": "content/landing-pages"
+    }
+  }
+}
+```
+
 Response fields:
 
 - `allowed`
 - `action`
 - `collectionName`
+- `schemaName` for schema-definition mutations
 - `entryId`
 - `branch`
 - `resultingStatus`
@@ -222,6 +243,8 @@ Response fields:
 - `configVersion`
 
 If `allowed` is `false`, inspect `details` instead of guessing why the mutation would fail.
+
+Schema-definition preflight responses include `structural: true` and require `schemas:update` permission. Supported structural actions are `createSchema` and `updateSchema`.
 
 ## Canonical Mutation Response
 
@@ -263,6 +286,80 @@ Response nuances:
 - `deletedEntry` is used for delete results
 
 That common response is there to keep agent integrations predictable. An agent should not need a different parsing strategy for every mutation.
+
+
+## Create Schema Definition
+
+`POST /schemas`
+
+Headers:
+
+- `Idempotency-Key` recommended
+
+Body:
+
+```json
+{
+  "schema": {
+    "id": "landing-pages",
+    "label": "Landing Pages",
+    "contentType": "landing-page",
+    "path": "content/landing-pages"
+  },
+  "branch": "main"
+}
+```
+
+Successful responses use the schema-definition structural shape:
+
+```json
+{
+  "success": true,
+  "data": {
+    "action": "createSchema",
+    "schemaName": "landing-pages",
+    "branch": "main",
+    "structural": true,
+    "schema": {
+      "id": "landing-pages",
+      "label": "Landing Pages",
+      "contentType": "landing-page",
+      "path": "content/landing-pages"
+    },
+    "createdSchemas": ["landing-pages"],
+    "persistence": {
+      "persisted": true,
+      "commitSha": "abc123"
+    },
+    "generatedAt": "2026-03-13T12:00:00.000Z",
+    "configVersion": "abc123"
+  }
+}
+```
+
+## Update Schema Definition
+
+`PUT /schemas/:name`
+
+Headers:
+
+- `Idempotency-Key` recommended
+
+Body:
+
+```json
+{
+  "schema": {
+    "id": "blog-posts",
+    "label": "Editorial Posts",
+    "contentType": "blog-post",
+    "path": "content/blog-posts"
+  },
+  "branch": "main"
+}
+```
+
+The route `:name` must match `schema.id`. Schema-definition mutations are governed structural writes: they respect allowed branch policy, require `schemas:update`, and emit audit actions `agent.schema.create` / `agent.schema.update` with `resourceType: schemaDefinition`.
 
 ## Create Entry
 

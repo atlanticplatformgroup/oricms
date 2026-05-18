@@ -30,6 +30,8 @@ Current public agent routes include:
 - `GET /files/*`
 - `POST /diagnose`
 - `POST /preflight`
+- `POST /schemas`
+- `PUT /schemas/:name`
 - `POST /collections/:name/entries`
 - `PUT /collections/:name/entries/:id`
 - `POST /collections/:name/entries/:id/transition`
@@ -56,6 +58,7 @@ These routes are for owners/admins and other members with `agents:*` permissions
 ## What Matters Most
 
 - mutations support idempotency
+- schema-definition mutations use the schema-centric `POST /schemas` and `PUT /schemas/:name` contract
 - destructive actions can require confirmation
 - stale revisions and hard locks can block writes
 - admin routes control access policy, issued tokens, consent records, and audit visibility

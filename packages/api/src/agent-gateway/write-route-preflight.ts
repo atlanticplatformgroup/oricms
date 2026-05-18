@@ -5,9 +5,14 @@ import { checkPermission } from '../permissions/middleware';
 import { prepareAgentMutation } from './mutations';
 import type { AgentMutationPreflightRequest } from '@ori/shared';
 import { buildDeniedPreflightResponse, getPermissionAction } from './write-route-common';
+import { runSchemaDefinitionPreflight } from './schema-definition-routes';
 
 export async function runMutationPreflight(req: Request, res: Response): Promise<void> {
   try {
+    if (await runSchemaDefinitionPreflight(req, res)) {
+      return;
+    }
+
     const body = req.body as AgentMutationPreflightRequest;
     if (!body?.action || !body.collectionName) {
       badRequest(res, 'action and collectionName are required', 'INVALID_PREFLIGHT_REQUEST');
