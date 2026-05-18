@@ -16,6 +16,9 @@ export function getPermissionAction(action: AgentMutationAction): 'create' | 'up
       return 'delete';
     case 'transition':
       return 'publish';
+    case 'createSchema':
+    case 'updateSchema':
+      return 'update';
   }
 
   throw new Error(`Unsupported agent mutation action: ${String(action)}`);
@@ -73,7 +76,8 @@ export function buildDeniedPreflightResponse(body: AgentMutationPreflightRequest
   return {
     allowed: false,
     action: body.action,
-    collectionName: body.collectionName,
+    ...(body.collectionName ? { collectionName: body.collectionName } : {}),
+    ...(body.schemaName ? { schemaName: body.schemaName } : {}),
     ...(body.entryId ? { entryId: body.entryId } : {}),
     autoPublish: false,
     requiresConfirmation: body.action === 'delete',

@@ -1245,7 +1245,7 @@ export interface AgentWritePolicy {
   canDelete: boolean;
 }
 
-export type AgentMutationAction = 'create' | 'update' | 'delete' | 'transition';
+export type AgentMutationAction = 'create' | 'update' | 'delete' | 'transition' | 'createSchema' | 'updateSchema';
 
 export type AgentEntryStatus = 'draft' | 'published';
 
@@ -1275,7 +1275,8 @@ export interface AgentDeletedEntrySummary {
 
 export interface AgentMutationResult extends AgentConfigFreshness {
   action: AgentMutationAction;
-  collectionName: string;
+  collectionName?: string;
+  schemaName?: string;
   entryId?: string;
   branch: string;
   resultingStatus?: AgentEntryStatus | null;
@@ -1288,7 +1289,8 @@ export interface AgentMutationResult extends AgentConfigFreshness {
 
 export interface AgentMutationPreflightRequest {
   action: AgentMutationAction;
-  collectionName: string;
+  collectionName?: string;
+  schemaName?: string;
   entryId?: string;
   branch?: string;
   data?: Record<string, unknown>;
@@ -1299,7 +1301,8 @@ export interface AgentMutationPreflightRequest {
 export interface AgentMutationPreflightResponse extends AgentConfigFreshness {
   allowed: boolean;
   action: AgentMutationAction;
-  collectionName: string;
+  collectionName?: string;
+  schemaName?: string;
   entryId?: string;
   branch?: string;
   resultingStatus?: AgentEntryStatus | null;
