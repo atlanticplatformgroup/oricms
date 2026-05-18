@@ -3,11 +3,23 @@ import { authenticateAgentToken } from './middleware';
 import { requirePermission } from '../permissions/middleware';
 import type { AgentEntryStatus } from '@ori/shared';
 import { handleAgentMutation, runMutationPreflight } from './write-route-support';
+import {
+  handleCreateSchemaDefinition,
+  handleUpdateSchemaDefinition,
+} from './schema-definition-routes';
 
 const router = Router();
 
 router.post('/v1/preflight', authenticateAgentToken, async (req, res) => {
   await runMutationPreflight(req, res);
+});
+
+router.post('/v1/schemas', authenticateAgentToken, requirePermission('schemas', 'update'), async (req, res) => {
+  await handleCreateSchemaDefinition(req, res);
+});
+
+router.put('/v1/schemas/:name', authenticateAgentToken, requirePermission('schemas', 'update'), async (req, res) => {
+  await handleUpdateSchemaDefinition(req, res);
 });
 
 router.post('/v1/collections/:name/entries', authenticateAgentToken, requirePermission('collections', 'create'), async (req, res) => {

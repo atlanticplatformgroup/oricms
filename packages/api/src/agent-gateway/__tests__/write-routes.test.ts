@@ -25,6 +25,9 @@ const state = vi.hoisted(() => {
     changeRequestCountMock: vi.fn(),
     changeRequestCreateMock: vi.fn(),
     changeRequestUpdateMock: vi.fn(),
+    projectFindUniqueMock: vi.fn(),
+    auditLogCreateMock: vi.fn(),
+    saveCollectionsConfigMock: vi.fn(),
   };
 });
 
@@ -129,6 +132,10 @@ vi.mock('../../collections/service', () => ({
   CollectionService: class MockCollectionService {
     async init() {}
 
+    async listCollections() {
+      return [{ id: 'blog-posts', label: 'Blog Posts', contentType: 'blog-post', path: 'content/blog-posts' }];
+    }
+
     async getCollectionConfig(collectionName: string) {
       if (collectionName !== 'blog-posts') return null;
       return {
@@ -157,8 +164,18 @@ vi.mock('../../application/agent-publish/auto-publish-change', () => ({
   tryAutoPublishChange: (...args: unknown[]) => state.tryAutoPublishChangeMock(...args),
 }));
 
+vi.mock('../../application/collections/save-collections-config', () => ({
+  saveCollectionsConfig: (...args: unknown[]) => state.saveCollectionsConfigMock(...args),
+}));
+
 vi.mock('../../lib/prisma', () => ({
   prisma: {
+    project: {
+      findUnique: (...args: unknown[]) => state.projectFindUniqueMock(...args),
+    },
+    auditLog: {
+      create: (...args: unknown[]) => state.auditLogCreateMock(...args),
+    },
     agentChangeRequest: {
       count: (...args: unknown[]) => state.changeRequestCountMock(...args),
       create: (...args: unknown[]) => state.changeRequestCreateMock(...args),
@@ -213,6 +230,11 @@ describe('agent write routes', () => {
       updatedAt: new Date('2026-03-13T11:00:00.000Z'),
     });
     state.changeRequestCountMock.mockResolvedValue(0);
+    state.projectFindUniqueMock.mockResolvedValue({ id: 'project-1', repoUrl: 'https://example.com/repo.git', defaultBranch: 'main' });
+    state.auditLogCreateMock.mockResolvedValue({ id: 'audit-1' });
+    state.saveCollectionsConfigMock.mockResolvedValue({
+      createdCollections: [{ id: 'landing-pages', label: 'Landing Pages', contentType: 'landing-page', path: 'content/landing-pages' }],
+    });
     state.changeRequestFindFirstMock.mockImplementation(async ({ where }: { where: { idempotencyKey?: string } }) => {
       return state.changeRequests.find((item) => item.projectId === 'project-1'
         && item.agentTokenId === 'agent-token-1'
@@ -383,6 +405,127 @@ describe('agent write routes', () => {
         $status: 'published',
       },
     });
+  });
+
+
+  it('preflights schema-definition creation as a structural mutation', async () => {
+    const response = await request(app)
+      .post('/api/v1/agent/v1/preflight')
+      .send({
+        action: 'createSchema',
+        schemaName: 'landing-pages',
+        data: {
+          schema: {
+            id: 'landing-pages',
+            label: 'Landing Pages',
+            contentType: 'landing-page',
+            path: 'content/landing-pages',
+          },
+        },
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body.data).toMatchObject({
+      allowed: true,
+      action: 'createSchema',
+      schemaName: 'landing-pages',
+      branch: 'main',
+      structural: true,
+      autoPublish: true,
+      requiresConfirmation: false,
+    });
+    expect(state.checkPermissionMock).toHaveBeenCalledWith('agent-user-1', 'project-1', 'schemas', 'update', 'admin');
+  });
+
+  it('creates schema definitions through the governed agent route and logs a structural audit event', async () => {
+    const schema = {
+      id: 'landing-pages',
+      label: 'Landing Pages',
+      contentType: 'landing-page',
+      path: 'content/landing-pages',
+    };
+
+    const response = await request(app)
+      .post('/api/v1/agent/v1/schemas')
+      .set('Idempotency-Key', 'structural-create-1')
+      .send({ schema });
+
+    expect(response.status).toBe(201);
+    expect(response.body.data).toMatchObject({
+      action: 'createSchema',
+      schemaName: 'landing-pages',
+      branch: 'main',
+      structural: true,
+      schema,
+      createdSchemas: ['landing-pages'],
+      persistence: { persisted: true, commitSha: 'commit-123' },
+    });
+    expect(state.saveCollectionsConfigMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        projectId: 'project-1',
+        branch: 'main',
+        actor: expect.objectContaining({ id: 'agent-user-1', email: 'agent@example.com' }),
+      }),
+      expect.arrayContaining([
+        expect.objectContaining({ id: 'blog-posts' }),
+        schema,
+      ]),
+    );
+    expect(state.auditLogCreateMock).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        projectId: 'project-1',
+        userId: 'agent-user-1',
+        action: 'agent.schema.create',
+        resourceType: 'schemaDefinition',
+        resourceId: 'landing-pages',
+      }),
+    });
+  });
+
+  it('updates schema definitions through the governed agent route without creating default configs again', async () => {
+    state.saveCollectionsConfigMock.mockResolvedValueOnce({ createdCollections: [] });
+    const schema = {
+      id: 'blog-posts',
+      label: 'Editorial Posts',
+      contentType: 'blog-post',
+      path: 'content/blog-posts',
+    };
+
+    const response = await request(app)
+      .put('/api/v1/agent/v1/schemas/blog-posts')
+      .send({ schema });
+
+    expect(response.status).toBe(200);
+    expect(response.body.data).toMatchObject({
+      action: 'updateSchema',
+      schemaName: 'blog-posts',
+      branch: 'main',
+      structural: true,
+      schema,
+      createdSchemas: [],
+      persistence: { persisted: true, commitSha: 'commit-123' },
+    });
+    expect(state.saveCollectionsConfigMock).toHaveBeenCalledWith(
+      expect.objectContaining({ projectId: 'project-1', branch: 'main' }),
+      expect.arrayContaining([schema]),
+    );
+    expect(state.auditLogCreateMock).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        action: 'agent.schema.update',
+        resourceType: 'schemaDefinition',
+        resourceId: 'blog-posts',
+        oldValue: expect.objectContaining({ id: 'blog-posts', label: 'Blog Posts' }),
+        newValue: schema,
+      }),
+    });
+  });
+
+  it('does not expose agent-facing collection definition mutation routes', async () => {
+    const response = await request(app)
+      .post('/api/v1/agent/v1/collections')
+      .send({ collection: { id: 'landing-pages' } });
+
+    expect(response.status).toBe(404);
   });
 
   it('returns allowed false for invalid transitions during preflight', async () => {
