@@ -179,7 +179,25 @@ async function setupMockApi(page: Page, state: MockState) {
       return;
     }
 
-    if (method === 'GET' && path === `/api/v1/projects/${PROJECT_ID}/collections`) {
+    if (method === 'GET' && path === `/api/v1/projects/${PROJECT_ID}/workspace-catalog`) {
+      await fulfill(route, success({
+        catalog: {
+          navigation: {
+            systemSurfaces: [],
+            uiGroups: [],
+            ungroupedCollectionIds: ['posts', 'pages'],
+          },
+          collections: [
+            { collection: { id: 'posts', label: 'Posts', contentType: 'post', path: 'content/posts' }, recordCount: state.entriesByCollection.posts?.length ?? 0 },
+            { collection: { id: 'pages', label: 'Pages', contentType: 'page', path: 'content/pages' }, recordCount: state.entriesByCollection.pages?.length ?? 0 },
+          ],
+          schemas: [],
+        },
+      }));
+      return;
+    }
+
+    if (method === 'GET' && path === `/api/v1/projects/${PROJECT_ID}/schemas`) {
       await fulfill(route, success({
         collections: [
           {
@@ -231,7 +249,31 @@ async function setupMockApi(page: Page, state: MockState) {
       return;
     }
 
-    const collectionListMatch = path.match(new RegExp(`^/api/v1/projects/${PROJECT_ID}/collections/([^/]+)$`));
+    if (method === 'GET' && path === `/api/v1/projects/${PROJECT_ID}/git/schemas/types`) {
+      await fulfill(route, success({
+        schemas: [
+          { name: 'post', path: 'schemas/types/post.json' },
+          { name: 'page', path: 'schemas/types/page.json' },
+        ],
+      }));
+      return;
+    }
+
+    if (method === 'GET' && path === `/api/v1/projects/${PROJECT_ID}/git/schemas/components`) {
+      await fulfill(route, success({ schemas: [] }));
+      return;
+    }
+
+    if (method === 'GET' && path.startsWith(`/api/v1/projects/${PROJECT_ID}/git/schemas/`)) {
+      const schemaPath = decodeURIComponent(path.replace(`/api/v1/projects/${PROJECT_ID}/git/schemas/`, ''));
+      const schema = schemaPath.includes('page')
+        ? { $schema: 'content-type-v1', $id: 'page', name: 'page', plural: 'pages', label: 'Page', labelPlural: 'Pages', fields: [{ key: 'title', label: 'Title', type: 'string', required: true }], display: { primary: 'title' } }
+        : { $schema: 'content-type-v1', $id: 'post', name: 'post', plural: 'posts', label: 'Post', labelPlural: 'Posts', fields: [{ key: 'title', label: 'Title', type: 'string', required: true }], display: { primary: 'title' } };
+      await fulfill(route, success({ path: schemaPath, content: JSON.stringify(schema) }));
+      return;
+    }
+
+    const collectionListMatch = path.match(new RegExp(`^/api/v1/projects/${PROJECT_ID}/schemas/([^/]+)/entries$`));
     if (collectionListMatch && method === 'GET') {
       const collectionId = collectionListMatch[1];
       const entries = state.entriesByCollection[collectionId] || [];
@@ -249,7 +291,7 @@ async function setupMockApi(page: Page, state: MockState) {
       return;
     }
 
-    const entryGetMatch = path.match(new RegExp(`^/api/v1/projects/${PROJECT_ID}/collections/([^/]+)/([^/]+)$`));
+    const entryGetMatch = path.match(new RegExp(`^/api/v1/projects/${PROJECT_ID}/schemas/([^/]+)/entries/([^/]+)$`));
     if (entryGetMatch && method === 'GET') {
       const collectionId = entryGetMatch[1];
       const entryId = entryGetMatch[2];
@@ -347,11 +389,11 @@ test.describe('Workspace dashboard', () => {
     };
 
     await setupMockApi(page, state);
-    await page.goto(BASE_URL);
+    await page.goto(`${BASE_URL}/workspace-e2e-project/b/main/content/posts`);
 
     await expect(page.getByTestId('project-switcher')).toBeVisible();
     await expect(page.getByRole('button', { name: 'Branch: main' })).toBeVisible();
-    await expect(page).toHaveURL(/\/collections\/posts$/);
+    await expect(page).toHaveURL(/\/content\/posts$/);
   });
 
   test('collections happy path: open entry, edit, commit, and verify update', async ({ page }) => {
@@ -373,10 +415,10 @@ test.describe('Workspace dashboard', () => {
     };
 
     await setupMockApi(page, state);
-    await page.goto(BASE_URL);
+    await page.goto(`${BASE_URL}/workspace-e2e-project/b/main/content/posts`);
 
     await page.getByTestId('entry-open-post-1').click();
-    await expect(page).toHaveURL(/\/collections\/posts\/entries\/post-1$/);
+    await expect(page).toHaveURL(/\/content\/posts\/entries\/post-1$/);
 
     await fillEntryTitle(page, 'Welcome Updated');
     await page.getByTestId('open-commit-bar').click();
@@ -407,7 +449,7 @@ test.describe('Workspace dashboard', () => {
     };
 
     await setupMockApi(page, state);
-    await page.goto(BASE_URL);
+    await page.goto(`${BASE_URL}/workspace-e2e-project/b/main/content/posts`);
 
     await page.getByTestId('entry-open-post-1').click();
     await fillEntryTitle(page, 'Failed save attempt');

@@ -159,7 +159,24 @@ async function setupMockApi(page: Page, entries: Entry[]) {
       return;
     }
 
-    if (method === 'GET' && path === `/api/v1/projects/${PROJECT_ID}/collections`) {
+    if (method === 'GET' && path === `/api/v1/projects/${PROJECT_ID}/workspace-catalog`) {
+      await fulfill(route, success({
+        catalog: {
+          navigation: {
+            systemSurfaces: [],
+            uiGroups: [],
+            ungroupedCollectionIds: ['blog-posts'],
+          },
+          collections: [
+            { collection: { id: 'blog-posts', label: 'Blog Posts', singularLabel: 'Blog Post', contentType: 'blog-post', path: 'content/blog-posts' }, recordCount: entries.length },
+          ],
+          schemas: [],
+        },
+      }));
+      return;
+    }
+
+    if (method === 'GET' && path === `/api/v1/projects/${PROJECT_ID}/schemas`) {
       await fulfill(route, success({
         collections: [
           {
@@ -196,9 +213,9 @@ async function setupMockApi(page: Page, entries: Entry[]) {
       return;
     }
 
-    if (method === 'GET' && path === `/api/v1/projects/${PROJECT_ID}/git/type-schemas`) {
+    if (method === 'GET' && path === `/api/v1/projects/${PROJECT_ID}/git/schemas/types`) {
       await fulfill(route, success({
-        documents: [
+        schemas: [
           {
             $schema: 'schema-document-v1',
             id: 'blog-post',
@@ -224,8 +241,30 @@ async function setupMockApi(page: Page, entries: Entry[]) {
       return;
     }
 
-    if (method === 'GET' && path === `/api/v1/projects/${PROJECT_ID}/git/component-schemas`) {
-      await fulfill(route, success({ documents: [] }));
+    if (method === 'GET' && path === `/api/v1/projects/${PROJECT_ID}/git/schemas/components`) {
+      await fulfill(route, success({ schemas: [] }));
+      return;
+    }
+
+    if (method === 'GET' && path.startsWith(`/api/v1/projects/${PROJECT_ID}/git/schemas/`)) {
+      const schemaPath = decodeURIComponent(path.replace(`/api/v1/projects/${PROJECT_ID}/git/schemas/`, ''));
+      await fulfill(route, success({
+        path: schemaPath,
+        content: JSON.stringify({
+          $schema: 'content-type-v1',
+          $id: 'blog-post',
+          name: 'blog-post',
+          plural: 'blog-posts',
+          label: 'Blog Post',
+          labelPlural: 'Blog Posts',
+          fields: [
+            { key: 'title', label: 'Title', type: 'string', required: true },
+            { key: 'slug', label: 'Slug', type: 'uid', required: false },
+            { key: 'subtitle', label: 'Subtitle', type: 'text', required: false },
+          ],
+          display: { primary: 'title', secondary: 'subtitle' },
+        }),
+      }));
       return;
     }
 
@@ -239,7 +278,7 @@ async function setupMockApi(page: Page, entries: Entry[]) {
       return;
     }
 
-    if (method === 'GET' && path === `/api/v1/projects/${PROJECT_ID}/collections/blog-posts`) {
+    if (method === 'GET' && path === `/api/v1/projects/${PROJECT_ID}/schemas/blog-posts/entries`) {
       await fulfill(route, success({
         data: entries,
         meta: {
@@ -287,8 +326,8 @@ test.describe('Collections browse alignment', () => {
       },
     ]);
 
-    await page.goto(BASE_URL);
-    await expect(page).toHaveURL(/\/collections\/blog-posts$/);
+    await page.goto(`${BASE_URL}/alignment-e2e-project/b/main/content/blog-posts`);
+    await expect(page).toHaveURL(/\/content\/blog-posts$/);
 
     const title = page.getByRole('heading', { name: 'Blog Posts' });
     const search = page.getByLabel('Search entries');
