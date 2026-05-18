@@ -144,7 +144,7 @@ export function useCollectionManager({
   const handleCreateCollection = async (headers?: Record<string, string>) => {
     const nextId = toSchemaFieldKey(newCollection.id);
     if (!nextId) {
-      showToast('Collection id is required', 'error');
+      showToast('Schema id is required', 'error');
       return;
     }
     if (!newCollection.contentType.trim()) {
@@ -152,7 +152,7 @@ export function useCollectionManager({
       return;
     }
     if (collections.some((collection) => collection.id === nextId)) {
-      showToast('Collection id already exists', 'error');
+      showToast('Schema id already exists', 'error');
       return;
     }
     if (newCollectionPathError) {
@@ -177,11 +177,11 @@ export function useCollectionManager({
     if (!selectedCollection) return;
     const nextId = collectionSettings.id.trim();
     if (!nextId) {
-      showToast('Collection id is required', 'error');
+      showToast('Schema id is required', 'error');
       return;
     }
     if (collections.some((collection) => collection.id === nextId && collection.id !== selectedCollection.id)) {
-      showToast('Collection id already exists', 'error');
+      showToast('Schema id already exists', 'error');
       return;
     }
     if (collectionSettingsPathError) {

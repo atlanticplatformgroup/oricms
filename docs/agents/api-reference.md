@@ -34,8 +34,8 @@ Authorization: Bearer YOUR_AGENT_TOKEN
 - `GET /schemas/:id`
 - `GET /structure`
 - `GET /history`
-- `GET /collections/:name/entries`
-- `GET /collections/:name/entries/:id`
+- `GET /schemas/:name/entries`
+- `GET /schemas/:name/entries/:id`
 - `GET /files/*`
 - `POST /diagnose`
 
@@ -44,10 +44,10 @@ Authorization: Bearer YOUR_AGENT_TOKEN
 - `POST /preflight`
 - `POST /schemas`
 - `PUT /schemas/:name`
-- `POST /collections/:name/entries`
-- `PUT /collections/:name/entries/:id`
-- `POST /collections/:name/entries/:id/transition`
-- `DELETE /collections/:name/entries/:id`
+- `POST /schemas/:name/entries`
+- `PUT /schemas/:name/entries/:id`
+- `POST /schemas/:name/entries/:id/transition`
+- `DELETE /schemas/:name/entries/:id`
 
 Separate JWT-authenticated admin routes also exist under `/api/v1/agent/v1/admin/*` for project members who manage agent policy, consent, tokens, and audit history. Those are part of the management API, not the bearer-token agent runtime contract.
 
@@ -141,11 +141,11 @@ Optional query:
 
 History is bounded by the project’s current `historyDays` and `historyDepth` settings.
 
-## Collection Entries
+## Schema Entries
 
-### `GET /collections/:name/entries`
+### `GET /schemas/:name/entries`
 
-Lists entries for a readable collection.
+Lists entries for a readable schema.
 
 Supported query params:
 
@@ -153,13 +153,13 @@ Supported query params:
 - `page`
 - `pageSize`
 
-If the collection does not exist:
+If the schema does not exist:
 
 - `404 COLLECTION_NOT_FOUND`
 
-### `GET /collections/:name/entries/:id`
+### `GET /schemas/:name/entries/:id`
 
-Returns one entry from a readable collection.
+Returns one entry from a readable schema.
 
 If the entry does not exist:
 
@@ -363,7 +363,7 @@ The route `:name` must match `schema.id`. Schema-definition mutations are govern
 
 ## Create Entry
 
-`POST /collections/:name/entries`
+`POST /schemas/:name/entries`
 
 Headers:
 
@@ -377,7 +377,7 @@ Body:
 
 ## Update Entry
 
-`PUT /collections/:name/entries/:id`
+`PUT /schemas/:name/entries/:id`
 
 Headers:
 
@@ -395,7 +395,7 @@ If `baseRevision` is stale, the API returns:
 
 ## Transition Entry Status
 
-`POST /collections/:name/entries/:id/transition`
+`POST /schemas/:name/entries/:id/transition`
 
 Headers:
 
@@ -425,7 +425,7 @@ The UI label `Ready` maps to persisted status `published`.
 
 ## Delete Entry
 
-`DELETE /collections/:name/entries/:id`
+`DELETE /schemas/:name/entries/:id`
 
 Headers:
 
@@ -469,7 +469,7 @@ All non-success responses use:
 | `REVOKED_AGENT_TOKEN` | 401 | Token was revoked |
 | `EXPIRED_AGENT_TOKEN` | 401 | Token expired |
 | `AGENT_ACCESS_DENIED` | 403 | Role or project config denied the request |
-| `COLLECTION_NOT_FOUND` | 404 | Collection does not exist |
+| `SCHEMA_NOT_FOUND` / `COLLECTION_NOT_FOUND` | 404 | Schema does not exist |
 | `CONTENT_TYPE_NOT_FOUND` | 404 | Content type does not exist |
 | `ENTRY_NOT_FOUND` | 404 | Entry does not exist |
 | `BRANCH_NOT_ALLOWED` | 403 | Requested branch is not allowed |
@@ -481,6 +481,6 @@ All non-success responses use:
 ## Important Current Behavior
 
 - permissions are role-based, not tier-based
-- collection reads and writes are still constrained by project agent config and collection write policy
-- raw file access is more restricted than normal collection reads
+- schema entry reads and writes are still constrained by project agent config and entry write policy
+- raw file access is more restricted than normal schema entry reads
 - agents should trust returned `entryId` instead of assuming `slug` or title-derived ids

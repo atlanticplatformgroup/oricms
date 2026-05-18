@@ -196,12 +196,12 @@ export function createWorkspaceExtensionRegistry(): WorkspaceExtensionRegistry {
       registerSection({
         id: 'builtin:collections',
         key: 'collections',
-        label: 'Collections',
+        label: 'Entries',
         icon: RectangleStackIcon,
-        permission: { resource: 'collections', action: 'read' },
+        permission: { resource: 'entries', action: 'read' },
         renderSidebarAction: ({ canCreateCollections, onCreateCollection }) => (
           <Button size="xs" variant="default" onClick={onCreateCollection} disabled={!canCreateCollections}>
-            New collection
+            New schema
           </Button>
         ),
       });
@@ -272,7 +272,7 @@ export function createWorkspaceExtensionRegistry(): WorkspaceExtensionRegistry {
         label: 'Builds',
         icon: RocketLaunchIcon,
         secondaryNavigation: 'inline',
-        permission: { resource: 'collections', action: 'read' },
+        permission: { resource: 'entries', action: 'read' },
         staticSidebarOptions: [
           { id: 'recent', label: 'Recent Builds', description: 'Latest deployment runs' },
           { id: 'running', label: 'Running', description: 'Active build jobs' },

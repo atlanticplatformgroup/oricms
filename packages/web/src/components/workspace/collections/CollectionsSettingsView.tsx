@@ -47,7 +47,7 @@ export function CollectionsSettingsView({
   return (
     <WorkspacePage>
       <WorkspaceHeader
-        title={`${selectedCollection.label} collection settings`}
+        title={`${selectedCollection.label} schema settings`}
         description={selectedCollection.path}
         actions={(
           <Button variant="subtle" onClick={onBackToCollection}>
@@ -58,22 +58,22 @@ export function CollectionsSettingsView({
 
       <WorkspaceMain>
         {settingsLock.blockingLock ? (
-          <Alert color="yellow" title={settingsLock.blockingLock?.holderName ? `Locked by ${settingsLock.blockingLock.holderName}` : 'Collection locked'}>
+          <Alert color="yellow" title={settingsLock.blockingLock?.holderName ? `Locked by ${settingsLock.blockingLock.holderName}` : 'Schema locked'}>
             {settingsLock.blockingLock?.holderName
-              ? `${settingsLock.blockingLock.holderName} is editing this collection configuration. Try again after their editing session ends.`
-              : 'This collection configuration is currently locked for editing.'}
+              ? `${settingsLock.blockingLock.holderName} is editing this schema configuration. Try again after their editing session ends.`
+              : 'This schema configuration is currently locked for editing.'}
           </Alert>
         ) : settingsLock.error ? (
-          <Alert color="red" title="Unable to edit collection settings">{settingsLock.error}</Alert>
+          <Alert color="red" title="Unable to edit schema settings">{settingsLock.error}</Alert>
         ) : null}
         <WorkspaceFormSection
           title="Configuration"
-          description="Configure how this collection is labeled, stored, and routed."
+          description="Configure how this schema is labeled, stored, and routed."
         >
           <Stack gap="md">
             <WorkspaceFieldGrid>
               <TextInput
-                label="Collection id"
+                label="Schema id"
                 description="Stable identifier used in routes and config."
                 value={collectionManager.collectionSettings.id}
                 disabled={!canUpdateCollections || isBusy}
@@ -81,7 +81,7 @@ export function CollectionsSettingsView({
               />
               <Select
                 label="Content type"
-                description={collectionManager.selectedCollectionEntryCount > 0 ? 'Locked after the collection has entries.' : 'Determines the shared schema used for entries in this collection.'}
+                description={collectionManager.selectedCollectionEntryCount > 0 ? 'Locked after the collection has entries.' : 'Determines the content type used for entries in this schema.'}
                 data={contentTypes.map((type) => ({ value: type.$id, label: type.label || type.name || type.$id }))}
                 value={collectionManager.collectionSettings.contentType}
                 disabled={!canUpdateCollections || collectionManager.selectedCollectionEntryCount > 0 || isBusy}
@@ -155,7 +155,7 @@ export function CollectionsSettingsView({
               disabled={!canUpdateCollections || isBusy || (Boolean(collectionManager.collectionSettings.path) && Boolean(collectionManager.collectionSettingsPathError))}
               style={{ alignSelf: 'flex-start' }}
             >
-              Save collection settings
+              Save schema settings
             </Button>
           </Stack>
         </WorkspaceFooterBar>
