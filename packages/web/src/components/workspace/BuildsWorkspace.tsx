@@ -92,6 +92,9 @@ export function BuildsWorkspace({
   const environments = (project?.settings?.environments ?? []) as Environment[];
   const hasEnvironments = environments.length > 0;
   const hasBuildWebhooks = environments.some((environment) => Boolean(environment.buildWebhook));
+  const hasAnyBuilds = summary.total > 0 || Boolean(latestBuild) || builds.length > 0;
+  const showBuildContextPanels = hasAnyBuilds || hasEnvironments;
+  const settingsHref = project?.slug ? `/${project.slug}/b/${currentBranch || 'main'}/settings/environments` : undefined;
 
   return (
     <WorkspacePage>
@@ -111,6 +114,7 @@ export function BuildsWorkspace({
         projectError={projectQuery.isError}
         hasEnvironments={hasEnvironments}
         hasBuildWebhooks={hasBuildWebhooks}
+        settingsHref={settingsHref}
       />
 
       {summaryQuery.isLoading && !summaryQuery.data ? (
@@ -121,9 +125,9 @@ export function BuildsWorkspace({
           message="Build status is unavailable right now. Reload and try again."
           onRetry={() => void summaryQuery.refetch()}
         />
-      ) : (
+      ) : hasAnyBuilds ? (
         <BuildSummaryGrid counts={summary} />
-      )}
+      ) : null}
 
       <WorkspaceMain>
         <WorkspaceSplitMain
@@ -135,12 +139,17 @@ export function BuildsWorkspace({
               loading={buildsQuery.isLoading}
               error={buildsQuery.isError}
               cancelPending={cancelBuildMutation.isPending}
+              currentBranch={currentBranch}
+              needsEnvironmentSetup={!hasEnvironments}
               onCancelBuild={(buildId) => cancelBuildMutation.mutate(buildId)}
               onSelectView={(view) => onSelectView?.(view)}
               onRetry={() => void buildsQuery.refetch()}
+              onTriggerBuild={() => triggerBuildMutation.mutate()}
+              settingsHref={settingsHref}
+              triggerPending={triggerBuildMutation.isPending}
             />
           }
-          secondary={
+          secondary={showBuildContextPanels ? (
             <Stack gap="md">
               <BuildLatestPanel
                 build={latestBuild}
@@ -162,8 +171,8 @@ export function BuildsWorkspace({
                 </Stack>
               </WorkspaceSection>
             </Stack>
-          }
-          primarySpan={{ base: 12, xl: 8 }}
+          ) : undefined}
+          primarySpan={showBuildContextPanels ? { base: 12, xl: 8 } : { base: 12 }}
           secondarySpan={{ base: 12, xl: 4 }}
         />
       </WorkspaceMain>
