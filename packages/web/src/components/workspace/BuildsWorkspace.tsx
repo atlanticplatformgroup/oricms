@@ -4,7 +4,7 @@ import { Button, Stack, Text } from '@mantine/core';
 import type { Environment, Project } from '@ori/shared';
 import { buildsApi } from '../../lib/api/builds';
 import { projectsApi } from '../../lib/api/projects';
-import { WorkspaceErrorState, WorkspaceHeader, WorkspaceLoadingState, WorkspaceMain, WorkspacePage, WorkspaceSection, WorkspaceSplitMain } from '../ui/WorkspacePrimitives';
+import { WorkspaceErrorState, WorkspaceHeader, WorkspaceLoadingState, WorkspaceMain, WorkspacePage, WorkspacePanel, WorkspaceSection, WorkspaceSplitMain } from '../ui/WorkspacePrimitives';
 import { BuildHistoryTable } from './builds/BuildHistoryTable';
 import { BuildLatestPanel } from './builds/BuildLatestPanel';
 import { BuildSetupAlert } from './builds/BuildSetupAlert';
@@ -95,6 +95,8 @@ export function BuildsWorkspace({
   const hasAnyBuilds = summary.total > 0 || Boolean(latestBuild) || builds.length > 0;
   const showBuildContextPanels = hasAnyBuilds || hasEnvironments;
   const settingsHref = project?.slug ? `/${project.slug}/b/${currentBranch || 'main'}/settings/environments` : undefined;
+  const needsFirstEnvironmentSetup = !projectQuery.isLoading && !projectQuery.isError && !hasEnvironments;
+  const showSetupAlert = hasEnvironments || hasAnyBuilds;
 
   return (
     <WorkspacePage>
@@ -103,19 +105,27 @@ export function BuildsWorkspace({
         description={selectedDescription || 'Track build health, recent deployment jobs, and manual triggers.'}
         meta={<Text size="sm" c="dimmed">{selectedLabel || 'Recent Builds'}{currentBranch ? ` · branch ${currentBranch}` : ''}</Text>}
         actions={
-          <Button onClick={() => triggerBuildMutation.mutate()} loading={triggerBuildMutation.isPending}>
-            Trigger build
-          </Button>
+          needsFirstEnvironmentSetup && settingsHref ? (
+            <Button component="a" href={settingsHref} variant="default">
+              Set up environment
+            </Button>
+          ) : (
+            <Button onClick={() => triggerBuildMutation.mutate()} loading={triggerBuildMutation.isPending}>
+              Trigger build
+            </Button>
+          )
         }
       />
 
-      <BuildSetupAlert
-        projectLoading={projectQuery.isLoading}
-        projectError={projectQuery.isError}
-        hasEnvironments={hasEnvironments}
-        hasBuildWebhooks={hasBuildWebhooks}
-        settingsHref={settingsHref}
-      />
+      {showSetupAlert ? (
+        <BuildSetupAlert
+          projectLoading={projectQuery.isLoading}
+          projectError={projectQuery.isError}
+          hasEnvironments={hasEnvironments}
+          hasBuildWebhooks={hasBuildWebhooks}
+          settingsHref={settingsHref}
+        />
+      ) : null}
 
       {summaryQuery.isLoading && !summaryQuery.data ? (
         <WorkspaceLoadingState label="Loading build summary…" />
@@ -159,17 +169,19 @@ export function BuildsWorkspace({
                 onCancelBuild={(buildId) => cancelBuildMutation.mutate(buildId)}
                 cancelPending={cancelBuildMutation.isPending}
               />
-              <WorkspaceSection
-                title="Build behavior"
-                description="Trigger builds manually from the current branch or use environment webhooks for deployment automation."
-              >
-                <Stack gap={4}>
-                  <Text size="sm" c="dimmed">Current branch</Text>
-                  <Text fw={600}>{currentBranch || 'main'}</Text>
-                  <Text size="sm" c="dimmed">Environment webhooks configured</Text>
-                  <Text fw={600}>{hasBuildWebhooks ? 'Yes' : 'No'}</Text>
-                </Stack>
-              </WorkspaceSection>
+              <WorkspacePanel>
+                <WorkspaceSection
+                  title="Build behavior"
+                  description="Trigger builds manually from the current branch or use environment webhooks for deployment automation."
+                >
+                  <Stack gap={4}>
+                    <Text size="sm" c="dimmed">Current branch</Text>
+                    <Text fw={600}>{currentBranch || 'main'}</Text>
+                    <Text size="sm" c="dimmed">Environment webhooks configured</Text>
+                    <Text fw={600}>{hasBuildWebhooks ? 'Yes' : 'No'}</Text>
+                  </Stack>
+                </WorkspaceSection>
+              </WorkspacePanel>
             </Stack>
           ) : undefined}
           primarySpan={showBuildContextPanels ? { base: 12, xl: 8 } : { base: 12 }}

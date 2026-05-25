@@ -1,4 +1,4 @@
-import { Button, Group, Paper, Select, Stack, Table, Text } from '@mantine/core';
+import { Button, Group, Paper, Select, SimpleGrid, Stack, Table, Text } from '@mantine/core';
 import { WorkspaceErrorState, WorkspaceListSurface, WorkspaceLoadingState, WorkspaceMetricBadge, WorkspaceOperationalTable, WorkspaceSection, WorkspaceTableContainer, WorkspaceTableToolbarInset, WorkspaceToolbar } from '../../ui/WorkspacePrimitives';
 import { WORKSPACE_FORM_PREVIEW_BG, WORKSPACE_FORM_SECTION_BORDER, WORKSPACE_SHELL_DESCRIPTION_TEXT } from '../../ui/workspace-primitives.shared';
 import type { BuildRecord, BuildStatus } from './types';
@@ -16,6 +16,18 @@ function BuildEmptyState({
   settingsHref?: string;
   triggerPending: boolean;
 }) {
+  const steps = needsEnvironmentSetup
+    ? [
+        { label: '1', title: 'Configure environment', description: 'Add the deployment target OriCMS should build toward.' },
+        { label: '2', title: 'Trigger first build', description: `Run the first build from ${currentBranch || 'main'} once setup is ready.` },
+        { label: '3', title: 'Review deployments', description: 'Track status, previews, logs, and deployment results here.' },
+      ]
+    : [
+        { label: '1', title: 'Trigger first build', description: `Run a build from ${currentBranch || 'main'} to create deployment history.` },
+        { label: '2', title: 'Review result', description: 'Build status, previews, logs, and deployment links will appear here.' },
+        { label: '3', title: 'Automate later', description: 'Add build webhooks when the deployment workflow is ready.' },
+      ];
+
   return (
     <Paper
       withBorder
@@ -26,21 +38,45 @@ function BuildEmptyState({
         borderColor: WORKSPACE_FORM_SECTION_BORDER,
       }}
     >
-      <Stack gap="md" align="flex-start">
+      <Stack gap="lg" align="stretch">
         <Stack gap={6}>
-          <Text fw={700} size="lg">No build history yet</Text>
-          <Text size="sm" maw={640} style={{ color: WORKSPACE_SHELL_DESCRIPTION_TEXT, lineHeight: 1.55 }}>
+          <Text fw={700} size="lg">
+            {needsEnvironmentSetup ? 'Set up builds for this project' : 'No build history yet'}
+          </Text>
+          <Text size="sm" maw={720} style={{ color: WORKSPACE_SHELL_DESCRIPTION_TEXT, lineHeight: 1.55 }}>
             {needsEnvironmentSetup
-              ? 'Configure an environment first, then OriCMS can record build jobs, deployment results, and branch activity here.'
-              : `Trigger a build from ${currentBranch || 'main'} to create the first deployment job for this project.`}
+              ? 'Start by adding an environment. After that, OriCMS can trigger builds, record deployment results, and show branch activity here.'
+              : `Your environment is ready. Trigger a build from ${currentBranch || 'main'} to create the first deployment job for this project.`}
           </Text>
         </Stack>
-        {needsEnvironmentSetup ? (
-          <Group gap="xs" wrap="wrap">
-            <WorkspaceMetricBadge>Branch {currentBranch || 'main'}</WorkspaceMetricBadge>
-            <WorkspaceMetricBadge color="orange">Webhooks not configured</WorkspaceMetricBadge>
-          </Group>
-        ) : null}
+        <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="sm" verticalSpacing="sm">
+          {steps.map((step) => (
+            <Paper
+              key={step.label}
+              withBorder
+              p="sm"
+              radius="md"
+              style={{
+                backgroundColor: 'rgba(255, 255, 255, 0.02)',
+                borderColor: WORKSPACE_FORM_SECTION_BORDER,
+              }}
+            >
+              <Stack gap={6}>
+                <WorkspaceMetricBadge color="slate">Step {step.label}</WorkspaceMetricBadge>
+                <Text fw={600} size="sm">{step.title}</Text>
+                <Text size="xs" style={{ color: WORKSPACE_SHELL_DESCRIPTION_TEXT, lineHeight: 1.45 }}>
+                  {step.description}
+                </Text>
+              </Stack>
+            </Paper>
+          ))}
+        </SimpleGrid>
+        <Group gap="xs" wrap="wrap">
+          <WorkspaceMetricBadge>Branch {currentBranch || 'main'}</WorkspaceMetricBadge>
+          <WorkspaceMetricBadge color={needsEnvironmentSetup ? 'orange' : 'yellow'}>
+            {needsEnvironmentSetup ? 'Environment required' : 'Manual build ready'}
+          </WorkspaceMetricBadge>
+        </Group>
         <Group gap="xs" wrap="wrap">
           {needsEnvironmentSetup && settingsHref ? (
             <Button component="a" href={settingsHref}>
