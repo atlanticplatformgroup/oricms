@@ -9,17 +9,6 @@ export function useProject() {
   return context;
 }
 
-export function useCurrentProject() {
-  const { currentProject, setCurrentProject, projects, isLoadingProjects, refreshProjects } = useProject();
-  return {
-    currentProject,
-    setCurrentProject,
-    projects,
-    isLoadingProjects,
-    refreshProjects,
-  };
-}
-
 export function useProjectPermissions() {
   const { permissions, hasPermission, currentProject } = useProject();
   return {

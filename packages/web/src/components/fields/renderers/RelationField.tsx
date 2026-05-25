@@ -1,5 +1,5 @@
 import { Button, Group, MultiSelect, Select, Stack, Text } from '@mantine/core';
-import { getRefId, getRefIds } from '../../../lib/entries/transforms';
+import { getRefId, getRefIds } from '@ori/shared';
 import { isMultiRelationField } from '../../../lib/entries/resolution';
 import { toLabel } from '../../../lib/workspace/format';
 import { resolveFieldLabel, type FieldRendererProps } from '../contracts';

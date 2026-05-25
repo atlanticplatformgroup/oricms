@@ -4,7 +4,7 @@ import type {
   ResourceRecordSummary,
   ResourceSchemaDefinition,
 } from '@ori/shared';
-import { OriCmsClientError } from './errors.js';
+import { OriCmsClientError } from './errors';
 
 interface ResourcesClientContext {
   mode: 'management' | 'delivery';

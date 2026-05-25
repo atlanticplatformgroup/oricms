@@ -5,7 +5,7 @@ import { apiServices } from '../lib/api-services';
 import { logger } from '../middleware/logger';
 import { forbidden } from '../lib/responses';
 import { projectSettingsSchema } from '../lib/validation';
-import { ProjectConfigService } from './configService';
+import { ProjectConfigService } from './config-service';
 import { gitService } from './runtime';
 import { isValidRepoUrl, sanitizeSettingsForStorage } from './settings';
 import { sendValidationError } from './shared';

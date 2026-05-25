@@ -7,7 +7,7 @@ import type {
   ListUiGroupsResponse,
   UpdateUiGroupRequest,
 } from '@ori/shared';
-import { OriCmsClientError } from './errors.js';
+import { OriCmsClientError } from './errors';
 
 interface WorkspaceClientContext {
   mode: 'management' | 'delivery';

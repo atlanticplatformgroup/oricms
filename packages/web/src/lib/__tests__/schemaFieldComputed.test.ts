@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { SchemaField } from '@ori/shared';
-import { applyDerivedSchemaFieldValues, buildSchemaFieldDefaults, getSchemaFieldDefaultValue } from '../schemaFieldComputed';
+import { applyDerivedSchemaFieldValues, getSchemaFieldDefaultValue } from '../schemaFieldComputed';
 
 describe('schemaFieldComputed', () => {
   it('returns typed defaults from schema options', () => {
@@ -57,7 +57,11 @@ describe('schemaFieldComputed', () => {
       },
     ];
 
-    const defaults = buildSchemaFieldDefaults(fields);
+    const base = fields.reduce<Record<string, unknown>>((acc, field) => {
+      acc[field.key] = getSchemaFieldDefaultValue(field);
+      return acc;
+    }, {});
+    const defaults = applyDerivedSchemaFieldValues(fields, base, { isCreate: true });
     expect(defaults.title).toBe('Home');
     expect(defaults.slug).toBe('home');
   });

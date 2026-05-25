@@ -2,7 +2,7 @@ import 'express-async-errors';
 import { describe, it, expect } from 'vitest';
 import request from 'supertest';
 import express from 'express';
-import { errorHandler, createError } from '../error';
+import { errorHandler } from '../error';
 
 describe('Error Handler Middleware', () => {
   function createTestApp() {
@@ -18,9 +18,12 @@ describe('Error Handler Middleware', () => {
     });
 
     app.get('/custom-error', () => {
-      throw createError('Custom business error', 422, 'VALIDATION_FAILED', {
-        field: ['is required'],
+      const error = Object.assign(new Error('Custom business error'), {
+        statusCode: 422,
+        code: 'VALIDATION_FAILED',
+        details: { field: ['is required'] },
       });
+      throw error;
     });
 
     app.get('/custom-status', () => {

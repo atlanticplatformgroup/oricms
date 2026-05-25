@@ -5,7 +5,7 @@ import { resolveRegisteredFieldCapability } from '../../lib/fields/capabilities'
 import { normalizeAssetReference } from '../../lib/assets/references';
 import { getDisplayText, toLabel } from '../../lib/workspace/format';
 import { inferFieldType } from '../../lib/fields/display';
-import { getRefId } from '../../lib/entries/transforms';
+import { getRefId } from '@ori/shared';
 import type { ReadonlyFieldValueProps, ReadonlyFieldValueContext } from './contracts';
 
 function stringifyStructuredValue(value: unknown): string {
