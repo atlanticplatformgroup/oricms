@@ -224,7 +224,7 @@ const themePacks: Record<AppThemePackName, AppThemePack> = {
       shellHeaderBg: '#ffffff',
       shellPrimaryRailBg: '#eef2f7',
       shellSecondaryRailBg: '#f3f6fb',
-      shellTopSurfaceBg: '#ffffff',
+      shellTopSurfaceBg: '#f3f6fb',
       shellMainBg: '#f7f8fb',
       shellBorderColor: '#e2e8f0',
       shellText: '#172033',
