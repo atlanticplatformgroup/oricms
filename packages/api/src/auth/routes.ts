@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { body, validationResult } from 'express-validator';
+import { body } from 'express-validator';
 import { authenticate, optionalAuth } from './middleware';
 import { logger } from '../middleware/logger';
 import {
@@ -16,6 +16,7 @@ import {
   registerUserOrRespond,
 } from './credential-route-support';
 import { authenticateGitHubOrRespond } from './github-route-support';
+import { generateGuestToken } from './middleware';
 import {
   getCurrentUserPreferencesOrRespond,
   updateCurrentUserPreferencesOrRespond,
@@ -66,13 +67,13 @@ router.post(
   }
 );
 
-router.post('/refresh', [body('refreshToken').isString().trim().notEmpty()], async (req: Request, res: Response) => {
+router.post('/refresh', async (req: Request, res: Response) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ success: false, error: { code: 'VALIDATION_ERROR', message: 'refreshToken is required', details: errors.mapped() } });
+    const refreshToken = req.body.refreshToken || req.cookies?.ori_refresh_token;
+    if (!refreshToken || typeof refreshToken !== 'string') {
+      return res.status(400).json({ success: false, error: { code: 'VALIDATION_ERROR', message: 'refreshToken is required' } });
     }
-    await refreshSessionOrRespond(res, req.body.refreshToken);
+    await refreshSessionOrRespond(res, refreshToken);
   } catch (error) {
     logger.error({ msg: 'Token refresh error', error });
     internalError(res, 'Failed to refresh token');
@@ -82,7 +83,7 @@ router.post('/refresh', [body('refreshToken').isString().trim().notEmpty()], asy
 router.post('/logout', optionalAuth, async (req: Request, res: Response) => {
   try {
     await logoutUserOrRespond(res, {
-      refreshToken: req.body.refreshToken,
+      refreshToken: req.body.refreshToken || req.cookies?.ori_refresh_token,
       userId: req.user?.id,
     });
   } catch (error) {
@@ -101,6 +102,16 @@ router.post('/github', async (req: Request, res: Response) => {
   } catch (error) {
     logger.error({ msg: 'GitHub auth error', error });
     internalError(res, 'GitHub authentication failed');
+  }
+});
+
+router.post('/guest-token', async (_req: Request, res: Response) => {
+  try {
+    const token = generateGuestToken();
+    ok(res, { token });
+  } catch (error) {
+    logger.error({ msg: 'Guest token generation error', error });
+    internalError(res, 'Failed to generate guest token');
   }
 });
 

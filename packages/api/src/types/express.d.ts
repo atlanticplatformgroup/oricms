@@ -14,6 +14,7 @@ declare global {
       agentSessionId?: string;
       agentAccessConfig?: AgentAccessConfig;
       agentTokenId?: string;
+      cookies?: Record<string, string>;
     }
   }
 }

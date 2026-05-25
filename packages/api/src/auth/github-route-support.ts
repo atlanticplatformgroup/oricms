@@ -1,6 +1,7 @@
 import { prisma } from '../lib/prisma';
 import { badRequest, ok } from '../lib/responses';
 import { fetchGitHubProfile, issueUserSession, toAuthUser } from './route-support';
+import { setAuthCookies } from './middleware';
 
 export async function authenticateGitHubOrRespond(
   res: Parameters<typeof ok>[0],
@@ -50,6 +51,7 @@ export async function authenticateGitHubOrRespond(
   }
 
   const { accessToken, refreshToken } = await issueUserSession(user);
+  setAuthCookies(res, accessToken, refreshToken);
   ok(res, {
     user: toAuthUser(user),
     accessToken,

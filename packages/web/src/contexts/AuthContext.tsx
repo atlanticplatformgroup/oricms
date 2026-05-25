@@ -10,8 +10,6 @@ import { ApiError } from '../lib/api/core';
 import { authApi } from '../lib/api/auth';
 import { AuthContext, type AuthContextType, type AuthState } from './auth-context';
 
-const TOKEN_KEY = 'accessToken';
-const REFRESH_KEY = 'refreshToken';
 const USER_KEY = 'user';
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -24,53 +22,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     error: null,
   });
 
-  // Initialize auth state from localStorage
+  // Initialize auth state from cookies + API
   useEffect(() => {
     const initAuth = async () => {
-      const accessToken = localStorage.getItem(TOKEN_KEY);
-      const refreshToken = localStorage.getItem(REFRESH_KEY);
-
-      if (accessToken && refreshToken) {
-        try {
-          // Validate token by fetching current user
-          const { user } = await authApi.me();
-          
-          setState({
-            user,
-            accessToken,
-            refreshToken,
-            isAuthenticated: true,
-            isLoading: false,
-            error: null,
-          });
-        } catch (error) {
-          // Token expired, try to refresh
-          if (error instanceof ApiError && error.statusCode === 401) {
-            try {
-              const refreshed = await authApi.refreshToken(refreshToken);
-              const { user } = await authApi.me();
-              
-              localStorage.setItem(TOKEN_KEY, refreshed.accessToken);
-              localStorage.setItem(REFRESH_KEY, refreshed.refreshToken);
-              
-              setState({
-                user,
-                accessToken: refreshed.accessToken,
-                refreshToken: refreshed.refreshToken,
-                isAuthenticated: true,
-                isLoading: false,
-                error: null,
-              });
-            } catch {
-              // Refresh failed, clear auth
-              clearAuth();
-            }
-          } else {
+      try {
+        const { user } = await authApi.me();
+        localStorage.setItem(USER_KEY, JSON.stringify(user));
+        setState({
+          user,
+          accessToken: null,
+          refreshToken: null,
+          isAuthenticated: true,
+          isLoading: false,
+          error: null,
+        });
+      } catch (error) {
+        if (error instanceof ApiError && error.statusCode === 401) {
+          try {
+            await authApi.refreshToken();
+            const { user } = await authApi.me();
+            localStorage.setItem(USER_KEY, JSON.stringify(user));
+            setState({
+              user,
+              accessToken: null,
+              refreshToken: null,
+              isAuthenticated: true,
+              isLoading: false,
+              error: null,
+            });
+          } catch {
             clearAuth();
           }
+        } else {
+          clearAuth();
         }
-      } else {
-        setState(prev => ({ ...prev, isLoading: false }));
       }
     };
 
@@ -83,30 +68,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Sync state across tabs
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === TOKEN_KEY || e.key === REFRESH_KEY || e.key === USER_KEY) {
-        const accessToken = localStorage.getItem(TOKEN_KEY);
-        const refreshToken = localStorage.getItem(REFRESH_KEY);
+      if (e.key === USER_KEY) {
         const userStr = localStorage.getItem(USER_KEY);
-        
-        if (accessToken && refreshToken && userStr) {
+        if (userStr) {
           try {
             const user = JSON.parse(userStr);
             setState(prev => ({
               ...prev,
               user,
-              accessToken,
-              refreshToken,
               isAuthenticated: true,
             }));
           } catch {
             // Invalid user JSON
           }
-        } else if (!accessToken || !refreshToken) {
+        } else {
           setState(prev => ({
             ...prev,
             user: null,
-            accessToken: null,
-            refreshToken: null,
             isAuthenticated: false,
           }));
         }
@@ -118,8 +96,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const clearAuth = () => {
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(REFRESH_KEY);
     localStorage.removeItem(USER_KEY);
     
     setState({
@@ -136,16 +112,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       setState(prev => ({ ...prev, isLoading: true, error: null }));
       
-      const { user, accessToken, refreshToken } = await authApi.login(email, password);
+      const { user } = await authApi.login(email, password);
       
-      localStorage.setItem(TOKEN_KEY, accessToken);
-      localStorage.setItem(REFRESH_KEY, refreshToken);
       localStorage.setItem(USER_KEY, JSON.stringify(user));
       
       setState({
         user,
-        accessToken,
-        refreshToken,
+        accessToken: null,
+        refreshToken: null,
         isAuthenticated: true,
         isLoading: false,
         error: null,
@@ -161,16 +135,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       setState(prev => ({ ...prev, isLoading: true, error: null }));
       
-      const { user, accessToken, refreshToken } = await authApi.register(email, name, password);
+      const { user } = await authApi.register(email, name, password);
       
-      localStorage.setItem(TOKEN_KEY, accessToken);
-      localStorage.setItem(REFRESH_KEY, refreshToken);
       localStorage.setItem(USER_KEY, JSON.stringify(user));
       
       setState({
         user,
-        accessToken,
-        refreshToken,
+        accessToken: null,
+        refreshToken: null,
         isAuthenticated: true,
         isLoading: false,
         error: null,
@@ -186,16 +158,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       setState(prev => ({ ...prev, isLoading: true, error: null }));
       
-      const { user, accessToken, refreshToken } = await authApi.githubAuth(code);
+      const { user } = await authApi.githubAuth(code);
       
-      localStorage.setItem(TOKEN_KEY, accessToken);
-      localStorage.setItem(REFRESH_KEY, refreshToken);
       localStorage.setItem(USER_KEY, JSON.stringify(user));
       
       setState({
         user,
-        accessToken,
-        refreshToken,
+        accessToken: null,
+        refreshToken: null,
         isAuthenticated: true,
         isLoading: false,
         error: null,
@@ -209,15 +179,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = useCallback(async () => {
     try {
-      if (state.refreshToken) {
-        await authApi.logout(state.refreshToken);
-      }
+      await authApi.logout();
     } catch {
       // Ignore logout errors
     } finally {
       clearAuth();
     }
-  }, [state.refreshToken]);
+  }, []);
 
   const clearError = useCallback(() => {
     setState(prev => ({ ...prev, error: null }));

@@ -65,22 +65,17 @@ let refreshPromise: Promise<string | null> | null = null;
 async function refreshAccessToken(): Promise<string | null> {
   if (refreshPromise) return refreshPromise;
 
-  const refreshToken = localStorage.getItem('refreshToken');
-  if (!refreshToken) return null;
-
   refreshPromise = (async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/v1/auth/refresh`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refreshToken }),
+        credentials: 'include',
       });
 
       const data: ApiResponse<{ accessToken: string; refreshToken: string }> = await response.json();
 
       if (data.success && data.data) {
-        localStorage.setItem('accessToken', data.data.accessToken);
-        localStorage.setItem('refreshToken', data.data.refreshToken);
         return data.data.accessToken;
       }
     } catch (error) {
@@ -121,6 +116,7 @@ export async function request<T>(endpoint: string, options: RequestOptions = {})
       method,
       headers: requestHeaders,
       body: body ? JSON.stringify(body) : undefined,
+      credentials: 'include',
     });
 
     const text = await response.text();
@@ -150,29 +146,20 @@ export async function request<T>(endpoint: string, options: RequestOptions = {})
 
   for (let attempt = 0; attempt <= retryCount; attempt += 1) {
     try {
-      let token: string | null = null;
       if (requiresAuth) {
-        token = localStorage.getItem('accessToken');
-        if (!token) throw new ApiError('Not authenticated', 'UNAUTHORIZED', 401);
-
-        if (tokenNeedsRefresh(token)) {
+        // With cookie-based auth, the browser sends cookies automatically.
+        // We only need to handle token refresh proactively when the access
+        // token cookie is about to expire.
+        const cachedToken = localStorage.getItem('accessToken');
+        if (cachedToken && tokenNeedsRefresh(cachedToken)) {
           const newToken = await refreshAccessToken();
           if (newToken) {
-            token = newToken;
             tokenRefreshed = true;
-          } else {
-            localStorage.removeItem('accessToken');
-            localStorage.removeItem('refreshToken');
-            localStorage.removeItem('user');
-            if (!window.location.pathname.startsWith('/login')) {
-              window.location.href = '/login';
-            }
-            throw new ApiError('Session expired', 'UNAUTHORIZED', 401);
           }
         }
       }
 
-      return await makeRequest(token || undefined);
+      return await makeRequest();
     } catch (error) {
       lastError = error;
       if (error instanceof ApiError) {
@@ -187,8 +174,6 @@ export async function request<T>(endpoint: string, options: RequestOptions = {})
           continue;
         }
 
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
         localStorage.removeItem('user');
         if (!window.location.pathname.startsWith('/login')) {
           window.location.href = '/login';
