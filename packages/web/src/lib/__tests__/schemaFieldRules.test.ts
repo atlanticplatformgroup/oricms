@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { SchemaField } from '@ori/shared';
-import { isSchemaFieldVisible, validateSchemaFieldOptionConstraints } from '../schemaFieldRules';
+import { isSchemaFieldVisible, validateSchemaFieldOptionConstraints } from '@ori/shared';
 
 const textField: SchemaField = {
   key: 'title',

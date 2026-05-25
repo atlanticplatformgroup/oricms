@@ -58,7 +58,7 @@ vi.mock('../../lib/api-services', () => ({
   },
 }));
 
-vi.mock('../configService', () => ({
+vi.mock('../config-service', () => ({
   ProjectConfigService: vi.fn().mockImplementation(() => ({
     bootstrap: configBootstrapMock,
     save: configSaveMock,

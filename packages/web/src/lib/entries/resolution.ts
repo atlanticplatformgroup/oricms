@@ -2,7 +2,8 @@ import type { Asset, CollectionConfig, CollectionEntry, ContentType, SchemaField
 import { getCollectionBrowseFields, getPreferredFieldKey } from '@ori/shared';
 import { resolveRegisteredFieldCapability } from '../fields/capabilities';
 import type { CollectionBrowsePreview, CollectionTableColumn } from './types';
-import { inferFallbackEditorField, getRefId } from './transforms';
+import { getRefId } from '@ori/shared';
+import { inferFallbackEditorField } from './transforms';
 
 export function resolveContentType(collection: CollectionConfig | null, contentTypes: ContentType[]): ContentType | null {
   if (!collection) return null;

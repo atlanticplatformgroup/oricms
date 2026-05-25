@@ -96,16 +96,4 @@ export function generateToken(length: number = 32): string {
     .toString('base64url');
 }
 
-/**
- * Constant-time comparison to prevent timing attacks
- */
-export function secureCompare(a: string, b: string): boolean {
-  const bufA = Buffer.from(a);
-  const bufB = Buffer.from(b);
 
-  if (bufA.length !== bufB.length) {
-    return false;
-  }
-
-  return crypto.timingSafeEqual(bufA, bufB);
-}

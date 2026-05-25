@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useMutation, type QueryClient } from '@tanstack/react-query';
 import type { ComponentSchema, ContentType, FieldType, SchemaField } from '@ori/shared';
 import { gitApi } from '../lib/api/git';
-import { moveArrayItem } from '../lib/arrayMove';
+import { moveArrayItem } from '../lib/array-move';
 import { makeSchemaField, toSchemaFieldKey } from '../lib/schemas/factory';
 import { getSchemaValidation } from '../lib/schemas/validation';
 import { toLabel } from '../lib/workspace/format';

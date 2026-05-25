@@ -2,7 +2,7 @@ import { Badge, Group, Stack, Text } from '@mantine/core';
 import { getAssetTags, type Asset, type SchemaField } from '@ori/shared';
 import { getProjectAssetPath, normalizeAssetReference } from '../../lib/assets/references';
 import { getAssetTypeLabel } from '../../lib/assets/display';
-import { getFieldChoiceLabel, getRefId, getRefIds } from '../../lib/entries/transforms';
+import { getFieldChoiceLabel, getRefId, getRefIds } from '@ori/shared';
 import { resolveRegisteredFieldCapability } from '../../lib/fields/capabilities';
 import { getDisplayText } from '../../lib/workspace/format';
 import { AuthenticatedImage } from '../ui/AuthenticatedImage';

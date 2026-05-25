@@ -1,7 +1,7 @@
 import type { CollectionConfig, CollectionEntry, ContentType, SchemaField } from '@ori/shared';
 import { getPreferredFieldKey, resolveFieldCapability } from '@ori/shared';
 import { collectionsApi } from '../api/collections';
-import { getRefIds } from './transforms';
+import { getRefIds } from '@ori/shared';
 import { resolveContentType, resolveTargetCollectionId } from './resolution';
 
 interface ResolveBrowseRelationLabelsOptions {
