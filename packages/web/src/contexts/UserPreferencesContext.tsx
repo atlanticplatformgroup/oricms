@@ -10,7 +10,7 @@
  * - Fallback to localStorage if offline
  */
 
-import { useEffect, useState, useCallback, useRef, type ReactNode } from 'react';
+import { useEffect, useState, useCallback, useRef, useMemo, type ReactNode } from 'react';
 import type { UserPreferences } from '@ori/shared';
 import { request } from '../lib/api/core';
 import { useAuth } from './useAuth';
@@ -180,16 +180,16 @@ export function UserPreferencesProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
+  const value = useMemo(() => ({
+    preferences,
+    isLoading,
+    updatePreferences,
+    updateProjectDefault,
+    setLastVisitedProject,
+  }), [preferences, isLoading, updatePreferences, updateProjectDefault, setLastVisitedProject]);
+
   return (
-    <UserPreferencesContext.Provider
-      value={{
-        preferences,
-        isLoading,
-        updatePreferences,
-        updateProjectDefault,
-        setLastVisitedProject,
-      }}
-    >
+    <UserPreferencesContext.Provider value={value}>
       {children}
     </UserPreferencesContext.Provider>
   );

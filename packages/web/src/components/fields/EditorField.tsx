@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Alert } from '@mantine/core';
 import type { SchemaField } from '@ori/shared';
 import { getUnknownFieldDisplay, resolveFieldLabel, type FieldRendererContext } from './contracts';
@@ -14,7 +15,7 @@ interface EditorFieldProps {
   context: FieldRendererContext;
 }
 
-export function EditorField({ field, value, error = null, disabled = false, changed = false, onChange, context }: EditorFieldProps) {
+export const EditorField = memo(function EditorField({ field, value, error = null, disabled = false, changed = false, onChange, context }: EditorFieldProps) {
   const { component: Renderer, isFallback, presentation } = fieldRegistry.resolve(field.type);
   const unknown = isFallback ? getUnknownFieldDisplay(field.type) : null;
   const descriptionLines = [field.description, field.options?.helpText]
@@ -48,4 +49,4 @@ export function EditorField({ field, value, error = null, disabled = false, chan
       <Renderer field={field} value={value} error={error} disabled={disabled} onChange={onChange} context={context} />
     </WorkspaceFieldShell>
   );
-}
+});
