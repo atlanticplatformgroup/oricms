@@ -1,7 +1,8 @@
+import { memo, useCallback } from 'react';
 import { Button, Group, Menu, Pagination, Stack, Table, Text } from '@mantine/core';
 import { ChevronDownIcon, Cog6ToothIcon } from '@heroicons/react/24/outline';
 import { Fragment, type ReactNode } from 'react';
-import type { CollectionConfig, ContentType } from '@ori/shared';
+import type { CollectionConfig, ContentType, CollectionEntry } from '@ori/shared';
 import { TableFieldValue } from '../../fields/TableFieldValue';
 import { CollectionStatusBadge } from '../../ui/CollectionStatusBadge';
 import { WorkspaceSearchField } from '../../ui/WorkspaceSearchField';
@@ -25,6 +26,7 @@ import {
 } from '../../ui/WorkspacePrimitives';
 import { resolveCollectionBrowsePreview } from '../../../lib/entries/resolution';
 import type { CollectionBrowseController } from './types';
+import type { CollectionTableColumn } from '../../../lib/entries/types';
 
 export function CollectionBrowseHeaderActions(props: {
   canCreateEntries: boolean;
@@ -182,6 +184,84 @@ export function CollectionBrowseToolbar(props: {
   );
 }
 
+interface MobileEntryItemProps {
+  entry: CollectionEntry;
+  selectedContentType: ContentType | null;
+  tableAssetMap: CollectionBrowseController['tableAssetMap'];
+  tableRelationLabelsByField: CollectionBrowseController['tableRelationLabelsByField'];
+  onSelectEntry: (entryId: string) => void;
+}
+
+const MobileEntryItem = memo(function MobileEntryItem({ entry, selectedContentType, tableAssetMap, tableRelationLabelsByField, onSelectEntry }: MobileEntryItemProps) {
+  const preview = resolveCollectionBrowsePreview({ contentType: selectedContentType, entry, tableAssetMap, relationLabelsByField: tableRelationLabelsByField });
+  const handleClick = useCallback(() => {
+    onSelectEntry(entry.$id);
+  }, [entry.$id, onSelectEntry]);
+
+  return (
+    <WorkspaceMobileRecordItem
+      testId={`entry-open-${entry.$id}`}
+      title={preview.primary}
+      summary={preview.summary || undefined}
+      tertiary={preview.tertiary || undefined}
+      meta={(
+        <Group justify="space-between" align="center" wrap="nowrap" style={{ minWidth: 0 }}>
+          <CollectionStatusBadge status={entry.$status} />
+          <Text size="xs" c="dimmed" style={{ flexShrink: 0 }}>
+            {new Date(entry.$updatedAt).toLocaleDateString(undefined, {
+              month: 'short',
+              day: 'numeric',
+              year: 'numeric',
+            })}
+          </Text>
+        </Group>
+      )}
+      onClick={handleClick}
+    />
+  );
+});
+
+interface EntryTableRowProps {
+  entry: CollectionEntry;
+  visibleTableColumns: CollectionTableColumn[];
+  showStatusColumn: boolean;
+  showUpdatedColumn: boolean;
+  onSelectEntry: (entryId: string) => void;
+  renderTableFieldValue: (entry: CollectionEntry, column: CollectionTableColumn) => ReactNode;
+}
+
+const EntryTableRow = memo(function EntryTableRow({ entry, visibleTableColumns, showStatusColumn, showUpdatedColumn, onSelectEntry, renderTableFieldValue }: EntryTableRowProps) {
+  const handleClick = useCallback(() => {
+    onSelectEntry(entry.$id);
+  }, [entry.$id, onSelectEntry]);
+
+  return (
+    <Table.Tr>
+      {visibleTableColumns.map((column, index) => (
+        <Table.Td key={`${entry.$id}-${column.key}`}>
+          {index === 0 ? (
+            <WorkspaceRecordLink testId={`entry-open-${entry.$id}`} onClick={handleClick}>
+              {renderTableFieldValue(entry, column)}
+            </WorkspaceRecordLink>
+          ) : (
+            renderTableFieldValue(entry, column)
+          )}
+        </Table.Td>
+      ))}
+      {showStatusColumn ? (
+        <Table.Td>
+          <CollectionStatusBadge status={entry.$status} />
+        </Table.Td>
+      ) : null}
+      {showUpdatedColumn ? (
+        <Table.Td>
+          <Text size="sm">{new Date(entry.$updatedAt).toLocaleDateString()}</Text>
+        </Table.Td>
+      ) : null}
+    </Table.Tr>
+  );
+});
+
 export function CollectionBrowseResults(props: {
   browse: CollectionBrowseController;
   isMobileShell: boolean;
@@ -246,37 +326,16 @@ export function CollectionBrowseResults(props: {
     return (
       <Stack gap="sm">
         <WorkspaceMobileRecordList>
-          {props.browse.entries.map((entry) => {
-            const preview = resolveCollectionBrowsePreview({
-              contentType: props.selectedContentType,
-              entry,
-              tableAssetMap: props.browse.tableAssetMap,
-              relationLabelsByField: props.browse.tableRelationLabelsByField,
-            });
-
-            return (
-              <WorkspaceMobileRecordItem
-                key={entry.$id}
-                testId={`entry-open-${entry.$id}`}
-                title={preview.primary}
-                summary={preview.summary || undefined}
-                tertiary={preview.tertiary || undefined}
-                meta={(
-                  <Group justify="space-between" align="center" wrap="nowrap" style={{ minWidth: 0 }}>
-                    <CollectionStatusBadge status={entry.$status} />
-                    <Text size="xs" c="dimmed" style={{ flexShrink: 0 }}>
-                      {new Date(entry.$updatedAt).toLocaleDateString(undefined, {
-                        month: 'short',
-                        day: 'numeric',
-                        year: 'numeric',
-                      })}
-                    </Text>
-                  </Group>
-                )}
-                onClick={() => props.onSelectEntry(entry.$id)}
-              />
-            );
-          })}
+          {props.browse.entries.map((entry) => (
+            <MobileEntryItem
+              key={entry.$id}
+              entry={entry}
+              selectedContentType={props.selectedContentType}
+              tableAssetMap={props.browse.tableAssetMap}
+              tableRelationLabelsByField={props.browse.tableRelationLabelsByField}
+              onSelectEntry={props.onSelectEntry}
+            />
+          ))}
         </WorkspaceMobileRecordList>
 
         {props.browse.entriesPagination.pageCount > 1 ? (
@@ -338,31 +397,15 @@ export function CollectionBrowseResults(props: {
             </Table.Thead>
             <Table.Tbody>
               {props.browse.entries.map((entry) => (
-                <Table.Tr key={entry.$id}>
-                  {visibleTableColumns.map((column, index) => (
-                    <Table.Td key={`${entry.$id}-${column.key}`}>
-                      {index === 0 ? (
-                        <WorkspaceRecordLink testId={`entry-open-${entry.$id}`} onClick={() => props.onSelectEntry(entry.$id)}>
-                          {renderTableFieldValue(entry, column)}
-                        </WorkspaceRecordLink>
-                      ) : (
-                        renderTableFieldValue(entry, column)
-                      )}
-                    </Table.Td>
-                  ))}
-                  {showStatusColumn ? (
-                    <Table.Td>
-                      <CollectionStatusBadge status={entry.$status} />
-                    </Table.Td>
-                  ) : null}
-                  {showUpdatedColumn ? (
-                    <Table.Td>
-                      <Text size="sm" lineClamp={1}>
-                        {new Date(entry.$updatedAt).toLocaleString()}
-                      </Text>
-                    </Table.Td>
-                  ) : null}
-                </Table.Tr>
+                <EntryTableRow
+                  key={entry.$id}
+                  entry={entry}
+                  visibleTableColumns={visibleTableColumns}
+                  showStatusColumn={showStatusColumn}
+                  showUpdatedColumn={showUpdatedColumn}
+                  onSelectEntry={props.onSelectEntry}
+                  renderTableFieldValue={renderTableFieldValue}
+                />
               ))}
             </Table.Tbody>
           </WorkspaceOperationalTable>

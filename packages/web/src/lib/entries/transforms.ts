@@ -1,4 +1,4 @@
-import type { CollectionEntry, SchemaField } from '@ori/shared';
+import type { CollectionEntry, GitCommit, SchemaField } from '@ori/shared';
 import type { FieldDiff, HistoryTimelineItem } from './types';
 import { toLabel } from '../workspace/format';
 import { inferFieldType } from '../fields/display';
@@ -33,12 +33,12 @@ export function createFieldDiffs(previousValue: Record<string, unknown>, current
   return diffs;
 }
 
-export function normalizeHistoryItem(item: Record<string, unknown>, index: number): HistoryTimelineItem {
+export function normalizeHistoryItem(item: GitCommit | Record<string, unknown>, index: number): HistoryTimelineItem {
   return {
-    hash: String(item.hash || item.commit || item.id || `rev-${index}`),
-    message: String(item.message || item.subject || 'Commit'),
-    author: String(item.author || item.authorName || 'Unknown'),
-    date: String(item.date || item.timestamp || ''),
+    hash: String('hash' in item ? item.hash : item.commit || item.id || `rev-${index}`),
+    message: String('message' in item ? item.message : item.subject || 'Commit'),
+    author: String('author' in item ? item.author : item.authorName || 'Unknown'),
+    date: String('date' in item ? item.date : item.timestamp || ''),
   };
 }
 

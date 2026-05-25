@@ -1,8 +1,8 @@
-import { memo } from 'react';
+import { memo, useCallback } from 'react';
 import { Button, Group, Paper, Select, SimpleGrid, Stack, Table, Text } from '@mantine/core';
 import { WorkspaceErrorState, WorkspaceListSurface, WorkspaceLoadingState, WorkspaceMetricBadge, WorkspaceOperationalTable, WorkspaceSection, WorkspaceTableContainer, WorkspaceTableToolbarInset, WorkspaceToolbar } from '../../ui/WorkspacePrimitives';
 import { WORKSPACE_FORM_PREVIEW_BG, WORKSPACE_FORM_SECTION_BORDER, WORKSPACE_SHELL_DESCRIPTION_TEXT } from '../../ui/workspace-primitives.shared';
-import type { BuildRecord, BuildStatus } from './types';
+import type { BuildRecord, BuildStatus } from '@ori/shared';
 
 function BuildEmptyState({
   currentBranch,
@@ -179,6 +179,10 @@ export function BuildHistoryTable({
   const hasBuilds = builds.length > 0;
   const showToolbar = loading || hasBuilds;
 
+  const handleSelectView = useCallback((value: string | null) => {
+    if (value) onSelectView(value);
+  }, [onSelectView]);
+
   return (
     <WorkspaceListSurface>
       <WorkspaceSection
@@ -202,9 +206,7 @@ export function BuildHistoryTable({
                     maw={180}
                     style={{ width: '100%' }}
                     aria-label="Build status filter"
-                    onChange={(value) => {
-                      if (value) onSelectView(value);
-                    }}
+                    onChange={handleSelectView}
                   />
                 )}
               />

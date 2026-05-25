@@ -2,6 +2,8 @@ import type { Asset, FieldCapabilityInput, FieldCapabilityResult, SchemaField, C
 import type { StructuredDragItem } from '../../lib/entries/types';
 import { toLabel } from '../../lib/workspace/format';
 
+export type { StructuredDragItem };
+
 
 export interface StructuredDragContext {
   draggedItem: StructuredDragItem | null;

@@ -1,7 +1,7 @@
 import type { Request, Response } from 'express';
 import { validationResult } from 'express-validator';
 import type { ProjectRole } from '@ori/shared';
-import { prisma } from '../lib/prisma';
+import { prisma, getPrismaErrorResponse } from '../lib/prisma';
 import { sendEmail } from '../lib/email';
 import { logger } from '../middleware/logger';
 import { buildInviteLink, sendValidationError } from './shared';
@@ -100,6 +100,13 @@ export async function createAgentProjectMember(input: CreateAgentProjectMemberIn
       });
     }
 
+    const prismaError = getPrismaErrorResponse(error);
+    if (prismaError) {
+      const errorWithCode = new Error(prismaError.message);
+      (errorWithCode as Error & { code: string; statusCode: number }).code = prismaError.code;
+      (errorWithCode as Error & { code: string; statusCode: number }).statusCode = prismaError.statusCode;
+      throw errorWithCode;
+    }
     throw error;
   }
 }

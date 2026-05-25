@@ -17,6 +17,7 @@ import {
 } from './credential-route-support';
 import { authenticateGitHubOrRespond } from './github-route-support';
 import { generateGuestToken } from './middleware';
+import { getPrismaErrorResponse } from '../lib/prisma';
 import {
   getCurrentUserPreferencesOrRespond,
   updateCurrentUserPreferencesOrRespond,
@@ -41,6 +42,10 @@ router.post(
       await registerUserOrRespond(res, { email, name, password });
     } catch (error) {
       logger.error({ msg: 'Registration error', error });
+      const prismaError = getPrismaErrorResponse(error);
+      if (prismaError) {
+        return res.status(prismaError.statusCode).json({ success: false, error: { code: prismaError.code, message: prismaError.message } });
+      }
       internalError(res, 'Failed to create account');
     }
   }
@@ -62,6 +67,10 @@ router.post(
       await loginUserOrRespond(res, { email, password });
     } catch (error) {
       logger.error({ msg: 'Login error', error });
+      const prismaError = getPrismaErrorResponse(error);
+      if (prismaError) {
+        return res.status(prismaError.statusCode).json({ success: false, error: { code: prismaError.code, message: prismaError.message } });
+      }
       internalError(res, 'Login failed');
     }
   }

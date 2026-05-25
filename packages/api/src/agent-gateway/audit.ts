@@ -154,16 +154,16 @@ export async function getAuditSummary(
     allLogs,
   ] = await Promise.all([
     prisma.agentAuditLog.count({ where }),
-    prisma.agentAuditLog.groupBy({
+    (async () => (await prisma.agentAuditLog.groupBy({
       by: ['filePath'],
       where,
       _count: { filePath: true },
-    }).then(results => results.length),
-    prisma.agentAuditLog.groupBy({
+    })).length)(),
+    (async () => (await prisma.agentAuditLog.groupBy({
       by: ['agentSessionId'],
       where,
       _count: { agentSessionId: true },
-    }).then(results => results.length),
+    })).length)(),
     prisma.agentAuditLog.count({
       where: { ...where, wasRedacted: true },
     }),

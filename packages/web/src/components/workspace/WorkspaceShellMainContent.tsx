@@ -1,4 +1,4 @@
-import { Suspense } from 'react';
+import { Suspense, lazy, useCallback } from 'react';
 import { Center, Loader } from '@mantine/core';
 import { EMPTY_SECONDARY } from '../../lib/workspace/constants';
 import { buildWorkspacePath } from '../../lib/workspace/routing';
@@ -9,12 +9,13 @@ import { PlaceholderWorkspace } from './PlaceholderWorkspace';
 import { SchemaDeleteModal } from './schema/SchemaDeleteModal';
 import { SchemaHistoryModal } from './schema/SchemaHistoryModal';
 import { SchemaJsonModal } from './schema/SchemaJsonModal';
-import { SchemasWorkspace } from './SchemasWorkspace';
-import { MediaWorkspace } from './MediaWorkspace';
-import { BuildsWorkspace } from './BuildsWorkspace';
-import { MembersWorkspace } from './MembersWorkspace';
-import { SettingsWorkspace } from './SettingsWorkspace';
 import { useSchemaEditorContext } from '../../contexts/workspace/SchemaEditorContext';
+
+const SchemasWorkspace = lazy(() => import('./SchemasWorkspace').then((m) => ({ default: m.SchemasWorkspace })));
+const MediaWorkspace = lazy(() => import('./MediaWorkspace').then((m) => ({ default: m.MediaWorkspace })));
+const BuildsWorkspace = lazy(() => import('./BuildsWorkspace').then((m) => ({ default: m.BuildsWorkspace })));
+const MembersWorkspace = lazy(() => import('./MembersWorkspace').then((m) => ({ default: m.MembersWorkspace })));
+const SettingsWorkspace = lazy(() => import('./SettingsWorkspace').then((m) => ({ default: m.SettingsWorkspace })));
 import { SCHEMA_FIELD_TYPE_GROUPS, SCHEMA_FIELD_TYPE_OPTIONS } from '../../lib/workspace/constants';
 import { toLabel } from '../../lib/workspace/format';
 import { makeSchemaField } from '../../lib/schemas/factory';
@@ -117,7 +118,32 @@ export function WorkspaceShellMainContent(props: {
   guardedNavigate: (to: string, replace?: boolean) => void;
   handleSelectEntry: (entryId: string) => void;
 }) {
-  const { layout } = props;
+  const { layout, guardedNavigate, handleSelectEntry } = props;
+
+  const handleBackToCollection = useCallback(() => {
+    if (!layout.activeProjectSlug || !layout.selectedCollection) return;
+    guardedNavigate(buildWorkspacePath(layout.activeProjectSlug, 'collections', layout.selectedCollection.id, { branchName: layout.currentBranchName }));
+  }, [layout.activeProjectSlug, layout.selectedCollection, layout.currentBranchName, guardedNavigate]);
+
+  const handleGoToCollectionSettings = useCallback(() => {
+    if (!layout.activeProjectSlug || !layout.selectedCollection) return;
+    guardedNavigate(buildWorkspacePath(layout.activeProjectSlug, 'collections', layout.selectedCollection.id, { collectionSettingsView: true, branchName: layout.currentBranchName }));
+  }, [layout.activeProjectSlug, layout.selectedCollection, layout.currentBranchName, guardedNavigate]);
+
+  const handleGoToHistory = useCallback(() => {
+    if (!layout.activeProjectSlug || !layout.selectedCollection || !layout.selectedEntry) return;
+    guardedNavigate(buildWorkspacePath(layout.activeProjectSlug, 'collections', layout.selectedCollection.id, { entryId: layout.selectedEntry.$id, historyView: true, branchName: layout.currentBranchName }));
+  }, [layout.activeProjectSlug, layout.selectedCollection, layout.selectedEntry, layout.currentBranchName, guardedNavigate]);
+
+  const handleBackToEditor = useCallback(() => {
+    if (!layout.activeProjectSlug || !layout.selectedCollection || !layout.selectedEntry) return;
+    guardedNavigate(buildWorkspacePath(layout.activeProjectSlug, 'collections', layout.selectedCollection.id, { entryId: layout.selectedEntry.$id, branchName: layout.currentBranchName }));
+  }, [layout.activeProjectSlug, layout.selectedCollection, layout.selectedEntry, layout.currentBranchName, guardedNavigate]);
+
+  const handleSelectView = useCallback((view: string) => {
+    if (!layout.activeProjectSlug) return;
+    guardedNavigate(buildWorkspacePath(layout.activeProjectSlug, 'builds', view, { branchName: layout.currentBranchName }));
+  }, [layout.activeProjectSlug, layout.currentBranchName, guardedNavigate]);
 
   return (
     <>
@@ -144,23 +170,11 @@ export function WorkspaceShellMainContent(props: {
               selectedEntryLoading={layout.selectedEntryLoading}
               selectedEntryError={layout.selectedEntryError}
               onRetrySelectedEntry={layout.retrySelectedEntry}
-              onSelectEntry={props.handleSelectEntry}
-              onBackToCollection={() => {
-                if (!layout.activeProjectSlug || !layout.selectedCollection) return;
-                props.guardedNavigate(buildWorkspacePath(layout.activeProjectSlug, 'collections', layout.selectedCollection.id, { branchName: layout.currentBranchName }));
-              }}
-              onGoToCollectionSettings={() => {
-                if (!layout.activeProjectSlug || !layout.selectedCollection) return;
-                props.guardedNavigate(buildWorkspacePath(layout.activeProjectSlug, 'collections', layout.selectedCollection.id, { collectionSettingsView: true, branchName: layout.currentBranchName }));
-              }}
-              onGoToHistory={() => {
-                if (!layout.activeProjectSlug || !layout.selectedCollection || !layout.selectedEntry) return;
-                props.guardedNavigate(buildWorkspacePath(layout.activeProjectSlug, 'collections', layout.selectedCollection.id, { entryId: layout.selectedEntry.$id, historyView: true, branchName: layout.currentBranchName }));
-              }}
-              onBackToEditor={() => {
-                if (!layout.activeProjectSlug || !layout.selectedCollection || !layout.selectedEntry) return;
-                props.guardedNavigate(buildWorkspacePath(layout.activeProjectSlug, 'collections', layout.selectedCollection.id, { entryId: layout.selectedEntry.$id, branchName: layout.currentBranchName }));
-              }}
+              onSelectEntry={handleSelectEntry}
+              onBackToCollection={handleBackToCollection}
+              onGoToCollectionSettings={handleGoToCollectionSettings}
+              onGoToHistory={handleGoToHistory}
+              onBackToEditor={handleBackToEditor}
               renderReadonlyFieldValue={layout.renderReadonlyFieldValue}
               currentBranchName={layout.currentBranchName}
             />
@@ -190,10 +204,7 @@ export function WorkspaceShellMainContent(props: {
             selectedLabel={layout.selectedSecondaryOption?.label}
             selectedDescription={layout.selectedSecondaryOption?.description}
             currentBranch={layout.currentBranchName}
-            onSelectView={(view) => {
-              if (!layout.activeProjectSlug) return;
-              props.guardedNavigate(buildWorkspacePath(layout.activeProjectSlug, 'builds', view, { branchName: layout.currentBranchName }));
-            }}
+            onSelectView={handleSelectView}
             showToast={layout.showToast}
           />
         ) : layout.activeSection === 'members' ? (

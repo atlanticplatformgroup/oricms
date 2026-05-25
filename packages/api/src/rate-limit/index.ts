@@ -405,14 +405,15 @@ class RateLimitStoreFactory {
     return this.redisClient;
   }
 
-  private getConnectPromise(): Promise<void> {
+  private async getConnectPromise(): Promise<void> {
     if (!this.connectPromise) {
-      this.connectPromise = this.getRedisClient().connect().then(() => {
+      this.connectPromise = (async () => {
+        await this.getRedisClient().connect();
         logger.info({
           msg: 'Rate limit Redis store connected',
           prefix: this.config.redisPrefix,
         });
-      });
+      })();
     }
 
     return this.connectPromise;

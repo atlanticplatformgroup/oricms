@@ -210,24 +210,24 @@ export function scheduleCdnExport(input: {
 
   apiServices.runBackgroundTask(
     'cdn-export',
-    service
-      .export({
-        sourcePath: input.sourcePath,
-        destinationPrefix,
-        onProgress: (progress) => {
-          logger.info({
-            msg: 'CDN export progress',
-            exportId: input.exportId,
-            projectId: input.projectId,
-            percentComplete: progress.percentComplete,
-            uploadedFiles: progress.uploadedFiles,
-            failedFiles: progress.failedFiles,
-            totalFiles: progress.totalFiles,
-            currentFile: progress.currentFile,
-          });
-        },
-      })
-      .then(async (result) => {
+    (async () => {
+      try {
+        const result = await service.export({
+          sourcePath: input.sourcePath,
+          destinationPrefix,
+          onProgress: (progress) => {
+            logger.info({
+              msg: 'CDN export progress',
+              exportId: input.exportId,
+              projectId: input.projectId,
+              percentComplete: progress.percentComplete,
+              uploadedFiles: progress.uploadedFiles,
+              failedFiles: progress.failedFiles,
+              totalFiles: progress.totalFiles,
+              currentFile: progress.currentFile,
+            });
+          },
+        });
         await prisma.cdnExport.update({
           where: { id: input.exportId },
           data: {
@@ -240,8 +240,7 @@ export function scheduleCdnExport(input: {
             urls: result.urls,
           },
         });
-      })
-      .catch(async (error) => {
+      } catch (error) {
         logger.error({
           msg: 'CDN export background task failed',
           exportId: input.exportId,
@@ -256,6 +255,7 @@ export function scheduleCdnExport(input: {
             errors: [error instanceof Error ? error.message : String(error)],
           },
         });
-      }),
+      }
+    })(),
   );
 }

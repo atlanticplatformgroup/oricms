@@ -35,7 +35,7 @@ router.get(
 
       const { projectId } = req.params;
       const status = req.query.status as string | undefined;
-      const limit = parseInt(req.query.limit as string) || 20;
+      const limit = Math.min(parseInt(req.query.limit as string) || 20, 100);
       const offset = parseInt(req.query.offset as string) || 0;
 
       ok(res, await listBuildsForProject(projectId, { status, limit, offset }));

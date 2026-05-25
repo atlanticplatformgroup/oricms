@@ -1,3 +1,4 @@
+import type { AgentWriteConfig } from '@ori/shared';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { agentApi } from '../../lib/api/agent';
 import { useToast } from '../../contexts/ToastContext';
@@ -29,7 +30,7 @@ export function useUpdateAgentWriteConfig(projectId?: string) {
   const { showToast } = useToast();
 
   return useMutation({
-    mutationFn: ({ collectionName, config }: { collectionName: string; config: any }) => 
+    mutationFn: ({ collectionName, config }: { collectionName: string; config: Partial<AgentWriteConfig> }) => 
       agentApi.updateWriteConfig(projectId!, collectionName, config),
     onSuccess: () => {
       showToast('Config saved', 'success');

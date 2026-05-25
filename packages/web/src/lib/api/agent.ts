@@ -1,3 +1,4 @@
+import type { AgentChange, AgentConflict, AgentWriteConfig } from '@ori/shared';
 import { API_BASE_URL, ApiError, request } from './core';
 
 export interface AgentAuditEntry {
@@ -48,22 +49,22 @@ export const agentApi = {
     });
   },
 
-  async getWriteConfigs(projectId: string): Promise<any[]> {
+  async getWriteConfigs(projectId: string): Promise<{ configs: AgentWriteConfig[] }> {
     return request(`/api/v1/projects/${projectId}/agent/write-config`);
   },
 
-  async updateWriteConfig(projectId: string, collectionName: string, config: any): Promise<void> {
+  async updateWriteConfig(projectId: string, collectionName: string, config: Partial<AgentWriteConfig>): Promise<void> {
     return request(`/api/v1/projects/${projectId}/agent/write-config/${collectionName}`, {
       method: 'PUT',
       body: config,
     });
   },
 
-  async getChanges(projectId: string, status: string = 'PENDING'): Promise<any[]> {
+  async getChanges(projectId: string, status: string = 'PENDING'): Promise<{ changes: AgentChange[] }> {
     return request(`/api/v1/projects/${projectId}/agent/changes?status=${status}`);
   },
 
-  async promoteChanges(projectId: string, changeIds: string[], targetBranch: string = 'main'): Promise<{ promoted: number; conflicts?: any[] }> {
+  async promoteChanges(projectId: string, changeIds: string[], targetBranch: string = 'main'): Promise<{ promoted: number; conflicts?: AgentConflict[] }> {
     return request(`/api/v1/projects/${projectId}/agent/promote`, {
       method: 'POST',
       body: { changeIds, targetBranch },

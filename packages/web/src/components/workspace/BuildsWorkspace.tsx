@@ -9,7 +9,8 @@ import { BuildHistoryTable } from './builds/BuildHistoryTable';
 import { BuildLatestPanel } from './builds/BuildLatestPanel';
 import { BuildSetupAlert } from './builds/BuildSetupAlert';
 import { BuildSummaryGrid } from './builds/BuildSummaryGrid';
-import { buildStatusColor, formatBuildDuration, mapBuildViewToStatus, type BuildRecord, type BuildSummaryCounts } from './builds/types';
+import type { BuildRecord, BuildSummaryCounts } from '@ori/shared';
+import { buildStatusColor, formatBuildDuration, mapBuildViewToStatus } from './builds/types';
 
 interface BuildsWorkspaceProps {
   projectId: string;
