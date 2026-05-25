@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { CollectionConfig, ContentType } from '@ori/shared';
 import { getCollectionPathError, normalizeCollectionPath } from '../lib/collections/path';
 import { toLabel } from '../lib/workspace/format';
@@ -127,7 +127,7 @@ export function useCollectionManager({
     [collectionSettingsPathValue, collections, selectedCollection?.id],
   );
 
-  const openCreateCollection = () => {
+  const openCreateCollection = useCallback(() => {
     const defaultType = contentTypes[0];
     const defaultId = defaultType?.name || '';
     setNewCollection({
@@ -139,9 +139,9 @@ export function useCollectionManager({
       description: '',
     });
     setCreateCollectionOpened(true);
-  };
+  }, [contentTypes]);
 
-  const handleCreateCollection = async (headers?: Record<string, string>) => {
+  const handleCreateCollection = useCallback(async (headers?: Record<string, string>) => {
     const nextId = toSchemaFieldKey(newCollection.id);
     if (!nextId) {
       showToast('Schema id is required', 'error');
@@ -171,9 +171,9 @@ export function useCollectionManager({
 
     await onPersistCreate(nextCollection, headers);
     setCreateCollectionOpened(false);
-  };
+  }, [newCollection.id, newCollection.contentType, newCollection.label, newCollection.singularLabel, newCollection.description, newCollectionPathError, newCollectionPathValue, collections, onPersistCreate, showToast]);
 
-  const handleSaveCollectionSettings = async (headers?: Record<string, string>) => {
+  const handleSaveCollectionSettings = useCallback(async (headers?: Record<string, string>) => {
     if (!selectedCollection) return;
     const nextId = collectionSettings.id.trim();
     if (!nextId) {
@@ -208,17 +208,17 @@ export function useCollectionManager({
     });
 
     await onPersistSaveSettings(nextCollections, nextId, headers);
-  };
+  }, [selectedCollection, collectionSettings, collectionSettingsPathError, collectionSettingsPathValue, collections, onPersistSaveSettings, showToast]);
 
-  const handleDeleteCollection = async (headers?: Record<string, string>) => {
+  const handleDeleteCollection = useCallback(async (headers?: Record<string, string>) => {
     if (!selectedCollection) return;
     if (!window.confirm(`Delete collection "${selectedCollection.label}" and all of its entries? The content type will be preserved.`)) return;
 
     const nextCollections = collections.filter((collection) => collection.id !== selectedCollection.id);
     await onPersistDelete(selectedCollection.id, nextCollections[0]?.id || null, headers);
-  };
+  }, [selectedCollection, collections, onPersistDelete]);
 
-  return {
+  return useMemo(() => ({
     createCollectionOpened,
     setCreateCollectionOpened,
     collectionSettings,
@@ -233,5 +233,17 @@ export function useCollectionManager({
     handleCreateCollection,
     handleSaveCollectionSettings,
     handleDeleteCollection,
-  };
+  }), [
+    createCollectionOpened,
+    collectionSettings,
+    newCollection,
+    selectedTypeOptions,
+    selectedCollectionEntryCount,
+    newCollectionPathError,
+    collectionSettingsPathError,
+    openCreateCollection,
+    handleCreateCollection,
+    handleSaveCollectionSettings,
+    handleDeleteCollection,
+  ]);
 }

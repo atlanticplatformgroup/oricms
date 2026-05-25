@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useMutation, type QueryClient } from '@tanstack/react-query';
 import type { ComponentSchema, ContentType, FieldType, SchemaField } from '@ori/shared';
 import { gitApi } from '../lib/api/git';
@@ -109,7 +109,7 @@ export function useSchemaEditor({
   }, [selectedSchema]);
 
   const effectiveSchema = schemaDraft ?? selectedSchema;
-  const effectiveSchemaFields = effectiveSchema?.fields ?? [];
+  const effectiveSchemaFields = useMemo(() => effectiveSchema?.fields ?? [], [effectiveSchema?.fields]);
 
   const newFieldGuidance = useMemo(() => {
     if (newSchemaFieldType === 'component') {
@@ -146,14 +146,14 @@ export function useSchemaEditor({
     schemaHistoryOpened,
   );
 
-  const handleSchemaMetaChange = (key: 'label' | 'description', value: string) => {
+  const handleSchemaMetaChange = useCallback((key: 'label' | 'description', value: string) => {
     setSchemaDraft((previous) => {
       if (!previous) return previous;
       return { ...previous, [key]: value };
     });
-  };
+  }, []);
 
-  const handleSchemaFieldPatch = (fieldKey: string, updater: (field: SchemaField) => SchemaField) => {
+  const handleSchemaFieldPatch = useCallback((fieldKey: string, updater: (field: SchemaField) => SchemaField) => {
     setSchemaDraft((previous) => {
       if (!previous) return previous;
       return {
@@ -161,9 +161,9 @@ export function useSchemaEditor({
         fields: previous.fields.map((field) => (field.key === fieldKey ? updater(field) : field)),
       };
     });
-  };
+  }, []);
 
-  const handleAddSchemaField = () => {
+  const handleAddSchemaField = useCallback(() => {
     setSchemaDraft((previous) => {
       if (!previous) return previous;
       return {
@@ -171,9 +171,9 @@ export function useSchemaEditor({
         fields: [...previous.fields, makeSchemaField(newSchemaFieldType, previous.fields)],
       };
     });
-  };
+  }, [newSchemaFieldType]);
 
-  const handleRemoveSchemaField = (fieldKey: string) => {
+  const handleRemoveSchemaField = useCallback((fieldKey: string) => {
     setSchemaDraft((previous) => {
       if (!previous) return previous;
       return {
@@ -181,9 +181,9 @@ export function useSchemaEditor({
         fields: previous.fields.filter((field) => field.key !== fieldKey),
       };
     });
-  };
+  }, []);
 
-  const handleReorderSchemaField = (fieldKey: string, targetFieldKey: string) => {
+  const handleReorderSchemaField = useCallback((fieldKey: string, targetFieldKey: string) => {
     setSchemaDraft((previous) => {
       if (!previous) return previous;
       const currentIndex = previous.fields.findIndex((field) => field.key === fieldKey);
@@ -194,9 +194,9 @@ export function useSchemaEditor({
         fields: moveArrayItem(previous.fields, currentIndex, targetIndex),
       };
     });
-  };
+  }, []);
 
-  const handleCreateSchema = async () => {
+  const handleCreateSchema = useCallback(async () => {
     if (!projectId) return;
     const nextName = toSchemaFieldKey(newSchemaName);
     const nextLabel = newSchemaLabel.trim() || toLabel(nextName);
@@ -238,19 +238,19 @@ export function useSchemaEditor({
     setNewSchemaLabel('');
     setNewSchemaDescription('');
     onNavigateToSchema(nextName, activeSchemaMode);
-  };
+  }, [projectId, newSchemaName, newSchemaLabel, newSchemaDescription, activeSchemaMode, schemaLock, saveSchemaMutation, onNavigateToSchema, showToast]);
 
-  const handleSaveSchema = async () => {
+  const handleSaveSchema = useCallback(async () => {
     if (!selectedSchemaDocument || !schemaDraft || schemaValidation.issueCount > 0) return;
     await schemaLock.runWithLock((headers) => saveSchemaMutation.mutateAsync({ path: selectedSchemaDocument.path, schema: schemaDraft, headers }));
-  };
+  }, [selectedSchemaDocument, schemaDraft, schemaValidation, schemaLock, saveSchemaMutation]);
 
-  const handleDeleteSchema = async () => {
+  const handleDeleteSchema = useCallback(async () => {
     if (!selectedSchemaDocument) return;
     await schemaLock.runWithLock((headers) => deleteSchemaMutation.mutateAsync({ path: selectedSchemaDocument.path, headers }));
-  };
+  }, [selectedSchemaDocument, schemaLock, deleteSchemaMutation]);
 
-  return {
+  return useMemo(() => ({
     effectiveSchema,
     effectiveSchemaFields,
     isSchemaDirty,
@@ -287,5 +287,41 @@ export function useSchemaEditor({
     saveSchemaPending: saveSchemaMutation.isPending,
     deleteSchemaPending: deleteSchemaMutation.isPending,
     schemaLock,
-  };
+  }), [
+    effectiveSchema,
+    effectiveSchemaFields,
+    isSchemaDirty,
+    createSchemaOpened,
+    setCreateSchemaOpened,
+    deleteSchemaOpened,
+    setDeleteSchemaOpened,
+    schemaJsonOpened,
+    setSchemaJsonOpened,
+    schemaHistoryOpened,
+    setSchemaHistoryOpened,
+    newSchemaName,
+    setNewSchemaName,
+    newSchemaLabel,
+    setNewSchemaLabel,
+    newSchemaDescription,
+    setNewSchemaDescription,
+    newSchemaFieldType,
+    setNewSchemaFieldType,
+    schemaValidation,
+    canSaveSchema,
+    newFieldGuidance,
+    schemaJson,
+    schemaHistoryQuery,
+    handleSchemaMetaChange,
+    handleSchemaFieldPatch,
+    handleAddSchemaField,
+    handleRemoveSchemaField,
+    handleReorderSchemaField,
+    handleCreateSchema,
+    handleSaveSchema,
+    handleDeleteSchema,
+    saveSchemaMutation,
+    deleteSchemaMutation,
+    schemaLock,
+  ]);
 }

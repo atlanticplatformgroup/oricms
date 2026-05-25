@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import type { Asset, ComponentSchema, CollectionConfig, CollectionEntry, ContentType } from '@ori/shared';
 import type { QueryClient } from '@tanstack/react-query';
 import { resolveEditorSections } from '../lib/entries/editor';
@@ -141,31 +141,34 @@ export function useEntryEditor({
 
   useDirtyEntryUnloadPrompt(isDirty);
 
-  const handleFieldChange = createEntryFieldChangeHandler({
-    derivedIdentifierConfig,
-    editorFields,
-    identifierStateByField,
-    setDraftEntry,
-    setIdentifierStateByField,
-  });
+  const handleFieldChange = useCallback(
+    createEntryFieldChangeHandler({
+      derivedIdentifierConfig,
+      editorFields,
+      identifierStateByField,
+      setDraftEntry,
+      setIdentifierStateByField,
+    }),
+    [derivedIdentifierConfig, editorFields, identifierStateByField, setDraftEntry, setIdentifierStateByField],
+  );
 
   const {
     relationOptionsByField,
     relationLabelMapByField,
     relationPickerOpened,
-    setRelationPickerOpened,
+    setRelationPickerOpened: rawSetRelationPickerOpened,
     activeRelationField,
     activeRelationFieldKey,
-    setActiveRelationFieldKey,
+    setActiveRelationFieldKey: rawSetActiveRelationFieldKey,
     relationSearch,
-    setRelationSearch,
+    setRelationSearch: rawSetRelationSearch,
     relationPickerResults,
     relationPickerLoading,
     activeSelectedRelationIds,
     activeSelectedRelationOptions,
     activeRelationCollection,
     activeRelationMultiple,
-    openRelationPicker,
+    openRelationPicker: rawOpenRelationPicker,
   } = useEntryRelations({
     projectId,
     visibleEditorFields,
@@ -173,6 +176,11 @@ export function useEntryEditor({
     contentTypes,
     draftEntry,
   });
+
+  const setRelationPickerOpened = useCallback(rawSetRelationPickerOpened, [rawSetRelationPickerOpened]);
+  const setActiveRelationFieldKey = useCallback(rawSetActiveRelationFieldKey, [rawSetActiveRelationFieldKey]);
+  const setRelationSearch = useCallback(rawSetRelationSearch, [rawSetRelationSearch]);
+  const openRelationPicker = useCallback(rawOpenRelationPicker, [rawOpenRelationPicker]);
 
   const structuredEditing = useEntryStructuredEditing({
     editorFields,
@@ -192,13 +200,40 @@ export function useEntryEditor({
   });
 
   const {
+    assetPickerOpened,
+    setAssetPickerOpened: rawSetAssetPickerOpened,
+    activeAssetFieldKey,
+    setActiveAssetFieldKey: rawSetActiveAssetFieldKey,
+    assetPickerScope,
+    setAssetPickerScope: rawSetAssetPickerScope,
+    assetSearch,
+    setAssetSearch: rawSetAssetSearch,
+    filteredAssets,
+    assetTagFilter,
+    setAssetTagFilter: rawSetAssetTagFilter,
+    assetTagOptions,
+    activeAssetField,
+    selectedAssetReference,
+    selectedAsset,
+    handleSelectAsset: rawHandleSelectAsset,
+    fieldRendererContext: rawFieldRendererContext,
+  } = structuredEditing;
+
+  const setAssetPickerOpened = useCallback(rawSetAssetPickerOpened, [rawSetAssetPickerOpened]);
+  const setActiveAssetFieldKey = useCallback(rawSetActiveAssetFieldKey, [rawSetActiveAssetFieldKey]);
+  const setAssetPickerScope = useCallback(rawSetAssetPickerScope, [rawSetAssetPickerScope]);
+  const setAssetSearch = useCallback(rawSetAssetSearch, [rawSetAssetSearch]);
+  const setAssetTagFilter = useCallback(rawSetAssetTagFilter, [rawSetAssetTagFilter]);
+  const handleSelectAsset = useCallback(rawHandleSelectAsset, [rawHandleSelectAsset]);
+
+  const {
     createEntryMutation,
     deleteEntryMutation,
-    handleCommitEntry,
-    handleDeleteEntry,
-    handleNewEntry,
-    handleRestoreVersion,
-    handleSaveEntry,
+    handleCommitEntry: rawHandleCommitEntry,
+    handleDeleteEntry: rawHandleDeleteEntry,
+    handleNewEntry: rawHandleNewEntry,
+    handleRestoreVersion: rawHandleRestoreVersion,
+    handleSaveEntry: rawHandleSaveEntry,
     updateEntryMutation,
   } = useEntryPersistence({
     canCreateEntries,
@@ -225,12 +260,21 @@ export function useEntryEditor({
     showToast,
   });
 
-  const handleResetIdentifierToAuto = buildIdentifierResetHandler({
-    derivedIdentifierConfig,
-    draftEntry,
-    setDraftEntry,
-    setIdentifierStateByField,
-  });
+  const handleCommitEntry = useCallback(rawHandleCommitEntry, [rawHandleCommitEntry]);
+  const handleDeleteEntry = useCallback(rawHandleDeleteEntry, [rawHandleDeleteEntry]);
+  const handleNewEntry = useCallback(rawHandleNewEntry, [rawHandleNewEntry]);
+  const handleRestoreVersion = useCallback(rawHandleRestoreVersion, [rawHandleRestoreVersion]);
+  const handleSaveEntry = useCallback(rawHandleSaveEntry, [rawHandleSaveEntry]);
+
+  const handleResetIdentifierToAuto = useCallback(
+    buildIdentifierResetHandler({
+      derivedIdentifierConfig,
+      draftEntry,
+      setDraftEntry,
+      setIdentifierStateByField,
+    }),
+    [derivedIdentifierConfig, draftEntry, setDraftEntry, setIdentifierStateByField],
+  );
 
   const editorValidationCount = Object.keys(editorFieldErrors).length + structuredEditing.structuredValidationCount;
 
@@ -241,69 +285,132 @@ export function useEntryEditor({
     showCommitBar,
   });
 
-  return {
-    draftEntry,
-    baselineEntry,
-    commitMessage,
-    setCommitMessage,
-    showCommitBar,
-    setShowCommitBar,
-    relationOptionsByField,
-    relationLabelMapByField,
-    relationPickerOpened,
-    setRelationPickerOpened,
-    activeRelationField,
-    activeRelationFieldKey,
-    setActiveRelationFieldKey,
-    relationSearch,
-    setRelationSearch,
-    relationPickerResults,
-    relationPickerLoading,
-    activeSelectedRelationIds,
-    activeSelectedRelationOptions,
-    activeRelationCollection,
-    activeRelationMultiple,
-    assetPickerOpened: structuredEditing.assetPickerOpened,
-    setAssetPickerOpened: structuredEditing.setAssetPickerOpened,
-    activeAssetFieldKey: structuredEditing.activeAssetFieldKey,
-    setActiveAssetFieldKey: structuredEditing.setActiveAssetFieldKey,
-    assetPickerScope: structuredEditing.assetPickerScope,
-    setAssetPickerScope: structuredEditing.setAssetPickerScope,
-    assetSearch: structuredEditing.assetSearch,
-    setAssetSearch: structuredEditing.setAssetSearch,
-    filteredAssets: structuredEditing.filteredAssets,
-    assetTagFilter: structuredEditing.assetTagFilter,
-    setAssetTagFilter: structuredEditing.setAssetTagFilter,
-    assetTagOptions: structuredEditing.assetTagOptions,
-    activeAssetField: structuredEditing.activeAssetField,
-    selectedAssetReference: structuredEditing.selectedAssetReference,
-    selectedAsset: structuredEditing.selectedAsset,
-    isDirty,
-    editorFields,
-    editorFieldMap,
-    editorSections,
-    editorFieldErrors,
-    editorValidationCount,
-    changedFieldCount,
-    entryStatusChanged,
-    createEntryPending: createEntryMutation.isPending,
-    updateEntryPending: updateEntryMutation.isPending,
-    deleteEntryPending: deleteEntryMutation.isPending,
-    currentRevision,
-    handleFieldChange,
-    handleNewEntry,
-    handleDeleteEntry,
-    handleSaveEntry,
-    handleCommitEntry,
-    handleRestoreVersion,
-    handleSelectAsset: structuredEditing.handleSelectAsset,
-    fieldRendererContext: {
-      ...structuredEditing.fieldRendererContext,
-      onOpenRelationPicker: openRelationPicker,
+  return useMemo(
+    () => ({
+      draftEntry,
+      baselineEntry,
+      commitMessage,
+      setCommitMessage,
+      showCommitBar,
+      setShowCommitBar,
+      relationOptionsByField,
+      relationLabelMapByField,
+      relationPickerOpened,
+      setRelationPickerOpened,
+      activeRelationField,
+      activeRelationFieldKey,
+      setActiveRelationFieldKey,
+      relationSearch,
+      setRelationSearch,
       relationPickerResults,
+      relationPickerLoading,
+      activeSelectedRelationIds,
       activeSelectedRelationOptions,
+      activeRelationCollection,
+      activeRelationMultiple,
+      assetPickerOpened,
+      setAssetPickerOpened,
+      activeAssetFieldKey,
+      setActiveAssetFieldKey,
+      assetPickerScope,
+      setAssetPickerScope,
+      assetSearch,
+      setAssetSearch,
+      filteredAssets,
+      assetTagFilter,
+      setAssetTagFilter,
+      assetTagOptions,
+      activeAssetField,
+      selectedAssetReference,
+      selectedAsset,
+      isDirty,
+      editorFields,
+      editorFieldMap,
+      editorSections,
+      editorFieldErrors,
+      editorValidationCount,
+      changedFieldCount,
+      entryStatusChanged,
+      createEntryPending: createEntryMutation.isPending,
+      updateEntryPending: updateEntryMutation.isPending,
+      deleteEntryPending: deleteEntryMutation.isPending,
+      currentRevision,
+      handleFieldChange,
+      handleNewEntry,
+      handleDeleteEntry,
+      handleSaveEntry,
+      handleCommitEntry,
+      handleRestoreVersion,
+      handleSelectAsset,
+      fieldRendererContext: {
+        ...rawFieldRendererContext,
+        onOpenRelationPicker: openRelationPicker,
+        relationPickerResults,
+        activeSelectedRelationOptions,
+        identifierStateByField,
+        onResetIdentifierToAuto: handleResetIdentifierToAuto,
+      },
+    }),
+    [
+      draftEntry,
+      baselineEntry,
+      commitMessage,
+      setCommitMessage,
+      showCommitBar,
+      setShowCommitBar,
+      relationOptionsByField,
+      relationLabelMapByField,
+      relationPickerOpened,
+      setRelationPickerOpened,
+      activeRelationField,
+      activeRelationFieldKey,
+      setActiveRelationFieldKey,
+      relationSearch,
+      setRelationSearch,
+      relationPickerResults,
+      relationPickerLoading,
+      activeSelectedRelationIds,
+      activeSelectedRelationOptions,
+      activeRelationCollection,
+      activeRelationMultiple,
+      assetPickerOpened,
+      setAssetPickerOpened,
+      activeAssetFieldKey,
+      setActiveAssetFieldKey,
+      assetPickerScope,
+      setAssetPickerScope,
+      assetSearch,
+      setAssetSearch,
+      filteredAssets,
+      assetTagFilter,
+      setAssetTagFilter,
+      assetTagOptions,
+      activeAssetField,
+      selectedAssetReference,
+      selectedAsset,
+      isDirty,
+      editorFields,
+      editorFieldMap,
+      editorSections,
+      editorFieldErrors,
+      editorValidationCount,
+      changedFieldCount,
+      entryStatusChanged,
+      createEntryMutation,
+      updateEntryMutation,
+      deleteEntryMutation,
+      currentRevision,
+      handleFieldChange,
+      handleNewEntry,
+      handleDeleteEntry,
+      handleSaveEntry,
+      handleCommitEntry,
+      handleRestoreVersion,
+      handleSelectAsset,
+      rawFieldRendererContext,
+      openRelationPicker,
       identifierStateByField,
-      onResetIdentifierToAuto: handleResetIdentifierToAuto,
-    },
-  };
+      handleResetIdentifierToAuto,
+    ],
+  );
 }
