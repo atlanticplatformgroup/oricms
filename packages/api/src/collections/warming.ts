@@ -11,6 +11,7 @@ import { CollectionService } from './service';
 
 export class WarmingService {
   private static warmingProjects = new Map<string, number>();
+  private static hasWarmedAll = false;
   private static readonly WARMING_TIMEOUT_MS = 5 * 60 * 1000;
 
   private static isProjectWarming(projectId: string): boolean {
@@ -24,9 +25,16 @@ export class WarmingService {
   }
 
   /**
-   * Warm up all active projects in the background
+   * Warm up all active projects in the background.
+   * Safe to call multiple times — skips if already warmed.
    */
   static async warmAll(): Promise<void> {
+    if (this.hasWarmedAll) {
+      logger.debug({ msg: 'Collection warmAll already completed; skipping' });
+      return;
+    }
+    this.hasWarmedAll = true;
+
     logger.info({ msg: 'Starting collection warming for active projects' });
     const startTime = Date.now();
 
@@ -52,6 +60,16 @@ export class WarmingService {
       logger.info({ msg: 'Finished collection warming', projectCount: projects.length, durationSeconds: duration });
     } catch (error) {
       logger.error({ msg: 'Collection warming failed', error });
+    }
+  }
+
+  /**
+   * Warm up all active projects if not already warmed.
+   * Convenience wrapper for lazy-init call sites.
+   */
+  static async warmAllIfNeeded(): Promise<void> {
+    if (!this.hasWarmedAll) {
+      await this.warmAll();
     }
   }
 

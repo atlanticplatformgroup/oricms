@@ -11,7 +11,6 @@ import 'dotenv/config';
 
 import { logger } from './middleware/logger';
 import { presenceService } from './presence/service';
-import { WarmingService } from './collections/warming';
 import { bootstrapPluginRuntime } from './plugins/runtime';
 import { startDeliveryProjectionReconciler, stopDeliveryProjectionReconciler } from './delivery-projection/reconciler';
 import { startDeliveryProjectionWatchers, stopDeliveryProjectionWatchers } from './delivery-projection/watcher';
@@ -36,7 +35,6 @@ async function main(): Promise<void> {
 
   const server = app.listen(PORT, () => {
     logger.info({ msg: 'Ori CMS API started', port: PORT, environment: process.env.NODE_ENV || 'development' });
-    void WarmingService.warmAll();
   });
 
   presenceService.initialize(server);
