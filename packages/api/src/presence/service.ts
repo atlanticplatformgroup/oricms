@@ -39,19 +39,31 @@ class PresenceService {
 
     this.io.use(async (socket: Socket, next) => {
       try {
-        const token = socket.handshake.auth.token;
+        // Try auth token first (guest tokens or legacy header tokens)
+        let token: string | undefined = socket.handshake.auth.token;
+
+        // Fall back to cookie for regular browser sessions
+        if (!token && socket.handshake.headers.cookie) {
+          const cookies = this.parseCookies(socket.handshake.headers.cookie);
+          token = cookies.ori_access_token;
+        }
+
         if (!token) {
           return next(new Error('Authentication required'));
         }
 
-        if (token === 'preview-guest') {
-          socket.data.user = { id: 'guest', name: 'Preview Guest', email: 'guest@oricms.com' };
+        const decoded = verifyToken(token);
+        if (decoded?.type === 'guest') {
+          socket.data.user = { id: decoded.userId || decoded.id || 'guest', name: 'Preview Guest', email: 'guest@oricms.com' };
           return next();
         }
 
-        const decoded = verifyToken(token);
-        socket.data.user = decoded;
-        next();
+        if (decoded) {
+          socket.data.user = decoded;
+          return next();
+        }
+
+        next(new Error('Invalid token'));
       } catch {
         next(new Error('Invalid token'));
       }
@@ -207,6 +219,15 @@ class PresenceService {
       socketId: socket.id,
     });
     socket.leave(result.roomKey);
+  }
+
+  private parseCookies(header: string): Record<string, string> {
+    const cookies: Record<string, string> = {};
+    for (const pair of header.split(';')) {
+      const [name, ...rest] = pair.trim().split('=');
+      if (name) cookies[name] = decodeURIComponent(rest.join('='));
+    }
+    return cookies;
   }
 
   getPresence(projectId: string, page: string): { users: Array<{ id: string; name: string; action: string }> } {

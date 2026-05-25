@@ -50,12 +50,5 @@ export function getAssetRenderUrl(url: string): string {
   const base = API_BASE_URL || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost');
   const resolved = /^https?:\/\//i.test(url) ? new URL(url) : new URL(url, base);
 
-  if (resolved.pathname.startsWith('/api/v1/projects/')) {
-    const token = typeof window !== 'undefined' ? window.localStorage.getItem('accessToken') : null;
-    if (token && !resolved.searchParams.has('token')) {
-      resolved.searchParams.set('token', token);
-    }
-  }
-
   return resolved.toString();
 }
