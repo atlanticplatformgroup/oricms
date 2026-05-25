@@ -50,7 +50,7 @@ const MemberRow = memo(function MemberRow({ member, readOnly, onUpdateRole, onRe
           <ThemeIcon variant="light" color={member.userType === 'HUMAN' ? 'blue' : 'yellow'}>
             {member.userType === 'HUMAN' ? <UserRound size={14} /> : <Bot size={14} />}
           </ThemeIcon>
-          <Stack gap={0} style={{ minWidth: 0 }}>
+          <Stack gap={0} miw={0}>
             <Text fw={600}>{member.user.name || member.user.email}</Text>
             <Text size="xs" c="dimmed">{member.user.email}</Text>
           </Stack>

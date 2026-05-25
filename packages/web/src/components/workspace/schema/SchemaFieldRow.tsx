@@ -1,4 +1,4 @@
-import { Badge, Button, Divider, Group, Select, Stack, Switch, Text, TextInput } from '@mantine/core';
+import { Badge, Box, Button, Divider, Group, Select, Stack, Switch, Text, TextInput } from '@mantine/core';
 import type { DragEvent as ReactDragEvent } from 'react';
 import type { FieldType, SchemaField } from '@ori/shared';
 import { WorkspaceDragHandle, WorkspaceFieldGrid, WorkspaceInset, WorkspaceMetricBadge } from '../../ui/WorkspacePrimitives';
@@ -55,14 +55,14 @@ export function SchemaFieldRow({
           onDragEnd={onDragEnd}
         />
       </Stack>
-      <div style={{ flex: 1, minWidth: 0 }} onDragLeave={onDragLeave}>
+      <Box flex={1} miw={0} onDragLeave={onDragLeave}>
         <WorkspaceInset>
           <Stack
             gap="sm"
             style={isDropTarget ? { outline: '1px solid var(--mantine-color-blue-5)', borderRadius: 'var(--mantine-radius-md)' } : undefined}
           >
-            <Group justify="space-between" align="flex-start" wrap="wrap" style={{ rowGap: 'var(--mantine-spacing-xs)' }}>
-              <Stack gap={3} style={{ minWidth: 0, flex: 1 }}>
+            <Group justify="space-between" align="flex-start" wrap="wrap" gap="xs">
+              <Stack gap={3} miw={0} flex={1}>
                 <Group gap="xs" wrap="wrap">
                   <Text fw={600} size="sm">{field.label || toLabel(field.key)}</Text>
                   <Badge variant="outline" color="gray">{field.type}</Badge>
@@ -138,7 +138,7 @@ export function SchemaFieldRow({
             />
           </Stack>
         </WorkspaceInset>
-      </div>
+      </Box>
     </Group>
   );
 }

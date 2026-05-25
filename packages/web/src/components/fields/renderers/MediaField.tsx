@@ -31,7 +31,7 @@ export function MediaField({ field, value, error, disabled, onChange, context }:
     <WorkspaceComplexFieldSurface>
       <Stack gap="md">
         <Group justify="space-between" align="flex-start" wrap="nowrap">
-          <Stack gap={4} style={{ flex: 1, minWidth: 0 }}>
+          <Stack gap={4} flex={1} miw={0}>
             <Group gap="xs">
               <Text size="sm" fw={600} lineClamp={1}>{selectedLabel}</Text>
               {selectedAssetReference?.scope === 'global' ? <Badge variant="light" color="gray">Global</Badge> : null}

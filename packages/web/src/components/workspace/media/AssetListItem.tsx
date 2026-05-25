@@ -65,9 +65,9 @@ function AssetPreview({
       withBorder
       p="md"
       radius={radius}
+      w={width}
+      mih={height}
       style={{
-        width,
-        minHeight: height,
         display: 'grid',
         placeItems: 'center',
         backgroundColor: 'var(--ori-form-preview-bg)',
@@ -108,9 +108,9 @@ export function AssetListItem({ asset, selected = false, selectionControl, onCli
       <Group align="flex-start" wrap="nowrap">
         {selectionControl}
         <AssetPreview asset={asset} width={isCompact ? 56 : 72} height={isCompact ? 56 : 72} />
-        <Stack gap={4} style={{ flex: 1, minWidth: 0 }}>
+        <Stack gap={4} flex={1} miw={0}>
           <Group justify="space-between" wrap="nowrap" align="flex-start">
-            <Stack gap={2} style={{ flex: 1, minWidth: 0 }}>
+            <Stack gap={2} flex={1} miw={0}>
               <Text fw={600} truncate="end">{asset.name}</Text>
               {!isCompact ? <Text size="xs" c="dimmed" truncate="end">{identifier}</Text> : null}
             </Stack>

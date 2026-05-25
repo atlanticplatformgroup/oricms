@@ -90,7 +90,8 @@ export function WorkspaceShellHeader({
       disabled={isLoadingProjects || projectOptions.length === 0}
       w={isMobileShell ? undefined : 300}
       maw="100%"
-      style={{ minWidth: 0, flex: isMobileShell ? '1 1 auto' : undefined }}
+      miw={0}
+      style={{ flex: isMobileShell ? '1 1 auto' : undefined }}
       onChange={(projectId) => {
         const nextProject = projects.find((project) => project.id === projectId);
         if (!nextProject) return;
@@ -120,7 +121,7 @@ export function WorkspaceShellHeader({
   );
 
   return (
-    <Group h={headerHeight} gap={0} wrap="nowrap" style={{ alignItems: 'stretch' }}>
+    <Group h={headerHeight} gap={0} wrap="nowrap" align="stretch">
       <Box
         w={PRIMARY_RAIL_WIDTH}
         miw={PRIMARY_RAIL_WIDTH}
@@ -134,10 +135,10 @@ export function WorkspaceShellHeader({
       >
         <OriMark />
       </Box>
-      <Box style={{ flex: 1, minWidth: 0 }}>
+      <Box flex={1} miw={0}>
         {isMobileShell ? (
           <Stack gap="xs" justify="center" h="100%" px="md" py="xs">
-            <Group justify="space-between" wrap="nowrap" gap="sm" style={{ minWidth: 0 }}>
+            <Group justify="space-between" wrap="nowrap" gap="sm" miw={0}>
               <WorkspaceToolbarButton
                 onClick={onOpenWorkspaceDrawer}
                 leftSection={<MenuIcon size={16} />}
@@ -146,7 +147,7 @@ export function WorkspaceShellHeader({
               >
                 {activeSectionLabel}
               </WorkspaceToolbarButton>
-              <Group gap="xs" wrap="nowrap" style={{ minWidth: 0, flexShrink: 0 }}>
+              <Group gap="xs" wrap="nowrap" miw={0} style={{ flexShrink: 0 }}>
                 <WorkspaceBranchSwitcher
                   projectId={currentProject.id}
                   currentBranchName={currentBranchName}
@@ -158,7 +159,7 @@ export function WorkspaceShellHeader({
                 {userMenu}
               </Group>
             </Group>
-            <Group gap="sm" wrap="nowrap" style={{ minWidth: 0 }}>
+            <Group gap="sm" wrap="nowrap" miw={0}>
               {projectSwitcher}
             </Group>
           </Stack>
@@ -167,18 +168,18 @@ export function WorkspaceShellHeader({
             justify="space-between"
             h="100%"
             wrap="wrap"
+            pl="md"
+            pr="md"
+            gap="xs"
             style={{
               alignContent: 'center',
-              rowGap: 'var(--mantine-spacing-xs)',
-              paddingLeft: 'var(--mantine-spacing-md)',
-              paddingRight: 'var(--mantine-spacing-md)',
             }}
           >
-            <Group wrap="wrap" gap="sm" style={{ minWidth: 0, flex: 1 }}>
+            <Group wrap="wrap" gap="sm" miw={0} flex={1}>
               {projectSwitcher}
               <Badge variant="light" color="blue">{currentProject.role}</Badge>
             </Group>
-            <Group wrap="wrap" gap="sm" style={{ minWidth: 0, justifyContent: 'flex-end' }}>
+            <Group wrap="wrap" gap="sm" miw={0} justify="flex-end">
               <WorkspaceBranchSwitcher
                 projectId={currentProject.id}
                 currentBranchName={currentBranchName}

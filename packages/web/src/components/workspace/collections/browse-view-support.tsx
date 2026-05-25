@@ -105,8 +105,8 @@ export function CollectionBrowseToolbar(props: {
           onChange={props.browse.setSearch}
           maw={undefined}
         />
-        <Group justify="space-between" align="center" wrap="nowrap" gap="sm" style={{ minWidth: 0 }}>
-          <Group gap="xs" wrap="wrap" style={{ minWidth: 0 }}>
+        <Group justify="space-between" align="center" wrap="nowrap" gap="sm" miw={0}>
+          <Group gap="xs" wrap="wrap" miw={0}>
             <Menu shadow="md" position="bottom-start">
               <Menu.Target>
                 <WorkspaceToolbarButton size="sm" aria-label="Sort entries" rightSection={<ChevronDownIcon width={14} height={14} />}>
@@ -205,7 +205,7 @@ const MobileEntryItem = memo(function MobileEntryItem({ entry, selectedContentTy
       summary={preview.summary || undefined}
       tertiary={preview.tertiary || undefined}
       meta={(
-        <Group justify="space-between" align="center" wrap="nowrap" style={{ minWidth: 0 }}>
+        <Group justify="space-between" align="center" wrap="nowrap" miw={0}>
           <CollectionStatusBadge status={entry.$status} />
           <Text size="xs" c="dimmed" style={{ flexShrink: 0 }}>
             {new Date(entry.$updatedAt).toLocaleDateString(undefined, {

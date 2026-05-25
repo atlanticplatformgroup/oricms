@@ -1,4 +1,4 @@
-import { Button, Group, MultiSelect, Select, Stack, Text } from '@mantine/core';
+import { Box, Button, Group, MultiSelect, Select, Stack, Text } from '@mantine/core';
 import { getRefId, getRefIds } from '@ori/shared';
 import { isMultiRelationField } from '../../../lib/entries/resolution';
 import { toLabel } from '../../../lib/workspace/format';
@@ -72,7 +72,7 @@ export function RelationField({ field, value, error, disabled, onChange, context
           <Button variant="default" disabled={disabled} onClick={() => context.onOpenRelationPicker?.(field.key)}>
             Browse entries
           </Button>
-          <div style={{ flex: 1, minWidth: 0 }}>{control}</div>
+          <Box flex={1} miw={0}>{control}</Box>
         </Group>
       </Stack>
     </WorkspaceComplexFieldSurface>

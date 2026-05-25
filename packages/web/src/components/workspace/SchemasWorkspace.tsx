@@ -166,7 +166,7 @@ export function SchemasWorkspace(props: SchemasWorkspaceProps) {
           }
         >
           <Stack gap="sm">
-            <Group justify="space-between" align="flex-start" wrap="wrap" style={{ rowGap: 'var(--mantine-spacing-xs)' }}>
+            <Group justify="space-between" align="flex-start" wrap="wrap" gap="xs">
               <Text size="sm" c="dimmed">{selectedSchemaDocument?.path}</Text>
               <Group gap="xs" wrap="wrap">
                 {validationIssueCount > 0 ? <WorkspaceMetricBadge color="red">{`${validationIssueCount} issues`}</WorkspaceMetricBadge> : null}
@@ -209,8 +209,8 @@ export function SchemasWorkspace(props: SchemasWorkspaceProps) {
             badge={effectiveSchema ? <WorkspaceMetricBadge>{`${effectiveSchemaFields.length} fields`}</WorkspaceMetricBadge> : undefined}
             actions={
               effectiveSchema ? (
-                <Group gap="xs" align="flex-start" wrap="wrap" style={{ width: '100%' }}>
-                  <Stack gap={4} style={{ minWidth: 0, flex: '1 1 240px' }}>
+                <Group gap="xs" align="flex-start" wrap="wrap" w="100%">
+                  <Stack gap={4} miw={0} style={{ flex: '1 1 240px' }}>
                     <Select
                       size="xs"
                       value={newSchemaFieldType}

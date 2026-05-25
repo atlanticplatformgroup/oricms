@@ -1,5 +1,5 @@
 import { memo, useCallback } from 'react';
-import { ActionIcon, Alert, Badge, Button, Group, Paper, Stack, Text } from '@mantine/core';
+import { ActionIcon, Alert, Badge, Box, Button, Group, Paper, Stack, Text } from '@mantine/core';
 import { ChevronDownIcon, ChevronUpIcon, DocumentDuplicateIcon } from '@heroicons/react/24/outline';
 import { WorkspaceDragHandle } from '../../ui/WorkspacePrimitives';
 import type { FieldRendererProps, StructuredDragItem } from '../contracts';
@@ -68,8 +68,9 @@ const ComponentFieldItem = memo(function ComponentFieldItem({
           onDragEnd={handleDragEnd}
         />
       </Stack>
-      <div
-        style={{ flex: 1, minWidth: 0 }}
+      <Box
+        flex={1}
+        miw={0}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
@@ -114,7 +115,7 @@ const ComponentFieldItem = memo(function ComponentFieldItem({
             ),
           })}
         </div>
-      </div>
+      </Box>
     </Group>
   );
 });
@@ -145,7 +146,7 @@ export function ComponentField({ field, value, disabled, context }: FieldRendere
     <Paper withBorder p="sm">
       <Stack gap="md">
         <Group justify="space-between" align="flex-start" wrap="nowrap">
-          <Stack gap={4} style={{ flex: 1, minWidth: 0 }}>
+          <Stack gap={4} flex={1} miw={0}>
             {eyebrow ? <Group gap="xs">{eyebrow}</Group> : null}
             <Text size="sm" fw={600} lineClamp={1}>{title}</Text>
             {description ? <Text size="xs" c="dimmed">{description}</Text> : null}

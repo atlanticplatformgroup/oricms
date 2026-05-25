@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { ActionIcon, Box, Group, NavLink, ScrollArea, Stack, Text, Title, UnstyledButton } from '@mantine/core';
+import { ActionIcon, Box, Flex, Group, NavLink, ScrollArea, Stack, Text, Title, UnstyledButton } from '@mantine/core';
 import { ArrowsUpDownIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import { SECONDARY_TOGGLE_WIDTH } from '../../lib/workspace/constants';
 import {
@@ -98,7 +98,7 @@ export function WorkspaceSidebarGroupLabel({ children }: { children: ReactNode }
       px={12}
       pt="sm"
       pb={4}
-      style={{ letterSpacing: '0.04em' }}
+      lts="0.04em"
     >
       {children}
     </Text>
@@ -162,26 +162,26 @@ export function WorkspaceMobileSectionButton({
       aria-label={label}
       data-testid={testId}
       onClick={onClick}
+      w="100%"
+      ta="left"
+      p="xs"
       style={{
-        width: '100%',
-        textAlign: 'left',
         borderRadius: 12,
         border: `1px solid ${active ? WORKSPACE_SHELL_ACTIVE_HOVER : WORKSPACE_SHELL_CONTROL_BORDER}`,
         backgroundColor: active ? WORKSPACE_SHELL_ACTIVE_BG : WORKSPACE_SHELL_CONTROL_BG,
         color: active ? WORKSPACE_SHELL_ACTIVE_TEXT : WORKSPACE_SHELL_TEXT,
-        padding: '12px',
       }}
     >
       <Group gap="sm" wrap="nowrap">
         <Box
+          w={34}
+          h={34}
+          display="flex"
           style={{
-            width: 34,
-            height: 34,
             borderRadius: 10,
             backgroundColor: active ? WORKSPACE_SHELL_ACTIVE_HOVER : 'transparent',
             color: active ? WORKSPACE_SHELL_ACTIVE_TEXT : WORKSPACE_SHELL_MUTED_TEXT,
             flexShrink: 0,
-            display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
           }}
@@ -216,9 +216,9 @@ export function WorkspaceSortableHeader({
     <UnstyledButton
       onClick={onToggle}
       aria-label={`Sort by ${typeof label === 'string' ? label : 'column'} ${nextDirectionLabel}`}
-      style={{ width: '100%' }}
+      w="100%"
     >
-      <Group justify="space-between" gap="xs" wrap="nowrap" style={{ width: '100%' }}>
+      <Group justify="space-between" gap="xs" wrap="nowrap" w="100%">
         <Text
           component="span"
           fw={active ? 600 : 500}
@@ -264,7 +264,7 @@ export function WorkspaceSidebarSection({
   if (collapsed) return null;
 
   return (
-    <Stack gap={0} py={0} style={{ flex: 1, minWidth: 0 }}>
+    <Stack gap={0} py={0} flex={1} miw={0}>
       <Box
         px={WORKSPACE_SIDEBAR_CONTENT_INSET}
         pt="md"
@@ -274,18 +274,20 @@ export function WorkspaceSidebarSection({
           borderBottom: `1px solid ${WORKSPACE_SHELL_BORDER_COLOR}`,
         }}
       >
-        <Group justify="space-between" align="center" wrap="nowrap" style={{ minHeight: 40, rowGap: 'var(--mantine-spacing-xs)' }}>
+        <Group justify="space-between" align="center" wrap="nowrap" mih={40}>
           <Title order={5}>{title}</Title>
           <Group gap="xs" wrap="nowrap" style={{ flexShrink: 0 }}>
             {action ? <WorkspaceActionGroup>{action}</WorkspaceActionGroup> : null}
             {onToggleCollapsed ? (
-              <Box
+              <Flex
                 w={SECONDARY_TOGGLE_WIDTH}
                 h={WORKSPACE_SIDEBAR_TOGGLE_SLOT}
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', paddingRight: 2 }}
+                align="center"
+                justify="flex-end"
+                style={{ paddingRight: 2 }}
               >
                 <WorkspaceSidebarToggle collapsed={false} onClick={onToggleCollapsed} />
-              </Box>
+              </Flex>
             ) : null}
           </Group>
         </Group>
@@ -339,9 +341,9 @@ export function WorkspaceSidebarBoundaryToggle({
 }) {
   return (
     <Stack justify="flex-start" align="center" h="100%" w={SECONDARY_TOGGLE_WIDTH} pt="md">
-      <Box w={SECONDARY_TOGGLE_WIDTH} h={WORKSPACE_SIDEBAR_TOGGLE_SLOT} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <Flex w={SECONDARY_TOGGLE_WIDTH} h={WORKSPACE_SIDEBAR_TOGGLE_SLOT} align="center" justify="center">
         <WorkspaceSidebarToggle collapsed={collapsed} onClick={onClick} />
-      </Box>
+      </Flex>
     </Stack>
   );
 }

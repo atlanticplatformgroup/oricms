@@ -26,7 +26,7 @@ export function WorkspaceSearchField({
       rightSection={value ? <CloseButton aria-label={`Clear ${ariaLabel.toLowerCase()}`} onClick={() => onChange('')} /> : null}
       rightSectionPointerEvents="all"
       maw={maw}
-      style={{ width: '100%' }}
+      w="100%"
     />
   );
 }

@@ -83,8 +83,8 @@ export function ConfiguredEnvironmentsSection(props: EnvironmentSettingsViewProp
               return (
                 <Paper key={environment.id} withBorder p="md" radius="md">
                   <Stack gap="md">
-                    <Group justify="space-between" align="flex-start" wrap="wrap" style={{ rowGap: 'var(--mantine-spacing-xs)' }}>
-                      <Stack gap={2} style={{ minWidth: 0, flex: 1 }}>
+                    <Group justify="space-between" align="flex-start" wrap="wrap" gap="xs">
+                      <Stack gap={2} miw={0} flex={1}>
                         <Group gap="xs" wrap="wrap">
                           <Text fw={600}>{environment.name || `Environment ${index + 1}`}</Text>
                           <Badge variant="light" color={typeMeta.color}>{typeMeta.label}</Badge>
@@ -282,8 +282,8 @@ export function BranchMappingsSection(props: EnvironmentSettingsViewProps) {
             {props.mappings.map((mapping) => (
               <Paper key={mapping.id} withBorder p="md" radius="md">
                 <Stack gap="md">
-                  <Group justify="space-between" align="flex-start" wrap="wrap" style={{ rowGap: 'var(--mantine-spacing-xs)' }}>
-                    <Stack gap={2} style={{ minWidth: 0, flex: 1 }}>
+                  <Group justify="space-between" align="flex-start" wrap="wrap" gap="xs">
+                    <Stack gap={2} miw={0} flex={1}>
                       <Group gap="xs" wrap="wrap">
                         <Text fw={600}>{mapping.branchPattern}</Text>
                         {mapping.environmentId ? (

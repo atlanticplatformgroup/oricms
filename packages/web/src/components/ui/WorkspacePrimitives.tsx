@@ -1,5 +1,5 @@
 import type { DragEventHandler, ReactNode } from 'react';
-import { ActionIcon, Alert, Badge, Box, Button, Center, Divider, Loader, ScrollArea, Stack, Table, Text, UnstyledButton } from '@mantine/core';
+import { ActionIcon, Alert, Badge, Box, Button, Center, Divider, Flex, Group, Loader, ScrollArea, Stack, Table, Text, UnstyledButton } from '@mantine/core';
 import { GripVertical } from 'lucide-react';
 import { WORKSPACE_SHELL_BORDER_COLOR, WORKSPACE_SHELL_TEXT } from './workspace-primitives.shared';
 import { WorkspaceActionGroup } from './WorkspaceShellPrimitives';
@@ -72,10 +72,10 @@ export function WorkspaceMobileRecordItem({
     <UnstyledButton
       onClick={onClick}
       data-testid={testId}
+      w="100%"
+      ta="left"
+      py="md"
       style={{
-        width: '100%',
-        textAlign: 'left',
-        paddingBlock: 'var(--mantine-spacing-md)',
         borderBottom: `1px solid ${WORKSPACE_SHELL_BORDER_COLOR}`,
         cursor: 'pointer',
       }}
@@ -85,7 +85,7 @@ export function WorkspaceMobileRecordItem({
           {title}
         </Text>
         {summary ? (
-          <Text size="sm" c="dimmed" lineClamp={2} style={{ lineHeight: 1.4 }}>
+          <Text size="sm" c="dimmed" lineClamp={2} lh={1.4}>
             {summary}
           </Text>
         ) : null}
@@ -119,18 +119,18 @@ export function WorkspaceSection({
     <Stack gap="sm">
       {dividerTop ? <Divider /> : null}
       <Stack gap={2}>
-        <Stack gap={2} style={{ minWidth: 0, flex: 1 }}>
+        <Stack gap={2} miw={0} flex={1}>
           <Box>
             <Stack gap={2}>
               <Box>
                 <Stack gap={2}>
                   <Box>
-                    <Box style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', rowGap: 'var(--mantine-spacing-xs)' }}>
-                      <Box style={{ minWidth: 0, flex: 1 }}>
-                        <Box style={{ display: 'flex', gap: 'var(--mantine-spacing-xs)', flexWrap: 'wrap' }}>
+                    <Group justify="space-between" align="flex-start" wrap="wrap" gap="xs">
+                      <Box miw={0} flex={1}>
+                        <Group gap="xs" wrap="wrap">
                           <Text fw={600}>{title}</Text>
                           {badge}
-                        </Box>
+                        </Group>
                         {description ? (
                           <Text size="sm" c="dimmed">
                             {description}
@@ -138,7 +138,7 @@ export function WorkspaceSection({
                         ) : null}
                       </Box>
                       {actions ? <WorkspaceActionGroup>{actions}</WorkspaceActionGroup> : null}
-                    </Box>
+                    </Group>
                   </Box>
                 </Stack>
               </Box>
@@ -225,14 +225,14 @@ export function WorkspaceErrorState({
 }) {
   return (
     <Alert color="red" title={title}>
-      <Box style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' }}>
+      <Flex justify="space-between" align="center" wrap="wrap">
         <Text size="sm">{message}</Text>
         {onRetry ? (
           <Button size="xs" variant="default" onClick={onRetry}>
             Retry
           </Button>
         ) : null}
-      </Box>
+      </Flex>
     </Alert>
   );
 }
@@ -266,7 +266,8 @@ export function WorkspaceOperationalTable({ children }: { children: ReactNode })
       withTableBorder
       verticalSpacing="sm"
       horizontalSpacing="md"
-      style={{ tableLayout: 'fixed', width: '100%' }}
+      w="100%"
+      style={{ tableLayout: 'fixed' }}
     >
       {children}
     </Table>
