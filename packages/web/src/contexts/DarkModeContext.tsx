@@ -6,7 +6,7 @@
  * Toggle is only exposed in Settings panel to avoid header clutter.
  */
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useUserPreferences } from './useUserPreferences';
 import { DarkModeContext } from './dark-mode-context';
 
@@ -114,8 +114,10 @@ export function DarkModeProvider({ children }: { children: React.ReactNode }) {
     setTheme(newTheme);
   }, [setTheme]);
 
+  const value = useMemo(() => ({ isDarkMode, toggleDarkMode, setDarkMode, theme, setTheme }), [isDarkMode, toggleDarkMode, setDarkMode, theme, setTheme]);
+
   return (
-    <DarkModeContext.Provider value={{ isDarkMode, toggleDarkMode, setDarkMode, theme, setTheme }}>
+    <DarkModeContext.Provider value={value}>
       {children}
     </DarkModeContext.Provider>
   );

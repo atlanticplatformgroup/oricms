@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useMemo, type ReactNode } from 'react';
 import { notifications } from '@mantine/notifications';
 
 type ToastType = 'success' | 'error' | 'warning' | 'info';
@@ -43,7 +43,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     [],
   );
 
-  return <ToastContext.Provider value={{ showToast, removeToast }}>{children}</ToastContext.Provider>;
+  const value = useMemo(() => ({ showToast, removeToast }), [showToast, removeToast]);
+  return <ToastContext.Provider value={value}>{children}</ToastContext.Provider>;
 }
 
 export function useToast() {

@@ -201,7 +201,7 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
     return key ? permissions[key] || false : false;
   }, [permissions]);
 
-  const value: ProjectContextType = {
+  const value: ProjectContextType = useMemo(() => ({
     projects,
     isLoadingProjects,
     refreshProjects,
@@ -227,7 +227,27 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
     collections,
     isLoadingCollections,
     refreshCollections,
-  };
+  }), [
+    projects,
+    isLoadingProjects,
+    refreshProjects,
+    currentProject,
+    setCurrentProject,
+    members,
+    isLoadingMembers,
+    refreshMembers,
+    permissions,
+    hasPermission,
+    gitStatus,
+    refreshGitStatus,
+    schemas,
+    isLoadingSchemas,
+    schemasError,
+    refreshSchemas,
+    collections,
+    isLoadingCollections,
+    refreshCollections,
+  ]);
 
   return (
     <ProjectContext.Provider value={value}>
