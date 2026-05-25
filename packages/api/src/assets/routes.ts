@@ -8,7 +8,7 @@ import { Router, type Response } from 'express';
 import { requirePermission } from '../permissions/middleware';
 import { GitAssetService } from './service';
 import { logger } from '../middleware/logger';
-import { badRequest, created, internalError, notFound, ok, lifecycleBlocked } from '../lib/responses';
+import { badRequest, created, internalError, notFound, ok, lifecycleBlocked, unauthorized } from '../lib/responses';
 import { LifecycleHookError } from '../plugins/dispatcher';
 import { uploadAsset } from '../application/assets/upload-asset';
 import { updateAssetMetadata } from '../application/assets/update-asset-metadata';
@@ -101,7 +101,11 @@ router.post(
   async (req, res) => {
     try {
       const { projectId } = req.params;
-      const user = req.user!;
+      if (!req.user) {
+        unauthorized(res, 'Authentication required');
+        return;
+      }
+      const user = req.user;
 
       const normalizedInput = normalizeUploadAssetInput((req.body || {}) as Record<string, unknown>);
       if (normalizedInput.error || !normalizedInput.input) {
@@ -177,7 +181,11 @@ router.delete(
     try {
       const { projectId } = req.params;
       const assetPath = req.params.path;
-      const user = req.user!;
+      if (!req.user) {
+        unauthorized(res, 'Authentication required');
+        return;
+      }
+      const user = req.user;
 
       await deleteAsset(
         {
@@ -218,7 +226,11 @@ router.put(
       const { projectId } = req.params;
       const assetPath = req.params.path;
       const metadata = normalizeMetadataUpdate((req.body || {}) as Record<string, unknown>);
-      const user = req.user!;
+      if (!req.user) {
+        unauthorized(res, 'Authentication required');
+        return;
+      }
+      const user = req.user;
 
       const { metadata: updated } = await updateAssetMetadata(
         {

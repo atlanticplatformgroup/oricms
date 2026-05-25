@@ -5,17 +5,19 @@ import * as path from 'path';
 import mime from 'mime-types';
 import { requirePermission } from '../permissions/middleware';
 import { logger } from '../middleware/logger';
-import { badRequest, created, internalError, notFound, ok } from '../lib/responses';
+import { badRequest, created, internalError, notFound, ok, unauthorized } from '../lib/responses';
 import { GlobalAssetService } from './global-service';
 
 const router = Router({ mergeParams: true });
 const globalAssetService = new GlobalAssetService();
 
 function getCommitAuthor(req: Request) {
-  const user = req.user!;
+  if (!req.user) {
+    return null;
+  }
   return {
-    name: user.name || 'Unknown',
-    email: user.email || 'unknown@example.com',
+    name: req.user.name || 'Unknown',
+    email: req.user.email || 'unknown@example.com',
   };
 }
 
@@ -86,6 +88,11 @@ router.post(
         return;
       }
 
+      const author = getCommitAuthor(req);
+      if (!author) {
+        unauthorized(res, 'Authentication required');
+        return;
+      }
       const asset = await globalAssetService.uploadAsset(
         projectId,
         String(folder),
@@ -97,7 +104,7 @@ router.post(
             ? normalizeAssetMetadata({ tags: [String(virtualFolder).trim()] })
             : undefined,
         {
-          author: getCommitAuthor(req),
+          author,
           message: `Upload global asset ${path.basename(filename)}`,
         },
       );
@@ -118,8 +125,13 @@ router.put(
       const { projectId } = req.params;
       const assetId = req.params.assetId;
       const metadata = normalizeAssetMetadata((req.body ?? {}) as Record<string, unknown>);
+      const author = getCommitAuthor(req);
+      if (!author) {
+        unauthorized(res, 'Authentication required');
+        return;
+      }
       const asset = await globalAssetService.updateMetadata(projectId, assetId, metadata, {
-        author: getCommitAuthor(req),
+        author,
         message: `Update global asset metadata ${path.basename(assetId)}`,
       });
 
@@ -160,8 +172,13 @@ router.delete(
     try {
       const { projectId } = req.params;
       const assetId = req.params.assetId;
+      const author = getCommitAuthor(req);
+      if (!author) {
+        unauthorized(res, 'Authentication required');
+        return;
+      }
       await globalAssetService.deleteAsset(projectId, assetId, {
-        author: getCommitAuthor(req),
+        author,
         message: `Delete global asset ${path.basename(assetId)}`,
       });
 
