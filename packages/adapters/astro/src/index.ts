@@ -45,14 +45,27 @@ export default function oricms(options: OriCMSOptions = {}): AstroIntegration {
           injectScript('page', `
             import { io } from 'socket.io-client';
             
-            // Look for metadata on the page to know what to preview
-            const previewMeta = document.querySelector('meta[name="oricms-preview"]');
-            if (previewMeta) {
+            async function initLivePreview() {
+              const previewMeta = document.querySelector('meta[name="oricms-preview"]');
+              if (!previewMeta) return;
+              
               const [collectionId, entryId] = previewMeta.content.split(':');
+              
+              let token = 'preview-guest';
+              try {
+                const res = await fetch('http://localhost:3001/api/v1/auth/guest-token');
+                const data = await res.json();
+                if (data.success && data.data?.token) {
+                  token = data.data.token;
+                }
+              } catch (e) {
+                console.warn('[OriCMS] Failed to fetch guest token, using fallback', e);
+              }
+              
               const socket = io('http://localhost:3001', {
                 path: '/presence',
                 transports: ['websocket'],
-                auth: { token: 'preview-guest' }
+                auth: { token }
               });
 
               socket.on('connect', () => {
@@ -62,10 +75,11 @@ export default function oricms(options: OriCMSOptions = {}): AstroIntegration {
 
               socket.on('content:preview', (data) => {
                 console.log('[OriCMS] Content update received, refreshing...', data);
-                // Simple reload for now to get fresh data from disk/memory
                 window.location.reload();
               });
             }
+            
+            initLivePreview();
           `);
         }
 

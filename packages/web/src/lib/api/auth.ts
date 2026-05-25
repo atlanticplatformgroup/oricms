@@ -26,18 +26,16 @@ export const authApi = {
     });
   },
 
-  async refreshToken(refreshToken: string): Promise<{ accessToken: string; refreshToken: string }> {
+  async refreshToken(): Promise<{ accessToken: string; refreshToken: string }> {
     return request('/api/v1/auth/refresh', {
       method: 'POST',
-      body: { refreshToken },
       requiresAuth: false,
     });
   },
 
-  async logout(refreshToken: string): Promise<void> {
+  async logout(): Promise<void> {
     return request('/api/v1/auth/logout', {
       method: 'POST',
-      body: { refreshToken },
       requiresAuth: false,
     });
   },

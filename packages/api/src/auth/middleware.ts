@@ -4,10 +4,15 @@ import type { User } from '@ori/shared';
 import { apiServices } from '../lib/api-services';
 import { internalError, unauthorized } from '../lib/responses';
 
+const COOKIE_NAME_ACCESS = 'ori_access_token';
+const COOKIE_NAME_REFRESH = 'ori_refresh_token';
+const IS_PRODUCTION = process.env.NODE_ENV === 'production';
+
 export interface TokenPayload {
   userId: string;
   email: string;
-  type: 'access' | 'refresh';
+  type: 'access' | 'refresh' | 'guest';
+  id?: string;
 }
 
 // Lazy-load JWT_SECRET to ensure dotenv is configured first
@@ -54,6 +59,53 @@ export function verifyToken(token: string): TokenPayload | null {
 }
 
 /**
+ * Generate a short-lived guest token for preview mode
+ */
+export function generateGuestToken(): string {
+  const secret = getJwtSecret();
+  return jwt.sign(
+    { type: 'guest', id: `guest-${Date.now()}` } as TokenPayload,
+    secret,
+    { expiresIn: '1h' }
+  );
+}
+
+function getCookieOptions(maxAgeMs: number) {
+  return {
+    httpOnly: true,
+    secure: IS_PRODUCTION,
+    sameSite: 'lax' as const,
+    maxAge: maxAgeMs,
+  };
+}
+
+export function setAuthCookies(
+  res: Response,
+  accessToken: string,
+  refreshToken: string,
+): void {
+  res.cookie(COOKIE_NAME_ACCESS, accessToken, getCookieOptions(15 * 60 * 1000));
+  res.cookie(COOKIE_NAME_REFRESH, refreshToken, getCookieOptions(7 * 24 * 60 * 60 * 1000));
+}
+
+export function clearAuthCookies(res: Response): void {
+  res.clearCookie(COOKIE_NAME_ACCESS, { httpOnly: true, secure: IS_PRODUCTION, sameSite: 'lax' });
+  res.clearCookie(COOKIE_NAME_REFRESH, { httpOnly: true, secure: IS_PRODUCTION, sameSite: 'lax' });
+}
+
+function extractTokenFromRequest(req: Request): string | undefined {
+  // Cookie takes precedence for browser clients
+  const cookieToken = req.cookies?.[COOKIE_NAME_ACCESS];
+  if (cookieToken) return cookieToken;
+
+  const authHeader = req.headers.authorization;
+  if (authHeader?.startsWith('Bearer ')) {
+    return authHeader.substring(7);
+  }
+  return undefined;
+}
+
+/**
  * Authentication middleware
  * Validates JWT and attaches user to request
  */
@@ -63,13 +115,8 @@ export async function authenticate(
   next: NextFunction
 ): Promise<void> {
   try {
-    const authHeader = req.headers.authorization;
-    let token = '';
+    const token = extractTokenFromRequest(req);
 
-    if (authHeader?.startsWith('Bearer ')) {
-      token = authHeader.substring(7);
-    }
-    
     if (!token) {
       unauthorized(res, 'Missing or invalid authorization header');
       return;
@@ -119,13 +166,11 @@ export async function optionalAuth(
   next: NextFunction
 ): Promise<void> {
   try {
-    const authHeader = req.headers.authorization;
-    
-    if (!authHeader?.startsWith('Bearer ')) {
+    const token = extractTokenFromRequest(req);
+
+    if (!token) {
       return next();
     }
-
-    const token = authHeader.substring(7);
     const payload = verifyToken(token);
 
     if (payload && payload.type === 'access') {

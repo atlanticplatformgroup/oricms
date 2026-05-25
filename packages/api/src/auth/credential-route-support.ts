@@ -3,7 +3,7 @@ import type { Prisma } from '@prisma/client';
 import { prisma } from '../lib/prisma';
 import { conflict, created, ok, unauthorized } from '../lib/responses';
 import { issueUserSession, resolveRefreshSession, revokeMatchingRefreshSession, rotateRefreshSession, toAuthUser } from './route-support';
-import { verifyToken } from './middleware';
+import { verifyToken, setAuthCookies, clearAuthCookies } from './middleware';
 
 type RegisterUserRecord = Pick<Prisma.UserGetPayload<{
   select: {
@@ -48,6 +48,7 @@ export async function registerUserOrRespond(
   });
 
   const { accessToken, refreshToken } = await issueUserSession(user);
+  setAuthCookies(res, accessToken, refreshToken);
   created(res, {
     user,
     accessToken,
@@ -76,6 +77,7 @@ export async function loginUserOrRespond(
   }
 
   const { accessToken, refreshToken } = await issueUserSession(user);
+  setAuthCookies(res, accessToken, refreshToken);
   ok(res, {
     user: toAuthUser(user),
     accessToken,
@@ -109,6 +111,7 @@ export async function refreshSessionOrRespond(
     resolvedSession.session,
   );
 
+  setAuthCookies(res, tokens.accessToken, tokens.refreshToken);
   ok(res, tokens);
 }
 
@@ -121,5 +124,6 @@ export async function logoutUserOrRespond(
     await revokeMatchingRefreshSession(userId, refreshToken);
   }
 
+  clearAuthCookies(res);
   ok(res, { message: 'Logged out successfully' });
 }

@@ -2,6 +2,7 @@ import 'express-async-errors';
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
 import { authenticate } from './auth/middleware';
 import authRoutes from './auth/routes';
 import projectRoutes from './projects/routes';
@@ -92,6 +93,7 @@ export async function createApiRuntime(options: ApiAppOptions = {}): Promise<Api
     },
   }));
   app.use(express.urlencoded({ extended: true }));
+  app.use(cookieParser());
 
   app.use(requestLogger);
 

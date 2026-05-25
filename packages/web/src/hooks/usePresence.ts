@@ -39,14 +39,15 @@ export function usePresence(projectId: string | undefined, page: string): UsePre
   }, [token]);
 
   useEffect(() => {
-    if (!projectId || !page || !tokenRef.current) {
+    if (!projectId || !page) {
       return;
     }
 
     // Connect to presence service
     const socket = io(realtimeOrigin, {
-      auth: { token: tokenRef.current },
+      auth: tokenRef.current ? { token: tokenRef.current } : undefined,
       transports: ['websocket', 'polling'],
+      withCredentials: true,
     });
 
     socketRef.current = socket;
