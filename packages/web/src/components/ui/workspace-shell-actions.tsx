@@ -9,6 +9,7 @@ import {
   WORKSPACE_SHELL_DESCRIPTION_TEXT,
   WORKSPACE_SHELL_MUTED_TEXT,
   WORKSPACE_SHELL_TEXT,
+  WORKSPACE_TRANSITION_COLOR,
 } from './workspace-primitives.shared';
 
 export function WorkspacePage({ children }: { children: ReactNode }) {
@@ -116,7 +117,7 @@ export function WorkspaceRecordLink({
         style={{
           display: 'inline-block',
           color: 'var(--ori-table-link)',
-          transition: 'color 120ms ease',
+          transition: WORKSPACE_TRANSITION_COLOR,
         }}
       >
         {children}

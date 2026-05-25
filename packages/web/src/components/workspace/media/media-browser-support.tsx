@@ -1,5 +1,5 @@
 import { memo, useCallback } from 'react';
-import { Badge, Button, Group, ScrollArea, SegmentedControl, Select, SimpleGrid, Stack, Text, TextInput } from '@mantine/core';
+import { Badge, Box, Button, Group, ScrollArea, SegmentedControl, Select, SimpleGrid, Stack, Text, TextInput } from '@mantine/core';
 import type { Asset } from '@ori/shared';
 import { WorkspaceSearchField } from '../../ui/WorkspaceSearchField';
 import { WorkspaceEmptyState, WorkspaceErrorState, WorkspaceLoadingState, WorkspaceToolbar } from '../../ui/WorkspacePrimitives';
@@ -63,7 +63,7 @@ export function MediaBrowserControls(props: {
     <>
       <Stack gap="xs">
         <Group align="flex-end" gap="sm" wrap="wrap">
-          <div style={{ minWidth: 280, flex: '0 1 320px' }}>
+          <Box miw={280} flex="0 1 320px">
             <SegmentedControl
               aria-label="Asset type"
               data={[
@@ -75,15 +75,15 @@ export function MediaBrowserControls(props: {
               onChange={(value) => props.onTypeChange((value as 'all' | 'images' | 'documents') || 'all')}
               fullWidth
             />
-          </div>
-          <div style={{ minWidth: 280, flex: '1 1 360px' }}>
+          </Box>
+          <Box miw={280} flex="1 1 360px">
             <WorkspaceSearchField
               ariaLabel="Search assets"
               placeholder="Search filename, alt text, caption, or tag"
               value={props.search}
               onChange={props.onSearchChange}
             />
-          </div>
+          </Box>
           <Group gap="xs" wrap="wrap" ml="auto">
             {props.canCreateAssets && !props.selectionMode ? <Button size="xs" onClick={props.onOpenUpload}>Upload asset</Button> : null}
           </Group>
@@ -123,7 +123,7 @@ export function MediaBrowserControls(props: {
             onChange={(value) => props.onSortChange((value as 'newest' | 'oldest' | 'name' | 'size') || 'newest')}
             style={{ width: 190 }}
           />
-          <div style={{ minWidth: 140 }}>
+          <Box miw={140}>
             <SegmentedControl
               aria-label="Asset view"
               data={[
@@ -134,7 +134,7 @@ export function MediaBrowserControls(props: {
               onChange={(value) => props.onViewModeChange((value as 'list' | 'grid') || 'list')}
               fullWidth
             />
-          </div>
+          </Box>
           <Group gap="xs" wrap="wrap" ml="auto">
             <Button size="xs" variant={props.selectionMode ? 'filled' : 'default'} color={props.selectionMode ? 'teal' : 'gray'} onClick={props.onToggleSelectionMode}>
               {props.selectionMode ? 'Done' : 'Select'}
