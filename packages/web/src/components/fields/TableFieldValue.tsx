@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Badge, Group, Stack, Text } from '@mantine/core';
 import { getAssetTags, type Asset, type SchemaField } from '@ori/shared';
 import { getProjectAssetPath, normalizeAssetReference } from '../../lib/assets/references';
@@ -188,7 +189,7 @@ export function getTableFieldSortText({
   }).sortToken;
 }
 
-export function TableFieldValue({ field, fieldType, value, context = {} }: TableFieldValueProps) {
+export const TableFieldValue = memo(function TableFieldValue({ field, fieldType, value, context = {} }: TableFieldValueProps) {
   if (value === null || value === undefined || value === '') {
     return (
       <Text size="sm" c="dimmed">
@@ -269,4 +270,4 @@ export function TableFieldValue({ field, fieldType, value, context = {} }: Table
       {getDisplayText(value)}
     </Text>
   );
-}
+});
