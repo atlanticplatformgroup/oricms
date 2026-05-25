@@ -65,9 +65,15 @@ describe('Builds workspace', () => {
 
     renderApp('/project-one/b/main/builds/recent');
 
-    expect(await screen.findByText('No build history yet')).toBeInTheDocument();
+    expect(await screen.findByText('Set up builds for this project')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Set up environment' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Configure environments' })).toBeInTheDocument();
+    expect(screen.getByText('Step 1')).toBeInTheDocument();
+    expect(screen.getByText('Configure environment')).toBeInTheDocument();
     expect(screen.getByText('Branch main')).toBeInTheDocument();
-    expect(screen.getByText('Webhooks not configured')).toBeInTheDocument();
+    expect(screen.getByText('Environment required')).toBeInTheDocument();
+    expect(screen.queryByText('Environment setup needed')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Trigger build' })).not.toBeInTheDocument();
     expect(screen.queryByText('Latest build')).not.toBeInTheDocument();
     expect(screen.queryByText('Build behavior')).not.toBeInTheDocument();
   });
