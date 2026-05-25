@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Center, Loader, MantineProvider, Stack, Text } from '@mantine/core';
 import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
@@ -12,13 +12,14 @@ import { ProjectProvider } from './contexts/ProjectContext';
 import { ToastProvider } from './contexts/ToastContext';
 import { UserPreferencesProvider } from './contexts/UserPreferencesContext';
 import { DarkModeProvider } from './contexts/DarkModeContext';
+import { ORICMS_THEME_CHANGE_EVENT } from './contexts/DarkModeContext';
 import { I18nProvider } from './contexts/I18nContext';
 import { useAuth } from './contexts/useAuth';
 import { useI18n } from './contexts/useI18n';
 import { LoginPage } from './components/auth/LoginPage';
 import { InstanceSetup } from './components/onboarding/InstanceSetup';
 import { initializeWorkspaceExtensions } from './lib/workspace/registry';
-import { appCssVariablesResolver, appTheme, DEFAULT_APP_THEME_PACK, getAppThemeColorScheme } from './lib/theme';
+import { createAppCssVariablesResolver, createAppTheme, DEFAULT_APP_THEME_PACK, getAppThemeColorScheme, type AppThemePackName } from './lib/theme';
 import App from './App';
 
 function AppContent() {
@@ -105,9 +106,39 @@ const queryClient = new QueryClient({
 
 initializeWorkspaceExtensions();
 
-const appColorScheme = getAppThemeColorScheme(DEFAULT_APP_THEME_PACK);
+const USER_PREFERENCES_STORAGE_KEY = 'oricms-user-preferences-v1';
+
+function getPreferredThemePack(): AppThemePackName {
+  try {
+    const storedPreferences = localStorage.getItem(USER_PREFERENCES_STORAGE_KEY);
+    if (storedPreferences) {
+      const theme = JSON.parse(storedPreferences)?.theme;
+      if (theme === 'dark') return 'dark';
+      if (theme === 'system') return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+  } catch {
+    // Fall back to the product default.
+  }
+
+  return DEFAULT_APP_THEME_PACK;
+}
 
 export function AppWrapper() {
+  const [themePackName, setThemePackName] = useState<AppThemePackName>(getPreferredThemePack);
+  const appTheme = useMemo(() => createAppTheme(themePackName), [themePackName]);
+  const appCssVariablesResolver = useMemo(() => createAppCssVariablesResolver(themePackName), [themePackName]);
+  const appColorScheme = getAppThemeColorScheme(themePackName);
+
+  useEffect(() => {
+    const handleThemeChange = (event: Event) => {
+      const detail = (event as CustomEvent<{ isDarkMode?: boolean }>).detail;
+      setThemePackName(detail?.isDarkMode ? 'dark' : 'light');
+    };
+
+    window.addEventListener(ORICMS_THEME_CHANGE_EVENT, handleThemeChange);
+    return () => window.removeEventListener(ORICMS_THEME_CHANGE_EVENT, handleThemeChange);
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <MantineProvider
