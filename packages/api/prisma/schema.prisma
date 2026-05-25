@@ -30,6 +30,8 @@ model User {
   invitesSent   ProjectInvite[] @relation("InvitedBy")
   memberships   ProjectMember[]
 
+  @@index([email])
+  @@index([githubId])
   @@map("users")
 }
 
@@ -129,6 +131,8 @@ model ProjectInvite {
   invitedBy   User        @relation("InvitedBy", fields: [invitedById], references: [id], onDelete: Cascade)
   project        Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
+  @@index([projectId])
+  @@index([email])
   @@map("project_invites")
 }
 
@@ -179,6 +183,7 @@ model AuditLog {
 
   @@index([projectId, createdAt])
   @@index([userId, createdAt])
+  @@index([action, resourceType, resourceId])
   @@map("audit_logs")
 }
 
@@ -265,6 +270,7 @@ model AgentAccess {
   createdBy          String?
   project               Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
+  @@index([enabled])
   @@map("agent_access")
 }
 
