@@ -134,7 +134,7 @@ router.get(
       }
 
       const page = typeof req.query.page === 'number' ? req.query.page : 1;
-      const limit = typeof req.query.limit === 'number' ? req.query.limit : 20;
+      const limit = Math.min(typeof req.query.limit === 'number' ? req.query.limit : 20, 100);
       const { records, total } = await service.listRecords(req.params.resourceCollectionId, {
         page,
         limit,

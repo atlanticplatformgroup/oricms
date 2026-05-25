@@ -74,7 +74,7 @@ export function createBranchRoutes(gitService: GitService): Router {
         const { projectId } = req.params;
         const base = String(req.query.base);
         const head = String(req.query.head);
-        const limit = req.query.limit ? Number.parseInt(String(req.query.limit), 10) : 200;
+        const limit = Math.min(req.query.limit ? Number.parseInt(String(req.query.limit), 10) : 200, 100);
         const summary = await gitService.getBranchDiffSummary(projectId, base, head, limit);
         ok(res, { base, head, ...summary });
       } catch (error) {

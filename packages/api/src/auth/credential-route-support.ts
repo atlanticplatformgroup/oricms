@@ -4,6 +4,7 @@ import { prisma } from '../lib/prisma';
 import { conflict, created, ok, unauthorized } from '../lib/responses';
 import { issueUserSession, resolveRefreshSession, revokeMatchingRefreshSession, rotateRefreshSession, toAuthUser } from './route-support';
 import { verifyToken, setAuthCookies, clearAuthCookies } from './middleware';
+import { getPrismaErrorResponse } from '../lib/prisma';
 
 type RegisterUserRecord = Pick<Prisma.UserGetPayload<{
   select: {

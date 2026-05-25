@@ -8,6 +8,7 @@ import { PrismaClient } from '@prisma/client';
 // Test database URL
 process.env.DATABASE_URL = process.env.TEST_DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/oricms_test';
 process.env.JWT_SECRET = 'test-secret-key';
+process.env.ENCRYPTION_KEY = 'aabbccddeeff00112233445566778899aabbccddeeff00112233445566778899';
 process.env.NODE_ENV = 'test';
 
 // Mock external services

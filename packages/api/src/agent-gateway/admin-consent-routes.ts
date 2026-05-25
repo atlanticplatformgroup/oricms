@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express';
 import { apiServices } from '../lib/api-services';
-import { badRequest, created, internalError, notFound, ok } from '../lib/responses';
+import { getPrismaErrorResponse } from '../lib/prisma';
+import { badRequest, conflict, created, internalError, notFound, ok } from '../lib/responses';
 import { ensureResourceNotLocked } from '../locks/middleware';
 import { ensureAdminAccess } from './admin-route-common';
 
@@ -45,6 +46,10 @@ export async function createAgentConsentRecord(req: Request, res: Response): Pro
     });
   } catch (error) {
     apiServices.logger.error({ msg: 'Agent consent error', error });
+    const prismaError = getPrismaErrorResponse(error);
+    if (prismaError) {
+      return conflict(res, prismaError.message, prismaError.code);
+    }
     internalError(res, 'Failed to record consent');
   }
 }
@@ -96,6 +101,11 @@ export async function revokeAgentConsentRecord(req: Request, res: Response): Pro
     ok(res, { message: 'Consent revoked successfully' });
   } catch (error) {
     apiServices.logger.error({ msg: 'Agent consent revoke error', error });
+    const prismaError = getPrismaErrorResponse(error);
+    if (prismaError) {
+      res.status(prismaError.statusCode).json({ success: false, error: { code: prismaError.code, message: prismaError.message } });
+      return;
+    }
     internalError(res, 'Failed to revoke consent');
   }
 }

@@ -13,7 +13,7 @@ export function createHistoryRoutes(gitService: GitService): Router {
     try {
       const { projectId } = req.params;
       const { limit = 20, path } = req.query;
-      const history = await gitService.getHistory(projectId, parseInt(limit as string, 10), typeof path === 'string' ? path : undefined);
+      const history = await gitService.getHistory(projectId, Math.min(parseInt(limit as string, 10), 100), typeof path === 'string' ? path : undefined);
       ok(res, { history });
     } catch (error) {
       logger.error({ msg: 'Get history error', error });

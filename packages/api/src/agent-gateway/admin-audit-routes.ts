@@ -16,7 +16,7 @@ export async function listAgentAuditLog(req: Request, res: Response): Promise<vo
       ...(startDate && { startDate: new Date(startDate) }),
       ...(endDate && { endDate: new Date(endDate) }),
       ...(agentSessionId && { agentSessionId }),
-      ...(limit && { limit: parseInt(limit, 10) }),
+      ...(limit && { limit: Math.min(parseInt(limit, 10), 100) }),
       ...(offset && { offset: parseInt(offset, 10) }),
     });
     ok(res, { logs });

@@ -66,9 +66,10 @@ export async function loadContentTypes(projectId: string, repoUrl: string, branc
   return types;
 }
 
-function getCollectionService(context: GraphQlContext): Promise<CollectionService> {
+async function getCollectionService(context: GraphQlContext): Promise<CollectionService> {
   const service = new CollectionService({ projectId: context.projectId, repoUrl: context.repoUrl, branch: context.defaultBranch });
-  return service.init().then(() => service);
+  await service.init();
+  return service;
 }
 
 async function requireCollectionAction(context: GraphQlContext, action: 'create' | 'update' | 'delete') {

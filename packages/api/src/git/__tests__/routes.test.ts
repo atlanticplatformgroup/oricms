@@ -246,7 +246,7 @@ describe('Git routes', () => {
 
     expect(response.status).toBe(200);
     expect(response.body.data.files).toContain('content/pages/home.md');
-    expect(getBranchDiffSummaryMock).toHaveBeenCalledWith('project-1', 'main', 'staging', 200);
+    expect(getBranchDiffSummaryMock).toHaveBeenCalledWith('project-1', 'main', 'staging', 100);
   });
 
   it('creates promotion request', async () => {
