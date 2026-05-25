@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { ActionIcon, Box, Flex, Group, NavLink, ScrollArea, Stack, Text, Title, UnstyledButton } from '@mantine/core';
+import { ActionIcon, alpha, Box, Flex, Group, NavLink, ScrollArea, Stack, Text, Title, UnstyledButton } from '@mantine/core';
 import { ArrowsUpDownIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 import { SECONDARY_TOGGLE_WIDTH } from '../../lib/workspace/constants';
 import {
@@ -129,9 +129,9 @@ export function WorkspacePrimaryRailButton({
         styles={{
           root: {
             backgroundColor: active ? WORKSPACE_SHELL_ACTIVE_BG : 'transparent',
-            borderColor: active ? 'rgba(107, 140, 174, 0.32)' : 'transparent',
+            borderColor: active ? alpha('var(--ori-shell-active-text)', 0.32) : 'transparent',
             color: active ? WORKSPACE_SHELL_ACTIVE_TEXT : WORKSPACE_SHELL_MUTED_TEXT,
-            boxShadow: active ? 'inset 0 0 0 1px rgba(107, 140, 174, 0.32)' : 'none',
+            boxShadow: active ? `inset 0 0 0 1px ${alpha('var(--ori-shell-active-text)', 0.32)}` : 'none',
             '&:hover': {
               backgroundColor: active ? WORKSPACE_SHELL_ACTIVE_HOVER : WORKSPACE_SHELL_CONTROL_HOVER,
             },

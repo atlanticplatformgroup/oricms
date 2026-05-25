@@ -18,22 +18,9 @@ function getCollectionStatusMeta(status: CollectionStatus) {
 
 export function CollectionStatusBadge({ status }: { status: CollectionStatus }) {
   const meta = getCollectionStatusMeta(status);
-  const tone = meta.color === 'blue'
-    ? { background: 'rgba(138, 174, 212, 0.14)', border: 'rgba(138, 174, 212, 0.2)', text: '#d0dce8' }
-    : meta.color === 'yellow'
-      ? { background: 'rgba(212, 184, 106, 0.14)', border: 'rgba(212, 184, 106, 0.22)', text: '#f0e8d0' }
-      : { background: 'rgba(148, 160, 198, 0.14)', border: 'rgba(148, 160, 198, 0.2)', text: '#d0d4dc' };
 
   return (
-    <Badge
-      variant="transparent"
-      color={meta.color}
-      style={{
-        backgroundColor: tone.background,
-        border: `1px solid ${tone.border}`,
-        color: tone.text,
-      }}
-    >
+    <Badge variant="light" color={meta.color}>
       {meta.label}
     </Badge>
   );

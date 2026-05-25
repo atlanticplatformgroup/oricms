@@ -1,5 +1,5 @@
 import type { DragEventHandler, ReactNode } from 'react';
-import { ActionIcon, Alert, Badge, Box, Button, Center, Divider, Flex, Group, Loader, ScrollArea, Stack, Table, Text, UnstyledButton } from '@mantine/core';
+import { ActionIcon, Alert, alpha, Badge, Box, Button, Center, Divider, Flex, Group, Loader, ScrollArea, Stack, Table, Text, UnstyledButton } from '@mantine/core';
 import { GripVertical } from 'lucide-react';
 import { WORKSPACE_SHELL_BORDER_COLOR, WORKSPACE_SHELL_TEXT } from './workspace-primitives.shared';
 import { WorkspaceActionGroup } from './WorkspaceShellPrimitives';
@@ -171,19 +171,19 @@ export function WorkspaceMetricBadge({
   const tone = (() => {
     switch (color) {
       case 'green':
-        return { background: 'rgba(125, 184, 138, 0.14)', border: 'rgba(125, 184, 138, 0.22)' };
+        return { background: alpha('var(--mantine-color-green-5)', 0.14), border: alpha('var(--mantine-color-green-5)', 0.22) };
       case 'blue':
-        return { background: 'rgba(138, 174, 212, 0.14)', border: 'rgba(138, 174, 212, 0.2)' };
+        return { background: alpha('var(--mantine-color-blue-5)', 0.14), border: alpha('var(--mantine-color-blue-5)', 0.2) };
       case 'yellow':
-        return { background: 'rgba(212, 184, 106, 0.14)', border: 'rgba(212, 184, 106, 0.22)' };
+        return { background: alpha('var(--mantine-color-yellow-5)', 0.14), border: alpha('var(--mantine-color-yellow-5)', 0.22) };
       case 'orange':
-        return { background: 'rgba(196, 139, 110, 0.14)', border: 'rgba(196, 139, 110, 0.22)' };
+        return { background: alpha('var(--mantine-color-orange-5)', 0.14), border: alpha('var(--mantine-color-orange-5)', 0.22) };
       case 'red':
-        return { background: 'rgba(196, 112, 112, 0.14)', border: 'rgba(196, 112, 112, 0.22)' };
+        return { background: alpha('var(--mantine-color-red-5)', 0.14), border: alpha('var(--mantine-color-red-5)', 0.22) };
       case 'slate':
-        return { background: 'rgba(74, 90, 114, 0.18)', border: 'rgba(98, 118, 148, 0.28)' };
+        return { background: alpha('var(--mantine-color-slate-5)', 0.18), border: alpha('var(--mantine-color-slate-5)', 0.28) };
       default:
-        return { background: 'rgba(148, 160, 198, 0.14)', border: 'rgba(148, 160, 198, 0.2)' };
+        return { background: alpha('var(--mantine-color-gray-5)', 0.14), border: alpha('var(--mantine-color-gray-5)', 0.2) };
     }
   })();
 
