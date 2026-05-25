@@ -6,6 +6,7 @@
  */
 
 import type { CollectionEntry, ContentType, CollectionQuery, CollectionQueryResult, CollectionConfig } from '@ori/shared';
+import LRU from 'lru-cache';
 import { GitService } from '../git/service';
 import {
   type BranchCollectionIndex,
@@ -49,7 +50,10 @@ export interface CollectionServiceOptions {
 }
 
 export class CollectionService {
-  private static indexCache: Map<string, BranchCollectionIndex> = new Map();
+  private static indexCache = new LRU<string, BranchCollectionIndex>({
+    max: 500,
+    maxAge: 1000 * 60 * 5,
+  });
   private static workspaceThrottle = new CollectionWorkspaceThrottle();
   private gitService: GitService;
   private workspacePath = '';

@@ -2,6 +2,7 @@ import { prisma } from '../lib/prisma';
 import { logger } from '../middleware/logger';
 import { apiServices } from '../lib/api-services';
 import { DeliveryProjectionService } from './service';
+import pLimit from 'p-limit';
 
 const DEFAULT_INTERVAL_MS = 5 * 60 * 1000;
 let timer: NodeJS.Timeout | null = null;
@@ -29,23 +30,28 @@ export async function reconcileAllDeliveryProjections(): Promise<void> {
       },
     });
 
-    for (const project of projects) {
-      const projector = new DeliveryProjectionService({
-        projectId: project.id,
-        repoUrl: project.repoUrl ?? '',
-        branch: project.defaultBranch,
-      });
-      try {
-        await projector.ensureCurrent();
-      } catch (error) {
-        logger.error({
-          msg: 'Delivery projection reconcile failed',
-          projectId: project.id,
-          branch: project.defaultBranch,
-          error,
-        });
-      }
-    }
+    const limit = pLimit(5);
+    await Promise.all(
+      projects.map((project) =>
+        limit(async () => {
+          const projector = new DeliveryProjectionService({
+            projectId: project.id,
+            repoUrl: project.repoUrl ?? '',
+            branch: project.defaultBranch,
+          });
+          try {
+            await projector.ensureCurrent();
+          } catch (error) {
+            logger.error({
+              msg: 'Delivery projection reconcile failed',
+              projectId: project.id,
+              branch: project.defaultBranch,
+              error,
+            });
+          }
+        }),
+      ),
+    );
   } finally {
     running = false;
   }

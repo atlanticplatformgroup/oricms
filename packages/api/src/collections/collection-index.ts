@@ -16,7 +16,7 @@ export function getCollectionBranchCacheKey(projectId: string, branch: string): 
 }
 
 export function getOrBuildCollectionBranchIndex(
-  indexCache: Map<string, BranchCollectionIndex>,
+  indexCache: { get(key: string): BranchCollectionIndex | undefined; set(key: string, value: BranchCollectionIndex): void },
   cacheKey: string,
   revision: string,
 ): BranchCollectionIndex {

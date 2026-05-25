@@ -28,26 +28,74 @@ export async function populateCollectionRelations(options: {
 }): Promise<void> {
   const fieldsToPopulate = Array.isArray(options.populate) ? options.populate : [options.populate];
 
+  // Batch 1: collect all unique content types needed
+  const typeNames = new Set<string>();
   for (const entry of options.entries) {
+    typeNames.add(entry.$type);
+  }
+
+  const contentTypes = new Map<string, ContentType | null>();
+  await Promise.all(
+    Array.from(typeNames).map(async (typeName) => {
+      contentTypes.set(typeName, await options.getContentType(typeName));
+    }),
+  );
+
+  // Batch 2: collect all unique relation targets
+  const relationTargets = new Map<string, Set<string>>();
+  for (const entry of options.entries) {
+    const contentType = contentTypes.get(entry.$type);
+    if (!contentType) continue;
+
     for (const fieldName of fieldsToPopulate) {
       const relationId = entry[fieldName];
       if (!relationId || typeof relationId !== 'string') {
         continue;
       }
-
-      const contentType = await options.getContentType(entry.$type);
-      if (!contentType) {
-        continue;
-      }
-
       const field = contentType.fields.find((candidate) => candidate.key === fieldName);
       if (!field || field.type !== 'relation' || !field.relation) {
         continue;
       }
+      const target = field.relation.target;
+      if (!relationTargets.has(target)) {
+        relationTargets.set(target, new Set());
+      }
+      relationTargets.get(target)!.add(relationId);
+    }
+  }
 
-      const relatedEntry = await options.findOne(field.relation.target, relationId);
-      if (relatedEntry) {
-        entry[fieldName] = relatedEntry;
+  // Batch 3: fetch all related entries in parallel
+  const relatedEntries = new Map<string, Map<string, CollectionEntry | null>>();
+  await Promise.all(
+    Array.from(relationTargets.entries()).map(async ([target, ids]) => {
+      const entries = new Map<string, CollectionEntry | null>();
+      await Promise.all(
+        Array.from(ids).map(async (id) => {
+          entries.set(id, await options.findOne(target, id));
+        }),
+      );
+      relatedEntries.set(target, entries);
+    }),
+  );
+
+  // Assign resolved relations back to entries
+  for (const entry of options.entries) {
+    const contentType = contentTypes.get(entry.$type);
+    if (!contentType) continue;
+
+    for (const fieldName of fieldsToPopulate) {
+      const relationId = entry[fieldName];
+      if (!relationId || typeof relationId !== 'string') {
+        continue;
+      }
+      const field = contentType.fields.find((candidate) => candidate.key === fieldName);
+      if (!field || field.type !== 'relation' || !field.relation) {
+        continue;
+      }
+      const target = field.relation.target;
+      const resolved = relatedEntries.get(target)?.get(relationId);
+      if (resolved) {
+        entry[fieldName] = resolved;
       }
     }
   }
