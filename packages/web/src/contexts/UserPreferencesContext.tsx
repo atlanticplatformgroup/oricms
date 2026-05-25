@@ -20,7 +20,7 @@ import { UserPreferencesContext } from './user-preferences-context';
 const STORAGE_KEY = 'oricms-user-preferences-v1';
 
 const defaultPreferences: UserPreferences = {
-  theme: 'system',
+  theme: 'light',
   editorMode: 'split',
   notifications: {
     builds: true,
