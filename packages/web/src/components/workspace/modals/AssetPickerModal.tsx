@@ -51,8 +51,8 @@ export function AssetPickerModal({
   return (
     <Modal opened={opened} onClose={onClose} title="Browse assets" centered size="xl" fullScreen={isMobile}>
       <Stack gap="sm">
-        <Group justify="space-between" align="flex-start" wrap="wrap" style={{ rowGap: 'var(--mantine-spacing-xs)' }}>
-          <Stack gap={2} style={{ minWidth: 0, flex: 1 }}>
+        <Group justify="space-between" align="flex-start" wrap="wrap" gap="xs">
+          <Stack gap={2} miw={0} flex={1}>
             <Text size="sm" fw={500}>{activeAssetFieldLabel || 'Asset selection'}</Text>
             <Text size="xs" c="dimmed">Use the same search, tag, and preview flow as the Media workspace, then select the asset you want to reuse.</Text>
           </Stack>
@@ -108,8 +108,8 @@ export function AssetPickerModal({
                 <Stack gap="sm">
                   <WorkspaceInset>
                     <Stack gap="xs">
-                      <Group justify="space-between" align="flex-start" wrap="wrap" style={{ rowGap: 'var(--mantine-spacing-xs)' }}>
-                        <Stack gap={2} style={{ minWidth: 0, flex: 1 }}>
+                      <Group justify="space-between" align="flex-start" wrap="wrap" gap="xs">
+                        <Stack gap={2} miw={0} flex={1}>
                           <Text fw={600}>{globalSelectionId}</Text>
                           <Text size="xs" c="dimmed">Global asset reference</Text>
                         </Stack>
@@ -120,7 +120,7 @@ export function AssetPickerModal({
                       </Text>
                     </Stack>
                   </WorkspaceInset>
-                  <Group justify="space-between" wrap="wrap" style={{ rowGap: 'var(--mantine-spacing-xs)' }}>
+                  <Group justify="space-between" wrap="wrap" gap="xs">
                     <Button variant="default" color="red" size="xs" onClick={() => onSelectAsset(null)}>Clear selection</Button>
                     <Button size="xs" onClick={onClose}>Done</Button>
                   </Group>
@@ -137,8 +137,8 @@ export function AssetPickerModal({
                 ) : null}
                 <WorkspaceInset>
                   <Stack gap="xs">
-                    <Group justify="space-between" align="flex-start" wrap="wrap" style={{ rowGap: 'var(--mantine-spacing-xs)' }}>
-                      <Stack gap={2} style={{ minWidth: 0, flex: 1 }}>
+                    <Group justify="space-between" align="flex-start" wrap="wrap" gap="xs">
+                      <Stack gap={2} miw={0} flex={1}>
                         <Text fw={600}>{selectedAsset.name}</Text>
                         <Text size="xs" c="dimmed">{selectedIdentifier}</Text>
                       </Stack>
@@ -154,7 +154,7 @@ export function AssetPickerModal({
                     {selectedAsset.metadata?.caption ? <Text size="xs" c="dimmed">Caption: {String(selectedAsset.metadata.caption)}</Text> : null}
                   </Stack>
                 </WorkspaceInset>
-                <Group justify="space-between" wrap="wrap" style={{ rowGap: 'var(--mantine-spacing-xs)' }}>
+                <Group justify="space-between" wrap="wrap" gap="xs">
                   <Button variant="default" color="red" size="xs" onClick={() => onSelectAsset(null)}>Clear selection</Button>
                   <Button size="xs" onClick={onClose}>Done</Button>
                 </Group>

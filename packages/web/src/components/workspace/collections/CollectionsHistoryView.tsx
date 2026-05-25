@@ -39,7 +39,7 @@ export function CollectionsHistoryView(props: CollectionsHistoryViewProps) {
                   p="sm"
                   onClick={() => history.setSelectedHistoryHash(item.hash)}
                 >
-                  <Stack gap={6} align="stretch" style={{ flex: 1 }}>
+                  <Stack gap={6} align="stretch" flex={1}>
                     <Group justify="space-between" wrap="nowrap">
                       <Badge variant="outline" color="gray">{item.hash.slice(0, 8)}</Badge>
                       {isActive && <Badge variant="light" color="gray">Selected</Badge>}
@@ -79,7 +79,7 @@ export function CollectionsHistoryView(props: CollectionsHistoryViewProps) {
         />
 
         <Group gap="sm" align="end" wrap="nowrap">
-          <Stack gap={4} style={{ flex: 1, minWidth: 0 }}>
+          <Stack gap={4} flex={1} miw={0}>
             <Text size="xs" c="dimmed">Base for comparison</Text>
             <Select
               size="md"

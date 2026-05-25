@@ -60,14 +60,14 @@ export function WorkspaceFormSection({
           borderBottom: `1px solid ${WORKSPACE_FORM_SECTION_BORDER}`,
         }}
       >
-        <Group justify="space-between" align="flex-start" wrap="wrap" style={{ rowGap: 'var(--mantine-spacing-xs)' }}>
-          <Stack gap={2} style={{ minWidth: 0, flex: 1 }}>
+        <Group justify="space-between" align="flex-start" wrap="wrap" gap="xs">
+          <Stack gap={2} miw={0} flex={1}>
             <Group gap="xs" wrap="wrap">
               {title ? <Text fw={600} style={{ color: WORKSPACE_FORM_LABEL_COLOR }}>{title}</Text> : null}
               {badge}
             </Group>
             {description ? (
-              <Text size="sm" style={{ color: WORKSPACE_FORM_DESCRIPTION_COLOR, lineHeight: 1.5 }}>
+              <Text size="sm" lh={1.5} style={{ color: WORKSPACE_FORM_DESCRIPTION_COLOR }}>
                 {description}
               </Text>
             ) : null}
@@ -110,8 +110,8 @@ export function WorkspaceIntro({
   return (
     <Stack gap="sm">
       {title || description || actions ? (
-        <Group justify="space-between" align="flex-start" wrap="wrap" style={{ rowGap: 'var(--mantine-spacing-xs)' }}>
-          <Stack gap={2} style={{ minWidth: 0, flex: 1 }}>
+        <Group justify="space-between" align="flex-start" wrap="wrap" gap="xs">
+          <Stack gap={2} miw={0} flex={1}>
             {title ? <Text fw={600}>{title}</Text> : null}
             {description ? (
               <Text size="sm" style={{ color: WORKSPACE_SHELL_DESCRIPTION_TEXT }}>
@@ -232,9 +232,9 @@ export function WorkspaceFieldShell({
   return (
     <Box
       data-ori-field-changed={changed ? 'true' : 'false'}
+      ps="sm"
       style={{
         borderInlineStart: `2px solid ${changed ? 'var(--ori-form-field-edited)' : 'transparent'}`,
-        paddingInlineStart: 'var(--mantine-spacing-sm)',
       }}
     >
       <Stack gap={8}>
@@ -251,7 +251,7 @@ export function WorkspaceFieldShell({
               }}
             />
           ) : null}
-          <Text size="sm" fw={700} style={{ color: WORKSPACE_FORM_LABEL_COLOR, letterSpacing: '0.005em', lineHeight: 1.35 }}>
+          <Text size="sm" fw={700} lts="0.005em" lh={1.35} style={{ color: WORKSPACE_FORM_LABEL_COLOR }}>
             {label}
           </Text>
           {required ? (
@@ -261,7 +261,7 @@ export function WorkspaceFieldShell({
           ) : null}
         </Group>
         {description ? (
-          <Text size="sm" style={{ color: WORKSPACE_FORM_DESCRIPTION_COLOR, lineHeight: 1.5 }}>
+          <Text size="sm" lh={1.5} style={{ color: WORKSPACE_FORM_DESCRIPTION_COLOR }}>
             {description}
           </Text>
         ) : null}
@@ -334,14 +334,14 @@ export function WorkspaceToggleRow({
   return (
     <Box
       data-ori-field-changed={changed ? 'true' : 'false'}
+      ps="sm"
       style={{
         borderInlineStart: `2px solid ${changed ? 'var(--ori-form-field-edited)' : 'transparent'}`,
-        paddingInlineStart: 'var(--mantine-spacing-sm)',
       }}
     >
       <Stack gap={6}>
         <Group justify="space-between" align="flex-start" wrap="nowrap" gap="md">
-          <Stack gap={2} style={{ minWidth: 0, flex: 1 }}>
+          <Stack gap={2} miw={0} flex={1}>
             <Group gap="xs" wrap="wrap">
               {changed ? (
                 <Box
@@ -365,7 +365,7 @@ export function WorkspaceToggleRow({
               ) : null}
             </Group>
             {description ? (
-              <Text size="sm" style={{ color: WORKSPACE_FORM_DESCRIPTION_COLOR, lineHeight: 1.5 }}>
+              <Text size="sm" lh={1.5} style={{ color: WORKSPACE_FORM_DESCRIPTION_COLOR }}>
                 {description}
               </Text>
             ) : null}

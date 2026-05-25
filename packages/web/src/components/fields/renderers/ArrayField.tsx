@@ -1,5 +1,5 @@
 import { memo, useCallback } from 'react';
-import { ActionIcon, Alert, Badge, Button, Group, NumberInput, Paper, Stack, Switch, Text, TextInput, Textarea } from '@mantine/core';
+import { ActionIcon, Alert, Badge, Box, Button, Group, NumberInput, Paper, Stack, Switch, Text, TextInput, Textarea } from '@mantine/core';
 import { WorkspaceDragHandle } from '../../ui/WorkspacePrimitives';
 import { getDisplayText } from '../../../lib/workspace/format';
 import type { FieldRendererProps, StructuredDragItem } from '../contracts';
@@ -82,8 +82,9 @@ const ArrayFieldItem = memo(function ArrayFieldItem({
           onDragEnd={handleDragEnd}
         />
       </Stack>
-      <div
-        style={{ flex: 1, minWidth: 0 }}
+      <Box
+        flex={1}
+        miw={0}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
@@ -122,7 +123,7 @@ const ArrayFieldItem = memo(function ArrayFieldItem({
             ),
           })}
         </div>
-      </div>
+      </Box>
     </Group>
   );
 });
@@ -144,7 +145,7 @@ export function ArrayField({ field, value, error, disabled, onChange, context }:
     <Paper withBorder p="sm">
       <Stack gap="md">
         <Group justify="space-between" align="flex-start" wrap="nowrap">
-          <Stack gap={4} style={{ flex: 1, minWidth: 0 }}>
+          <Stack gap={4} flex={1} miw={0}>
             {eyebrow ? <Group gap="xs">{eyebrow}</Group> : null}
             <Text size="sm" fw={600} lineClamp={1}>{title}</Text>
             {description ? <Text size="xs" c="dimmed">{description}</Text> : null}

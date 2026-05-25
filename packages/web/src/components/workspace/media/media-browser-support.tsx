@@ -84,7 +84,7 @@ export function MediaBrowserControls(props: {
               onChange={props.onSearchChange}
             />
           </div>
-          <Group gap="xs" wrap="wrap" style={{ marginLeft: 'auto' }}>
+          <Group gap="xs" wrap="wrap" ml="auto">
             {props.canCreateAssets && !props.selectionMode ? <Button size="xs" onClick={props.onOpenUpload}>Upload asset</Button> : null}
           </Group>
         </Group>
@@ -135,7 +135,7 @@ export function MediaBrowserControls(props: {
               fullWidth
             />
           </div>
-          <Group gap="xs" wrap="wrap" style={{ marginLeft: 'auto' }}>
+          <Group gap="xs" wrap="wrap" ml="auto">
             <Button size="xs" variant={props.selectionMode ? 'filled' : 'default'} color={props.selectionMode ? 'teal' : 'gray'} onClick={props.onToggleSelectionMode}>
               {props.selectionMode ? 'Done' : 'Select'}
             </Button>
@@ -171,7 +171,7 @@ export function MediaBrowserControls(props: {
       ) : null}
 
       {hasActiveFilters ? (
-        <Group justify="space-between" align="center" wrap="wrap" style={{ rowGap: 'var(--mantine-spacing-xs)' }}>
+        <Group justify="space-between" align="center" wrap="wrap" gap="xs">
           <Group gap="xs" wrap="wrap">
             {activeFilterChips.map((chip) => (
               <Badge key={chip.key} variant="light" color="gray">

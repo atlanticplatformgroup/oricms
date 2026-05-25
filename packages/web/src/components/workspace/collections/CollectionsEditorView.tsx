@@ -75,7 +75,7 @@ export function CollectionsEditorView(props: CollectionsEditorViewProps) {
                 data={[{ label: 'Draft', value: 'draft' }, { label: 'Ready', value: 'published' }]}
                 value={entryEditor.draftEntry.$status}
                 maw={160}
-                style={{ width: '100%' }}
+                w="100%"
                 disabled={!props.canUpdateEntries}
                 onChange={(nextStatus) => {
                   if (!nextStatus) return;
@@ -144,7 +144,7 @@ export function CollectionsEditorView(props: CollectionsEditorViewProps) {
             ))}
 
             <WorkspaceFooterBar>
-              <Group justify="space-between" wrap="wrap" style={{ rowGap: 'var(--mantine-spacing-xs)' }}>
+              <Group justify="space-between" wrap="wrap" gap="xs">
                 <Group gap="xs">
                   <Badge color={entryEditor.isDirty ? 'orange' : 'green'} variant="light">{entryEditor.isDirty ? 'Unsaved changes' : 'No unsaved changes'}</Badge>
                   {entryEditor.editorValidationCount > 0 ? <Badge color="red" variant="light">{`${entryEditor.editorValidationCount} validation ${entryEditor.editorValidationCount === 1 ? 'issue' : 'issues'}`}</Badge> : null}
@@ -161,8 +161,8 @@ export function CollectionsEditorView(props: CollectionsEditorViewProps) {
                     Save changes
                   </Button>
                 ) : (
-                  <Stack gap="sm" style={{ flex: 1, minWidth: 0 }}>
-                    <Stack gap={4} style={{ flex: 1, minWidth: 0 }}>
+                  <Stack gap="sm" flex={1} miw={0}>
+                    <Stack gap={4} flex={1} miw={0}>
                       <Text size="sm" fw={500}>{`${entryEditor.changedFieldCount} ${entryEditor.changedFieldCount === 1 ? 'field' : 'fields'} will be committed`}</Text>
                       <Group gap="xs" wrap="wrap">
                         {entryEditor.entryStatusChanged ? (
@@ -183,7 +183,7 @@ export function CollectionsEditorView(props: CollectionsEditorViewProps) {
                         value={entryEditor.commitMessage}
                         data-testid="commit-message"
                         onChange={(event) => entryEditor.setCommitMessage(event.currentTarget.value)}
-                        style={{ width: '100%' }}
+                        w="100%"
                       />
                       <Group gap="sm" wrap="wrap" justify="flex-end" align="flex-end">
                         <Button

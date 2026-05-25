@@ -47,7 +47,7 @@ function renderPrimitiveFieldValue(
   if (isLongform) {
     return (
       <Paper withBorder p="sm">
-        <Text component="pre" ff="monospace" size="sm" style={{ margin: 0, whiteSpace: 'pre-wrap' }}>
+        <Text component="pre" ff="monospace" size="sm" m={0} style={{ whiteSpace: 'pre-wrap' }}>
           {text}
         </Text>
       </Paper>
@@ -307,7 +307,7 @@ export function ReadonlyFieldValue({
     if (depth >= 2) {
       return (
         <Paper withBorder p="sm">
-          <Text component="pre" ff="monospace" size="xs" style={{ margin: 0, whiteSpace: 'pre-wrap' }}>
+          <Text component="pre" ff="monospace" size="xs" m={0} style={{ whiteSpace: 'pre-wrap' }}>
             {stringifyStructuredValue(value)}
           </Text>
         </Paper>
@@ -360,7 +360,7 @@ export function ReadonlyFieldValue({
 
     return (
       <Paper withBorder p="sm">
-        <Text component="pre" ff="monospace" size="xs" style={{ margin: 0, whiteSpace: 'pre-wrap' }}>
+        <Text component="pre" ff="monospace" size="xs" m={0} style={{ whiteSpace: 'pre-wrap' }}>
           {stringifyStructuredValue(value)}
         </Text>
       </Paper>

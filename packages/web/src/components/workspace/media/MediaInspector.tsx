@@ -86,7 +86,7 @@ export function MediaInspector({
 
           <WorkspaceInset>
             <Stack gap="xs">
-              <Group justify="space-between" align="flex-start" wrap="wrap" style={{ rowGap: 'var(--mantine-spacing-xs)' }}>
+              <Group justify="space-between" align="flex-start" wrap="wrap" gap="xs">
                 <Stack gap={2}>
                   <Text fw={600}>{selectedAsset.name}</Text>
                   <Text size="sm" c="dimmed">{selectedAsset.path}</Text>

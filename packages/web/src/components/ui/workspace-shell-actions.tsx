@@ -16,7 +16,7 @@ export function WorkspacePage({ children }: { children: ReactNode }) {
 }
 
 export function WorkspaceActionGroup({ children }: { children: ReactNode }) {
-  return <Group gap="xs" wrap="wrap" style={{ minWidth: 0 }}>{children}</Group>;
+  return <Group gap="xs" wrap="wrap" miw={0}>{children}</Group>;
 }
 
 export function WorkspaceIconTooltip({
@@ -107,7 +107,7 @@ export function WorkspaceRecordLink({
     <UnstyledButton
       onClick={onClick}
       data-testid={testId}
-      style={{ width: '100%', textAlign: 'left' }}
+      w="100%" ta="left"
     >
       <Text
         component="span"
@@ -135,8 +135,8 @@ export function WorkspaceToolbar({
   if (!controls && !actions) return null;
 
   return (
-    <Group justify="space-between" align="flex-start" wrap="wrap" style={{ rowGap: 'var(--mantine-spacing-xs)' }}>
-      {controls ? <Group gap="xs" wrap="wrap" style={{ minWidth: 0, flex: 1 }}>{controls}</Group> : <div />}
+    <Group justify="space-between" align="flex-start" wrap="wrap" gap="xs">
+      {controls ? <Group gap="xs" wrap="wrap" miw={0} flex={1}>{controls}</Group> : <div />}
       {actions ? <WorkspaceActionGroup>{actions}</WorkspaceActionGroup> : null}
     </Group>
   );
@@ -160,8 +160,8 @@ export function WorkspaceHeader({
   title: ReactNode;
 }) {
   return (
-    <Group justify="space-between" align="flex-start" wrap="wrap" style={{ rowGap: 'var(--mantine-spacing-xs)' }}>
-      <Stack gap={2} style={{ minWidth: 0, flex: 1, paddingLeft: contentInsetLeft }}>
+    <Group justify="space-between" align="flex-start" wrap="wrap" gap="xs">
+      <Stack gap={2} miw={0} flex={1} style={{ paddingLeft: contentInsetLeft }}>
         {eyebrow ? (
           <Text size="sm" style={{ color: WORKSPACE_SHELL_MUTED_TEXT }}>
             {eyebrow}

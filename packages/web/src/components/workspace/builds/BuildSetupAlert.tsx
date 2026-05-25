@@ -43,13 +43,13 @@ export function BuildSetupAlert({
         borderColor: WORKSPACE_FORM_SECTION_BORDER,
       }}
     >
-      <Group justify="space-between" align="flex-start" wrap="wrap" style={{ rowGap: 'var(--mantine-spacing-sm)' }}>
-        <Stack gap={6} style={{ minWidth: 0, flex: 1 }}>
+      <Group justify="space-between" align="flex-start" wrap="wrap" gap="sm">
+        <Stack gap={6} miw={0} flex={1}>
           <Group gap="xs" wrap="wrap">
             <Text fw={700}>{setupState.title}</Text>
             <WorkspaceMetricBadge color={!hasEnvironments ? 'orange' : 'yellow'}>{setupState.badge}</WorkspaceMetricBadge>
           </Group>
-          <Text size="sm" style={{ color: WORKSPACE_SHELL_DESCRIPTION_TEXT, lineHeight: 1.5 }}>
+          <Text size="sm" lh={1.5} style={{ color: WORKSPACE_SHELL_DESCRIPTION_TEXT }}>
             {setupState.message}
           </Text>
         </Stack>

@@ -18,7 +18,7 @@ export function SchemaHistoryModal({ opened, onClose, loading, history }: Schema
         ) : (
           history.map((item) => (
             <Group key={item.hash} justify="space-between" align="flex-start" wrap="nowrap">
-              <Stack gap={2} style={{ minWidth: 0, flex: 1 }}>
+              <Stack gap={2} miw={0} flex={1}>
                 <Group gap="xs" wrap="nowrap">
                   <Badge variant="outline" color="gray">{item.hash.slice(0, 8).toUpperCase()}</Badge>
                   <Text size="sm" truncate="end">{item.message}</Text>

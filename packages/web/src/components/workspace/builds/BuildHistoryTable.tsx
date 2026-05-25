@@ -44,7 +44,7 @@ function BuildEmptyState({
           <Text fw={700} size="lg">
             {needsEnvironmentSetup ? 'Set up builds for this project' : 'No build history yet'}
           </Text>
-          <Text size="sm" maw={720} style={{ color: WORKSPACE_SHELL_DESCRIPTION_TEXT, lineHeight: 1.55 }}>
+          <Text size="sm" maw={720} lh={1.55} style={{ color: WORKSPACE_SHELL_DESCRIPTION_TEXT }}>
             {needsEnvironmentSetup
               ? 'Start by adding an environment. After that, OriCMS can trigger builds, record deployment results, and show branch activity here.'
               : `Your environment is ready. Trigger a build from ${currentBranch || 'main'} to create the first deployment job for this project.`}
@@ -65,7 +65,7 @@ function BuildEmptyState({
               <Stack gap={6}>
                 <WorkspaceMetricBadge color="slate">Step {step.label}</WorkspaceMetricBadge>
                 <Text fw={600} size="sm">{step.title}</Text>
-                <Text size="xs" style={{ color: WORKSPACE_SHELL_DESCRIPTION_TEXT, lineHeight: 1.45 }}>
+                <Text size="xs" lh={1.45} style={{ color: WORKSPACE_SHELL_DESCRIPTION_TEXT }}>
                   {step.description}
                 </Text>
               </Stack>
@@ -204,7 +204,7 @@ export function BuildHistoryTable({
                       { value: 'failed', label: 'Failed' },
                     ]}
                     maw={180}
-                    style={{ width: '100%' }}
+                    w="100%"
                     aria-label="Build status filter"
                     onChange={handleSelectView}
                   />

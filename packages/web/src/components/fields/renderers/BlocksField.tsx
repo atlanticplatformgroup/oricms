@@ -1,5 +1,5 @@
 import { memo, useCallback } from 'react';
-import { ActionIcon, Alert, Badge, Button, Group, Paper, Select, Stack, Text } from '@mantine/core';
+import { ActionIcon, Alert, Badge, Box, Button, Group, Paper, Select, Stack, Text } from '@mantine/core';
 import type { ComponentSchema } from '@ori/shared';
 import { WorkspaceDragHandle } from '../../ui/WorkspacePrimitives';
 import { toLabel } from '../../../lib/workspace/format';
@@ -70,8 +70,9 @@ const BlocksFieldItem = memo(function BlocksFieldItem({
           onDragEnd={handleDragEnd}
         />
       </Stack>
-      <div
-        style={{ flex: 1, minWidth: 0 }}
+      <Box
+        flex={1}
+        miw={0}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
@@ -120,7 +121,7 @@ const BlocksFieldItem = memo(function BlocksFieldItem({
             ),
           })}
         </div>
-      </div>
+      </Box>
     </Group>
   );
 });
@@ -148,7 +149,7 @@ export function BlocksField({ field, value, disabled, context }: FieldRendererPr
     <Paper withBorder p="sm">
       <Stack gap="md">
         <Group justify="space-between" align="flex-start" wrap="nowrap">
-          <Stack gap={4} style={{ flex: 1, minWidth: 0 }}>
+          <Stack gap={4} flex={1} miw={0}>
             {eyebrow ? <Group gap="xs">{eyebrow}</Group> : null}
             <Text size="sm" fw={600} lineClamp={1}>{title}</Text>
             {description ? <Text size="xs" c="dimmed">{description}</Text> : null}
