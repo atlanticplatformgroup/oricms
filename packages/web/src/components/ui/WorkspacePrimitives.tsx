@@ -171,19 +171,19 @@ export function WorkspaceMetricBadge({
   const tone = (() => {
     switch (color) {
       case 'green':
-        return { background: 'rgba(125, 184, 138, 0.14)', border: 'rgba(125, 184, 138, 0.22)', text: '#d0e4d6' };
+        return { background: 'rgba(125, 184, 138, 0.14)', border: 'rgba(125, 184, 138, 0.22)' };
       case 'blue':
-        return { background: 'rgba(138, 174, 212, 0.14)', border: 'rgba(138, 174, 212, 0.2)', text: '#d0dce8' };
+        return { background: 'rgba(138, 174, 212, 0.14)', border: 'rgba(138, 174, 212, 0.2)' };
       case 'yellow':
-        return { background: 'rgba(212, 184, 106, 0.14)', border: 'rgba(212, 184, 106, 0.22)', text: '#f0e8d0' };
+        return { background: 'rgba(212, 184, 106, 0.14)', border: 'rgba(212, 184, 106, 0.22)' };
       case 'orange':
-        return { background: 'rgba(196, 139, 110, 0.14)', border: 'rgba(196, 139, 110, 0.22)', text: '#f0ddd0' };
+        return { background: 'rgba(196, 139, 110, 0.14)', border: 'rgba(196, 139, 110, 0.22)' };
       case 'red':
-        return { background: 'rgba(196, 112, 112, 0.14)', border: 'rgba(196, 112, 112, 0.22)', text: '#f0d8d8' };
+        return { background: 'rgba(196, 112, 112, 0.14)', border: 'rgba(196, 112, 112, 0.22)' };
       case 'slate':
-        return { background: 'rgba(74, 90, 114, 0.18)', border: 'rgba(98, 118, 148, 0.28)', text: '#d8dce8' };
+        return { background: 'rgba(74, 90, 114, 0.18)', border: 'rgba(98, 118, 148, 0.28)' };
       default:
-        return { background: 'rgba(148, 160, 198, 0.14)', border: 'rgba(148, 160, 198, 0.2)', text: '#d0d4dc' };
+        return { background: 'rgba(148, 160, 198, 0.14)', border: 'rgba(148, 160, 198, 0.2)' };
     }
   })();
 
@@ -194,7 +194,7 @@ export function WorkspaceMetricBadge({
       style={{
         backgroundColor: tone.background,
         border: `1px solid ${tone.border}`,
-        color: tone.text,
+        color: 'var(--ori-shell-text)',
         ...style,
       }}
     >

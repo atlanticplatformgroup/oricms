@@ -1,7 +1,7 @@
 import type { CSSVariablesResolver, MantineColorShade, MantineColorsTuple, MantineThemeOverride } from '@mantine/core';
 import { ActionIcon, Badge, Button, createTheme, Input, InputWrapper, Paper, Table } from '@mantine/core';
 
-export type AppThemePackName = 'dracula';
+export type AppThemePackName = 'light' | 'dark';
 
 type AppThemePalette = {
   primaryColor: string;
@@ -194,7 +194,87 @@ const charcoalSlate: MantineColorsTuple = [
 ];
 
 const themePacks: Record<AppThemePackName, AppThemePack> = {
-  dracula: {
+  light: {
+    colorScheme: 'light',
+    palette: {
+      primaryColor: 'blue',
+      primaryShade: 6,
+      black: '#172033',
+      white: '#ffffff',
+      colors: {
+        blue: steelBlue,
+        cyan: steelBlue,
+        green: sageGreen,
+        teal: sageGreen,
+        orange: copper,
+        pink: dustyRose,
+        purple: slateBlue,
+        red: brickRed,
+        yellow: warmAmber,
+        gray: coolGray,
+        slate: charcoalSlate,
+      },
+    },
+    tokens: {
+      mantineDimmed: '#667085',
+      logoStroke: '#3158c9',
+      logoTopBar: '#2454d6',
+      logoLeftBlock: '#172033',
+      logoRightBlock: '#5f6f85',
+      shellHeaderBg: '#ffffff',
+      shellPrimaryRailBg: '#172033',
+      shellSecondaryRailBg: '#f3f6fb',
+      shellTopSurfaceBg: '#ffffff',
+      shellMainBg: '#f7f8fb',
+      shellBorderColor: '#d9e2ec',
+      shellText: '#172033',
+      shellMutedText: '#5f6f85',
+      shellDescriptionText: '#667085',
+      shellActiveBg: 'rgba(49, 88, 201, 0.10)',
+      shellActiveHover: 'rgba(49, 88, 201, 0.15)',
+      shellActiveText: '#2454d6',
+      shellControlBg: '#ffffff',
+      shellControlHover: '#eef3fb',
+      shellControlBorder: '#d9e2ec',
+      shellControlBorderStrong: '#b8c4d4',
+      formSurfaceBg: '#ffffff',
+      formSectionBg: '#ffffff',
+      formSectionHeaderBg: '#f3f6fb',
+      formSectionBorder: '#d9e2ec',
+      formLabelColor: '#172033',
+      formDescriptionColor: '#667085',
+      formInputBg: '#ffffff',
+      formInputText: '#172033',
+      formInputPlaceholder: '#98a2b3',
+      formInputBorder: '#cbd5e1',
+      formInputBorderHover: '#94a3b8',
+      formInputBorderFocus: '#3158c9',
+      formInputReadonlyBg: '#f3f6fb',
+      formInputReadonlyBorder: '#d9e2ec',
+      formInputReadonlyText: '#667085',
+      formFieldEdited: '#b45309',
+      formPreviewBg: '#f8fafc',
+      selectionBg: '#e9efff',
+      selectionBorder: '#3158c9',
+      selectionRing: 'rgba(49, 88, 201, 0.18)',
+      selectionText: '#172033',
+      brandPrimaryBg: '#2454d6',
+      brandPrimaryHover: '#1d4ed8',
+      brandPrimaryBorder: '#2454d6',
+      brandPrimaryText: '#ffffff',
+      tableBg: '#ffffff',
+      tableRowBg: '#ffffff',
+      tableRowHoverBg: '#f3f6fb',
+      tableHeaderBg: '#f8fafc',
+      tableBorder: '#e2e8f0',
+      tableBorderStrong: '#cbd5e1',
+      tableText: '#172033',
+      tableHeaderText: '#475467',
+      tableLink: '#2454d6',
+      tableLinkHover: '#1d4ed8',
+    },
+  },
+  dark: {
     colorScheme: 'dark',
     palette: {
       primaryColor: 'blue',
@@ -276,7 +356,7 @@ const themePacks: Record<AppThemePackName, AppThemePack> = {
   },
 };
 
-export const DEFAULT_APP_THEME_PACK: AppThemePackName = 'dracula';
+export const DEFAULT_APP_THEME_PACK: AppThemePackName = 'light';
 
 function getThemePack(name: AppThemePackName) {
   return themePacks[name];
@@ -332,7 +412,7 @@ function createComponentOverrides(): MantineThemeOverride['components'] {
             ? {
                 backgroundColor: 'rgba(196, 112, 112, 0.08)',
                 borderColor: 'rgba(196, 112, 112, 0.28)',
-                color: '#f0d8d8',
+                color: 'var(--ori-form-label-color)',
                 boxShadow: 'none',
               }
             : {

@@ -12,6 +12,11 @@ import { DarkModeContext } from './dark-mode-context';
 
 // Fallback storage key for non-authenticated users
 const FALLBACK_STORAGE_KEY = 'oricms-dark-mode';
+export const ORICMS_THEME_CHANGE_EVENT = 'oricms-theme-change';
+
+function announceThemeChange(theme: 'light' | 'dark' | 'system', isDarkMode: boolean) {
+  window.dispatchEvent(new CustomEvent(ORICMS_THEME_CHANGE_EVENT, { detail: { theme, isDarkMode } }));
+}
 
 export function DarkModeProvider({ children }: { children: React.ReactNode }) {
   const preferencesContext = useUserPreferences?.();
@@ -26,7 +31,7 @@ export function DarkModeProvider({ children }: { children: React.ReactNode }) {
     const stored = localStorage.getItem(FALLBACK_STORAGE_KEY);
     if (stored === 'true') return 'dark';
     if (stored === 'false') return 'light';
-    return 'system';
+    return 'light';
   };
 
   const [theme, setThemeState] = useState<'light' | 'dark' | 'system'>(getInitialTheme());
@@ -50,8 +55,10 @@ export function DarkModeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (hasUserPreferences && !preferencesContext.isLoading) {
       const dbTheme = preferencesContext.preferences.theme;
+      const nextIsDarkMode = calculateDarkMode(dbTheme);
       setThemeState(dbTheme);
-      setIsDarkMode(calculateDarkMode(dbTheme));
+      setIsDarkMode(nextIsDarkMode);
+      announceThemeChange(dbTheme, nextIsDarkMode);
     }
   }, [hasUserPreferences, preferencesContext?.preferences.theme, preferencesContext?.isLoading, calculateDarkMode]);
 
@@ -62,6 +69,7 @@ export function DarkModeProvider({ children }: { children: React.ReactNode }) {
     } else {
       document.documentElement.classList.remove('dark');
     }
+    document.documentElement.dataset.oriTheme = isDarkMode ? 'dark' : 'light';
   }, [isDarkMode]);
 
   // Listen for system preference changes (when theme is 'system')
@@ -78,8 +86,10 @@ export function DarkModeProvider({ children }: { children: React.ReactNode }) {
   }, [theme]);
 
   const setTheme = useCallback((newTheme: 'light' | 'dark' | 'system') => {
+    const nextIsDarkMode = calculateDarkMode(newTheme);
     setThemeState(newTheme);
-    setIsDarkMode(calculateDarkMode(newTheme));
+    setIsDarkMode(nextIsDarkMode);
+    announceThemeChange(newTheme, nextIsDarkMode);
     
     if (hasUserPreferences) {
       // Sync to database via UserPreferencesContext

@@ -7,6 +7,7 @@ import { beforeEach, vi } from 'vitest';
 import type { CollectionEntry, ContentType, ProjectMember } from '@ori/shared';
 import { initializeWorkspaceExtensions } from '../lib/workspace/registry';
 import { appCssVariablesResolver, appTheme } from '../lib/theme';
+import { DarkModeContext } from '../contexts/dark-mode-context';
 
 vi.mock('@mantine/core', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@mantine/core')>();
@@ -469,11 +470,13 @@ export function renderApp(initialPath: string) {
 
   return render(
     <MantineProvider theme={appTheme} cssVariablesResolver={appCssVariablesResolver}>
-      <QueryClientProvider client={queryClient}>
-        <MemoryRouter initialEntries={[initialPath]}>
-          <App />
-        </MemoryRouter>
-      </QueryClientProvider>
+      <DarkModeContext.Provider value={{ isDarkMode: false, toggleDarkMode: vi.fn(), setDarkMode: vi.fn(), theme: 'light', setTheme: vi.fn() }}>
+        <QueryClientProvider client={queryClient}>
+          <MemoryRouter initialEntries={[initialPath]}>
+            <App />
+          </MemoryRouter>
+        </QueryClientProvider>
+      </DarkModeContext.Provider>
     </MantineProvider>,
   );
 }
