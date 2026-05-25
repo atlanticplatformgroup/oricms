@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { authenticate } from '../auth/middleware';
 import { prisma } from '../lib/prisma';
 import { logger } from '../middleware/logger';
 import { internalError, ok } from '../lib/responses';
@@ -9,7 +10,7 @@ const router = Router();
  * GET /api/v1/system/status
  * Public endpoint to check if the CMS requires initial setup.
  */
-router.get('/status', async (req, res) => {
+router.get('/status', authenticate, async (req, res) => {
   try {
     const [userCount, projectCount] = await Promise.all([
       prisma.user.count({ where: { type: 'HUMAN' } }),

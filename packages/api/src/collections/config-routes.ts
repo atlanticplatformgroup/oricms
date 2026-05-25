@@ -20,6 +20,7 @@ import {
 export function registerCollectionConfigRoutes(router: Router): void {
   router.get(
     '/',
+    requirePermission('collections', 'read'),
     async (req: Request, res: Response) => {
       try {
         const { projectId } = req.params as { projectId: string };

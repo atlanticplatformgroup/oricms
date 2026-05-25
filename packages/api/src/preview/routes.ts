@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { param, query, validationResult } from 'express-validator';
+import { requirePermission } from '../permissions/middleware';
 import { logger } from '../middleware/logger';
 import { badRequest, internalError, normalizeValidationDetails, notFound, ok, validationError } from '../lib/responses';
 import { SUPPORTED_PREVIEW_LOCALES } from './localization';
@@ -25,6 +26,7 @@ const router = Router({ mergeParams: true });
  */
 router.get(
   '/content',
+  requirePermission('collections', 'read'),
   [
     param('projectId').isUUID(),
     query('branch').optional().trim(),
@@ -88,6 +90,7 @@ router.get(
 
 router.get(
   '/pages',
+  requirePermission('collections', 'read'),
   [
     param('projectId').isUUID(),
     query('branch').optional().trim(),
@@ -136,6 +139,7 @@ router.get(
  */
 router.post(
   '/validate',
+  requirePermission('collections', 'read'),
   [
     param('projectId').isUUID(),
   ],

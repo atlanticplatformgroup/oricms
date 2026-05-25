@@ -43,7 +43,7 @@ function schemaIdParam() {
 
 // Schema-first public aliases. Internally these still delegate to the existing
 // collection-backed storage and lifecycle helpers while the deeper rename lands.
-router.get('/', async (req: Request, res: Response) => {
+router.get('/', requirePermission('schemas', 'read'), async (req: Request, res: Response) => {
   try {
     const { projectId } = req.params as { projectId: string };
     const result = await listCollectionsOrRespond(projectId, res);
@@ -131,6 +131,7 @@ router.delete(
 
 router.get(
   '/:schemaId/entries',
+  requirePermission('entries', 'read'),
   [
     schemaIdParam(),
     query('filter').optional().isJSON(),
@@ -184,6 +185,7 @@ router.post(
 
 router.get(
   '/:schemaId/entries/:id',
+  requirePermission('entries', 'read'),
   [schemaIdParam(), param('id').trim().notEmpty(), query('populate').optional().trim()],
   async (req: Request, res: Response) => {
     try {
@@ -252,6 +254,7 @@ router.delete(
 
 router.get(
   '/:schemaId/entries/:id/history',
+  requirePermission('entries', 'read'),
   [schemaIdParam(), param('id').trim().notEmpty(), query('limit').optional().isInt({ min: 1, max: 100 }).toInt(), query('branch').optional().isString().trim()],
   async (req: Request, res: Response) => {
     try {
@@ -278,6 +281,7 @@ router.get(
 
 router.get(
   '/:schemaId/entries/:id/history/:hash',
+  requirePermission('entries', 'read'),
   [schemaIdParam(), param('id').trim().notEmpty(), param('hash').trim().notEmpty(), query('branch').optional().isString().trim()],
   async (req: Request, res: Response) => {
     try {
@@ -299,6 +303,7 @@ router.get(
 
 router.post(
   '/:schemaId/entries/:id/branch-transfer/preview',
+  requirePermission('entries', 'read'),
   [schemaIdParam(), param('id').trim().notEmpty(), body('sourceBranch').trim().notEmpty(), body('targetBranch').trim().notEmpty()],
   async (req: Request, res: Response) => {
     try {

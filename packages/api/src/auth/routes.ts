@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { body } from 'express-validator';
+import { body, validationResult } from 'express-validator';
 import { authenticate, optionalAuth } from './middleware';
 import { logger } from '../middleware/logger';
 import {
@@ -66,8 +66,12 @@ router.post(
   }
 );
 
-router.post('/refresh', async (req: Request, res: Response) => {
+router.post('/refresh', [body('refreshToken').isString().trim().notEmpty()], async (req: Request, res: Response) => {
   try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ success: false, error: { code: 'VALIDATION_ERROR', message: 'refreshToken is required', details: errors.mapped() } });
+    }
     await refreshSessionOrRespond(res, req.body.refreshToken);
   } catch (error) {
     logger.error({ msg: 'Token refresh error', error });

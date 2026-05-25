@@ -1,5 +1,6 @@
 import { Router, type Request, type Response } from 'express';
 import { param, body, validationResult } from 'express-validator';
+import { requirePermission } from '../permissions/middleware';
 import { logger } from '../middleware/logger';
 import { conflict, created, internalError, normalizeValidationDetails, notFound, ok, validationError } from '../lib/responses';
 import { LifecycleHookError } from '../plugins/dispatcher';
@@ -38,7 +39,7 @@ function respondLifecycleBlocked(res: Response, error: Error) {
   });
 }
 
-router.get('/', async (req: Request, res: Response) => {
+router.get('/', requirePermission('contentTypes', 'read'), async (req: Request, res: Response) => {
   try {
     const { projectId } = req.params as { projectId: string };
     const workspace = await resolveContentTypesWorkspace(projectId);
@@ -58,7 +59,7 @@ router.get('/', async (req: Request, res: Response) => {
   }
 });
 
-router.get('/:typeId', async (req: Request, res: Response) => {
+router.get('/:typeId', requirePermission('contentTypes', 'read'), async (req: Request, res: Response) => {
   try {
     const { projectId, typeId } = req.params as { projectId: string; typeId: string };
     const workspace = await resolveContentTypesWorkspace(projectId);
@@ -202,7 +203,7 @@ router.put(
   }
 );
 
-router.delete('/:typeId', async (req: Request, res: Response) => {
+router.delete('/:typeId', requirePermission('contentTypes', 'delete'), async (req: Request, res: Response) => {
   try {
     const { projectId, typeId } = req.params as { projectId: string; typeId: string };
     const deleteRecords = req.query.deleteRecords === 'true';

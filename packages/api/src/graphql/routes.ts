@@ -90,6 +90,9 @@ router.get('/schema/snapshots/:version', requirePermission('collections', 'read'
 });
 
 router.get('/schema/introspection', requirePermission('collections', 'read'), async (req: Request, res: Response) => {
+  if (process.env.NODE_ENV === 'production') {
+    return res.status(403).json({ success: false, error: { code: 'INTROSPECTION_DISABLED', message: 'GraphQL introspection is disabled in production' } });
+  }
   const { projectId } = req.params as { projectId: string };
   const project = await findProjectRuntime(projectId);
   if (!project) return projectNotFound(res);
