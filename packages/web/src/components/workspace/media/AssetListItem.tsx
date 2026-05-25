@@ -1,20 +1,8 @@
-import { Badge, Box, Checkbox, Group, Paper, Stack, Text } from '@mantine/core';
+import { alpha, Badge, Box, Checkbox, Group, Paper, Stack, Text } from '@mantine/core';
 import type { Asset } from '@ori/shared';
 import type { GlobalAsset } from '../../../lib/assets/references';
 import { formatAssetSize, formatAssetUsage, getAssetDisplayTags, getAssetIdentifier, getAssetTypeLabel } from '../../../lib/assets/display';
 import { AuthenticatedImage } from '../../ui/AuthenticatedImage';
-
-const selectedBadgeStyles = {
-  root: {
-    backgroundColor: '#eef4f3',
-    border: '1px solid #d6e3e0',
-    color: 'var(--ori-selection-text)',
-  },
-  label: {
-    fontWeight: 700,
-    letterSpacing: '0.06em',
-  },
-} as const;
 
 interface AssetListItemProps {
   asset: Asset | GlobalAsset;
@@ -101,7 +89,7 @@ export function AssetListItem({ asset, selected = false, selectionControl, onCli
         cursor: onClick ? 'pointer' : 'default',
         backgroundColor: selected ? 'var(--ori-selection-bg)' : undefined,
         borderColor: selected ? 'var(--ori-selection-border)' : undefined,
-        boxShadow: selected ? '0 1px 3px rgba(24, 33, 38, 0.05)' : undefined,
+        boxShadow: selected ? `0 1px 3px ${alpha('var(--mantine-color-black)', 0.05)}` : undefined,
       }}
       onClick={onClick}
     >
@@ -116,7 +104,7 @@ export function AssetListItem({ asset, selected = false, selectionControl, onCli
             </Stack>
             {action ?? (
               selected
-                ? <Badge variant="transparent" styles={selectedBadgeStyles}>Selected</Badge>
+                ? <Badge variant="light" color="blue">Selected</Badge>
                 : <Badge variant="outline" color="gray">{getAssetTypeLabel(asset.type)}</Badge>
             )}
           </Group>
@@ -156,7 +144,7 @@ export function AssetGridItem({
         cursor: onClick ? 'pointer' : 'default',
         backgroundColor: selected ? 'var(--ori-selection-bg)' : undefined,
         borderColor: selected ? 'var(--ori-selection-border)' : undefined,
-        boxShadow: selected ? 'inset 0 0 0 1px var(--ori-selection-border), 0 1px 3px rgba(24, 33, 38, 0.05)' : undefined,
+        boxShadow: selected ? `inset 0 0 0 1px var(--ori-selection-border), 0 1px 3px ${alpha('var(--mantine-color-black)', 0.05)}` : undefined,
       }}
       onClick={onClick}
     >

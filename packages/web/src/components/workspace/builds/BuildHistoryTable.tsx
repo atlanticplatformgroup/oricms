@@ -1,5 +1,5 @@
 import { memo, useCallback } from 'react';
-import { Button, Group, Paper, Select, SimpleGrid, Stack, Table, Text } from '@mantine/core';
+import { alpha, Button, Group, Paper, Select, SimpleGrid, Stack, Table, Text } from '@mantine/core';
 import { WorkspaceErrorState, WorkspaceListSurface, WorkspaceLoadingState, WorkspaceMetricBadge, WorkspaceOperationalTable, WorkspaceSection, WorkspaceTableContainer, WorkspaceTableToolbarInset, WorkspaceToolbar } from '../../ui/WorkspacePrimitives';
 import { WORKSPACE_FORM_PREVIEW_BG, WORKSPACE_FORM_SECTION_BORDER, WORKSPACE_SHELL_DESCRIPTION_TEXT } from '../../ui/workspace-primitives.shared';
 import type { BuildRecord, BuildStatus } from '@ori/shared';
@@ -58,7 +58,7 @@ function BuildEmptyState({
               p="sm"
               radius="md"
               style={{
-                backgroundColor: 'rgba(255, 255, 255, 0.02)',
+                backgroundColor: alpha('var(--mantine-color-white)', 0.02),
                 borderColor: WORKSPACE_FORM_SECTION_BORDER,
               }}
             >
