@@ -47,6 +47,10 @@ vi.mock('fs/promises', () => ({
   },
 }));
 
+vi.mock('../../permissions/middleware', () => ({
+  requirePermission: () => (_req: express.Request, _res: express.Response, next: express.NextFunction) => next(),
+}));
+
 import router from '../routes';
 
 const app = express();

@@ -1,5 +1,6 @@
 import { Router, type Request, type Response } from 'express';
 import { param, query, validationResult } from 'express-validator';
+import { requirePermission } from '../permissions/middleware';
 import { logger } from '../middleware/logger';
 import {
   internalError,
@@ -20,6 +21,7 @@ import {
 export function registerCollectionEntryReadRoutes(router: Router): void {
   router.get(
     '/:collectionId',
+    requirePermission('collections', 'read'),
     [
       param('collectionId').trim().notEmpty(),
       query('filter').optional().isJSON(),
@@ -51,6 +53,7 @@ export function registerCollectionEntryReadRoutes(router: Router): void {
 
   router.get(
     '/:collectionId/:id',
+    requirePermission('collections', 'read'),
     [
       param('collectionId').trim().notEmpty(),
       param('id').trim().notEmpty(),
@@ -79,6 +82,7 @@ export function registerCollectionEntryReadRoutes(router: Router): void {
 
   router.get(
     '/:collectionId/:id/history',
+    requirePermission('collections', 'read'),
     [
       param('collectionId').trim().notEmpty(),
       param('id').trim().notEmpty(),
@@ -112,6 +116,7 @@ export function registerCollectionEntryReadRoutes(router: Router): void {
 
   router.get(
     '/:collectionId/:id/history/:hash',
+    requirePermission('collections', 'read'),
     [
       param('collectionId').trim().notEmpty(),
       param('id').trim().notEmpty(),

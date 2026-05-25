@@ -107,7 +107,7 @@ describe('rate limit middleware', () => {
     expect(limitedAttempt.body.error.message).toBe('Too many authentication attempts. Please try again later.');
     expectRateLimitHeaders(limitedAttempt, '2;w=60');
     expect(secondClientAttempt.status).toBe(401);
-    expect(systemAttempt.status).toBe(200);
+    expect(systemAttempt.status).toBe(401);
   });
 
   it('shares the core API budget across mounted project routes and returns the API tier contract', async () => {
