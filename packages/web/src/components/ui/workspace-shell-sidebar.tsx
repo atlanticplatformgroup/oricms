@@ -16,6 +16,9 @@ import {
   WORKSPACE_SIDEBAR_CONTENT_INSET,
   WORKSPACE_SIDEBAR_ROW_RADIUS,
   WORKSPACE_SIDEBAR_TOGGLE_SLOT,
+  WORKSPACE_TRANSITION_BG,
+  WORKSPACE_TRANSITION_COLOR,
+  WORKSPACE_TRANSITION_SHADOW,
 } from './workspace-primitives.shared';
 import { WorkspaceActionGroup, WorkspaceIconTooltip } from './workspace-shell-actions';
 
@@ -57,7 +60,7 @@ export function WorkspaceSidebarNavItem({
           paddingBlock: description ? 9 : 11,
           paddingInline: 12,
           minHeight: description ? 58 : 44,
-          transition: 'background-color 120ms ease, color 120ms ease, box-shadow 120ms ease',
+          transition: `${WORKSPACE_TRANSITION_BG}, ${WORKSPACE_TRANSITION_COLOR}, ${WORKSPACE_TRANSITION_SHADOW}`,
           color: WORKSPACE_SHELL_TEXT,
           boxShadow: 'inset 0 0 0 1px transparent',
           '&:hover': {
