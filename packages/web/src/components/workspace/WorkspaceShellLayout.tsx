@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { AppShell } from '@mantine/core';
 import { useWorkspaceShellMode } from '../../hooks/useWorkspaceShellMode';
 import { useCollectionManagerContext } from '../../contexts/workspace/CollectionManagerContext';
@@ -15,19 +15,31 @@ import { WorkspaceShellMainContent } from './WorkspaceShellMainContent';
 import type { AppShellLayoutProps } from './WorkspaceShellLayout.types';
 
 export function AppShellLayout(props: AppShellLayoutProps) {
+  const {
+    activeProjectSlug,
+    setSecondaryRailCollapsed,
+    secondaryOptions,
+    selectedCollection,
+    activeSchemaMode,
+    componentSchemaData,
+    contentTypes,
+    currentBranchName,
+    navigateTo,
+  } = props;
+
   const entryEditor = useEditorContext();
   const collectionManager = useCollectionManagerContext();
   const { isWideShell, isNarrowShell, isMobileShell } = useWorkspaceShellMode();
   const [secondaryDrawerOpened, setSecondaryDrawerOpened] = useState(false);
   const [workspaceDrawerOpened, setWorkspaceDrawerOpened] = useState(false);
-  const confirmDiscardChanges = (): boolean => {
+  const confirmDiscardChanges = useCallback((): boolean => {
     if (!entryEditor.isDirty) return true;
     return window.confirm('You have unsaved changes. Discard them?');
-  };
-  const guardedNavigate = (to: string, replace = false) => {
+  }, [entryEditor.isDirty]);
+  const guardedNavigate = useCallback((to: string, replace = false) => {
     if (!confirmDiscardChanges()) return;
-    props.navigateTo(to, replace);
-  };
+    navigateTo(to, replace);
+  }, [confirmDiscardChanges, navigateTo]);
   const activeSectionRegistration = workspaceExtensionRegistry.getSection(props.activeSection);
   const secondaryNavigationMode = getSectionSecondaryNavigation(props.activeSection);
   const hasSecondaryRail = secondaryNavigationMode === 'rail' && props.secondaryOptions.length > 0;
@@ -61,31 +73,31 @@ export function AppShellLayout(props: AppShellLayoutProps) {
     }
   }, [isNarrowShell]);
 
-  const handleSectionChange = (section: SectionKey) => {
-    if (!props.activeProjectSlug) return;
-    props.setSecondaryRailCollapsed(false);
+  const handleSectionChange = useCallback((section: SectionKey) => {
+    if (!activeProjectSlug) return;
+    setSecondaryRailCollapsed(false);
     setWorkspaceDrawerOpened(false);
     setSecondaryDrawerOpened(false);
     if (section === 'collections') {
-      guardedNavigate(buildWorkspacePath(props.activeProjectSlug, 'collections', props.secondaryOptions[0]?.id ?? props.selectedCollection?.id ?? null, { branchName: props.currentBranchName }));
+      guardedNavigate(buildWorkspacePath(activeProjectSlug, 'collections', secondaryOptions[0]?.id ?? selectedCollection?.id ?? null, { branchName: currentBranchName }));
       return;
     }
     if (section === 'schemas') {
-      const fallback = props.activeSchemaMode === 'components'
-        ? (props.componentSchemaData[0]?.schema.$id || DEFAULT_SCHEMA_SECONDARY)
-        : (props.contentTypes[0]?.$id || DEFAULT_SCHEMA_SECONDARY);
-      guardedNavigate(buildWorkspacePath(props.activeProjectSlug, 'schemas', fallback, { schemaMode: props.activeSchemaMode, branchName: props.currentBranchName }));
+      const fallback = activeSchemaMode === 'components'
+        ? (componentSchemaData[0]?.schema.$id || DEFAULT_SCHEMA_SECONDARY)
+        : (contentTypes[0]?.$id || DEFAULT_SCHEMA_SECONDARY);
+      guardedNavigate(buildWorkspacePath(activeProjectSlug, 'schemas', fallback, { schemaMode: activeSchemaMode, branchName: currentBranchName }));
       return;
     }
-    guardedNavigate(buildWorkspacePath(props.activeProjectSlug, section, null, { branchName: props.currentBranchName }));
-  };
+    guardedNavigate(buildWorkspacePath(activeProjectSlug, section, null, { branchName: currentBranchName }));
+  }, [activeProjectSlug, setSecondaryRailCollapsed, secondaryOptions, selectedCollection, activeSchemaMode, componentSchemaData, contentTypes, currentBranchName, guardedNavigate]);
 
-  const handleSelectEntry = (entryId: string) => {
-    if (!props.selectedCollection || !props.activeProjectSlug) return;
+  const handleSelectEntry = useCallback((entryId: string) => {
+    if (!selectedCollection || !activeProjectSlug) return;
     setWorkspaceDrawerOpened(false);
     setSecondaryDrawerOpened(false);
-    guardedNavigate(buildWorkspacePath(props.activeProjectSlug, 'collections', props.selectedCollection.id, { entryId, branchName: props.currentBranchName }));
-  };
+    guardedNavigate(buildWorkspacePath(activeProjectSlug, 'collections', selectedCollection.id, { entryId, branchName: currentBranchName }));
+  }, [selectedCollection, activeProjectSlug, currentBranchName, guardedNavigate]);
 
   const sidebarAction = activeSectionRegistration?.renderSidebarAction?.({
     canCreateCollections: props.canCreateCollections,

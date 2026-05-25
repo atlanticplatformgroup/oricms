@@ -1,3 +1,4 @@
+import { memo, useCallback } from 'react';
 import { Badge, Group, Select, Stack, Table, Text, ThemeIcon } from '@mantine/core';
 import type { ProjectMember, ProjectRole } from '@ori/shared';
 import { Bot, UserRound } from 'lucide-react';
@@ -23,6 +24,88 @@ function getViewLabel(selectedView: string): string {
   if (selectedView === 'agents') return 'AI agents';
   return 'All members';
 }
+
+interface MemberRowProps {
+  member: ProjectMember;
+  readOnly: boolean;
+  onUpdateRole: (userId: string, role: ProjectRole) => void;
+  onRemoveMember: (member: ProjectMember) => void;
+}
+
+const MemberRow = memo(function MemberRow({ member, readOnly, onUpdateRole, onRemoveMember }: MemberRowProps) {
+  const handleRoleChange = useCallback((value: string | null) => {
+    if (!value) return;
+    onUpdateRole(member.userId, value as ProjectRole);
+  }, [member.userId, onUpdateRole]);
+
+  const handleRemove = useCallback(() => {
+    if (readOnly) return;
+    onRemoveMember(member);
+  }, [readOnly, member, onRemoveMember]);
+
+  return (
+    <Table.Tr>
+      <Table.Td>
+        <Group gap="sm" wrap="nowrap" align="flex-start">
+          <ThemeIcon variant="light" color={member.userType === 'HUMAN' ? 'blue' : 'yellow'}>
+            {member.userType === 'HUMAN' ? <UserRound size={14} /> : <Bot size={14} />}
+          </ThemeIcon>
+          <Stack gap={0} style={{ minWidth: 0 }}>
+            <Text fw={600}>{member.user.name || member.user.email}</Text>
+            <Text size="xs" c="dimmed">{member.user.email}</Text>
+          </Stack>
+        </Group>
+      </Table.Td>
+      <Table.Td>
+        <Stack gap={4}>
+          <Group gap="xs" wrap="wrap">
+            <Badge variant="light" color={member.userType === 'HUMAN' ? 'blue' : 'yellow'}>
+              {member.userType === 'HUMAN' ? 'Human' : 'AI Agent'}
+            </Badge>
+            {member.role === 'owner' ? (
+              <Badge variant="light" color="blue">Owner</Badge>
+            ) : null}
+          </Group>
+          {member.role === 'owner' ? (
+            <Text size="sm" c="dimmed">Full project control</Text>
+          ) : (
+            <Select
+              size="xs"
+              value={member.role}
+              data={ROLE_OPTIONS}
+              aria-label={`Role for ${member.user.email}`}
+              disabled={readOnly}
+              onChange={handleRoleChange}
+            />
+          )}
+        </Stack>
+      </Table.Td>
+      <Table.Td>
+        <Stack gap={0}>
+          <Text size="sm">{new Date(member.joinedAt || member.createdAt).toLocaleDateString()}</Text>
+          <Text size="xs" c="dimmed">{member.userType === 'AGENT' ? 'Service account' : 'Member'}</Text>
+        </Stack>
+      </Table.Td>
+      <Table.Td>
+        {member.role !== 'owner' ? (
+          <Text
+            component="button"
+            type="button"
+            c="red"
+            size="sm"
+            aria-disabled={readOnly}
+            style={{ background: 'transparent', border: 0, padding: 0, cursor: readOnly ? 'not-allowed' : 'pointer', opacity: readOnly ? 0.6 : 1 }}
+            onClick={handleRemove}
+          >
+            Remove
+          </Text>
+        ) : (
+          <Text size="sm" c="dimmed">Protected</Text>
+        )}
+      </Table.Td>
+    </Table.Tr>
+  );
+});
 
 export function MembersDirectoryTable({
   members,
@@ -76,72 +159,13 @@ export function MembersDirectoryTable({
           </Table.Thead>
           <Table.Tbody>
             {members.map((member) => (
-              <Table.Tr key={member.id}>
-                <Table.Td>
-                  <Group gap="sm" wrap="nowrap" align="flex-start">
-                    <ThemeIcon variant="light" color={member.userType === 'HUMAN' ? 'blue' : 'yellow'}>
-                      {member.userType === 'HUMAN' ? <UserRound size={14} /> : <Bot size={14} />}
-                    </ThemeIcon>
-                    <Stack gap={0} style={{ minWidth: 0 }}>
-                      <Text fw={600}>{member.user.name || member.user.email}</Text>
-                      <Text size="xs" c="dimmed">{member.user.email}</Text>
-                    </Stack>
-                  </Group>
-                </Table.Td>
-                <Table.Td>
-                  <Stack gap={4}>
-                    <Group gap="xs" wrap="wrap">
-                      <Badge variant="light" color={member.userType === 'HUMAN' ? 'blue' : 'yellow'}>
-                        {member.userType === 'HUMAN' ? 'Human' : 'AI Agent'}
-                      </Badge>
-                      {member.role === 'owner' ? (
-                        <Badge variant="light" color="blue">Owner</Badge>
-                      ) : null}
-                    </Group>
-                    {member.role === 'owner' ? (
-                      <Text size="sm" c="dimmed">Full project control</Text>
-                    ) : (
-                      <Select
-                        size="xs"
-                        value={member.role}
-                        data={ROLE_OPTIONS}
-                        aria-label={`Role for ${member.user.email}`}
-                        disabled={readOnly}
-                        onChange={(value) => {
-                          if (!value) return;
-                          onUpdateRole(member.userId, value as ProjectRole);
-                        }}
-                      />
-                    )}
-                  </Stack>
-                </Table.Td>
-                <Table.Td>
-                  <Stack gap={0}>
-                    <Text size="sm">{new Date(member.joinedAt || member.createdAt).toLocaleDateString()}</Text>
-                    <Text size="xs" c="dimmed">{member.userType === 'AGENT' ? 'Service account' : 'Member'}</Text>
-                  </Stack>
-                </Table.Td>
-                <Table.Td>
-                  {member.role !== 'owner' ? (
-                    <Text
-                      component="button"
-                      type="button"
-                      c="red"
-                      size="sm"
-                      aria-disabled={readOnly}
-                      style={{ background: 'transparent', border: 0, padding: 0, cursor: readOnly ? 'not-allowed' : 'pointer', opacity: readOnly ? 0.6 : 1 }}
-                      onClick={() => {
-                        if (readOnly) return;
-                        onRemoveMember(member);
-                      }}
-                    >
-                      Remove
-                    </Text>
-                  ) : (
-                    <Text size="sm" c="dimmed">Protected</Text>
-                  )}
-                </Table.Td>
-              </Table.Tr>
+              <MemberRow
+                key={member.id}
+                member={member}
+                readOnly={readOnly}
+                onUpdateRole={onUpdateRole}
+                onRemoveMember={onRemoveMember}
+              />
             ))}
           </Table.Tbody>
         </WorkspaceOperationalTable>

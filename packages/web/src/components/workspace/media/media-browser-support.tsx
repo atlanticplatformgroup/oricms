@@ -1,3 +1,4 @@
+import { memo, useCallback } from 'react';
 import { Badge, Button, Group, ScrollArea, SegmentedControl, Select, SimpleGrid, Stack, Text, TextInput } from '@mantine/core';
 import type { Asset } from '@ori/shared';
 import { WorkspaceSearchField } from '../../ui/WorkspaceSearchField';
@@ -262,6 +263,64 @@ export function MediaSelectionToolbar(props: {
   );
 }
 
+interface MediaAssetGridItemProps {
+  asset: Asset;
+  selectionMode: boolean;
+  isSelected: boolean;
+  isChecked: boolean;
+  onSelectAsset: (path: string) => void;
+  onToggleAssetSelection: (path: string) => void;
+}
+
+const MemoAssetGridItem = memo(function MemoAssetGridItem({ asset, selectionMode, isSelected, isChecked, onSelectAsset, onToggleAssetSelection }: MediaAssetGridItemProps) {
+  const handleClick = useCallback(() => {
+    if (selectionMode) onToggleAssetSelection(asset.path);
+    else onSelectAsset(asset.path);
+  }, [selectionMode, asset.path, onSelectAsset, onToggleAssetSelection]);
+
+  const handleToggle = useCallback(() => {
+    onToggleAssetSelection(asset.path);
+  }, [asset.path, onToggleAssetSelection]);
+
+  return (
+    <AssetGridItem
+      asset={asset}
+      selected={isSelected}
+      selectionControl={selectionMode ? (
+        <AssetSelectionCheckbox assetName={asset.name} checked={isChecked} onChange={handleToggle} />
+      ) : undefined}
+      onClick={handleClick}
+    />
+  );
+});
+
+interface MediaAssetListItemProps extends MediaAssetGridItemProps {
+  density?: 'compact' | 'default';
+}
+
+const MemoAssetListItem = memo(function MemoAssetListItem({ asset, selectionMode, isSelected, isChecked, onSelectAsset, onToggleAssetSelection, density }: MediaAssetListItemProps) {
+  const handleClick = useCallback(() => {
+    if (selectionMode) onToggleAssetSelection(asset.path);
+    else onSelectAsset(asset.path);
+  }, [selectionMode, asset.path, onSelectAsset, onToggleAssetSelection]);
+
+  const handleToggle = useCallback(() => {
+    onToggleAssetSelection(asset.path);
+  }, [asset.path, onToggleAssetSelection]);
+
+  return (
+    <AssetListItem
+      asset={asset}
+      selected={isSelected}
+      selectionControl={selectionMode ? (
+        <AssetSelectionCheckbox assetName={asset.name} checked={isChecked} onChange={handleToggle} />
+      ) : undefined}
+      onClick={handleClick}
+      density={density}
+    />
+  );
+});
+
 export function MediaBrowserResults(props: SharedMediaBrowserProps & {
   canLoadMore: boolean;
   error: boolean;
@@ -286,42 +345,28 @@ export function MediaBrowserResults(props: SharedMediaBrowserProps & {
         {props.selectedViewMode === 'grid' ? (
           <SimpleGrid cols={{ base: 2, md: 4, xl: 5 }} spacing="sm" verticalSpacing="sm">
             {props.assets.map((asset) => (
-              <AssetGridItem
+              <MemoAssetGridItem
                 key={asset.path}
                 asset={asset}
-                selected={props.selectionMode ? props.selectedAssetPaths.includes(asset.path) : asset.path === props.selectedAssetPath}
-                selectionControl={props.selectionMode ? (
-                  <AssetSelectionCheckbox
-                    assetName={asset.name}
-                    checked={props.selectedAssetPaths.includes(asset.path)}
-                    onChange={() => props.onToggleAssetSelection(asset.path)}
-                  />
-                ) : undefined}
-                onClick={() => {
-                  if (props.selectionMode) props.onToggleAssetSelection(asset.path);
-                  else props.onSelectAsset(asset.path);
-                }}
+                selectionMode={props.selectionMode}
+                isSelected={props.selectionMode ? props.selectedAssetPaths.includes(asset.path) : asset.path === props.selectedAssetPath}
+                isChecked={props.selectedAssetPaths.includes(asset.path)}
+                onSelectAsset={props.onSelectAsset}
+                onToggleAssetSelection={props.onToggleAssetSelection}
               />
             ))}
           </SimpleGrid>
         ) : (
           <Stack gap="xs">
             {props.assets.map((asset) => (
-              <AssetListItem
+              <MemoAssetListItem
                 key={asset.path}
                 asset={asset}
-                selected={props.selectionMode ? props.selectedAssetPaths.includes(asset.path) : asset.path === props.selectedAssetPath}
-                selectionControl={props.selectionMode ? (
-                  <AssetSelectionCheckbox
-                    assetName={asset.name}
-                    checked={props.selectedAssetPaths.includes(asset.path)}
-                    onChange={() => props.onToggleAssetSelection(asset.path)}
-                  />
-                ) : undefined}
-                onClick={() => {
-                  if (props.selectionMode) props.onToggleAssetSelection(asset.path);
-                  else props.onSelectAsset(asset.path);
-                }}
+                selectionMode={props.selectionMode}
+                isSelected={props.selectionMode ? props.selectedAssetPaths.includes(asset.path) : asset.path === props.selectedAssetPath}
+                isChecked={props.selectedAssetPaths.includes(asset.path)}
+                onSelectAsset={props.onSelectAsset}
+                onToggleAssetSelection={props.onToggleAssetSelection}
                 density="compact"
               />
             ))}
