@@ -120,24 +120,30 @@ export async function request<T>(endpoint: string, options: RequestOptions = {})
     });
 
     const text = await response.text();
-    let data: any;
+    let data: unknown;
     try {
       data = JSON.parse(text);
     } catch {
       throw new ApiError(`Invalid JSON from ${endpoint} (${response.status}): ${text.slice(0, 100)}...`, 'PARSE_ERROR', response.status);
     }
 
-    if (!data.success) {
-      console.error(`[API] Request to ${endpoint} failed with status ${response.status}:`, data.error);
+    if (!data || typeof data !== 'object' || !('success' in data)) {
+      throw new ApiError(`Invalid response from ${endpoint}`, 'INVALID_RESPONSE', response.status);
+    }
+
+    const responseData = data as { success: boolean; error?: { message?: string; code?: string; details?: unknown } };
+
+    if (!responseData.success) {
+      console.error(`[API] Request to ${endpoint} failed with status ${response.status}:`, responseData.error);
       throw new ApiError(
-        data.error?.message || `Request to ${endpoint} failed`,
-        data.error?.code || 'UNKNOWN_ERROR',
+        responseData.error?.message || `Request to ${endpoint} failed`,
+        responseData.error?.code || 'UNKNOWN_ERROR',
         response.status,
-        data.error?.details,
+        responseData.error?.details as Record<string, string[]> | undefined,
       );
     }
 
-    return data.data as T;
+    return (data as unknown as { data: T }).data;
   };
 
   let lastError: unknown;

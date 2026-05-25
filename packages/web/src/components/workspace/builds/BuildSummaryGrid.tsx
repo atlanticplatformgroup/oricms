@@ -1,6 +1,6 @@
 import { SimpleGrid, Stack, Text } from '@mantine/core';
 import { WorkspacePanel } from '../../ui/WorkspacePrimitives';
-import type { BuildSummaryCounts } from './types';
+import type { BuildSummaryCounts } from '@ori/shared';
 
 export function BuildSummaryGrid({ counts }: { counts: BuildSummaryCounts }) {
   const items = [

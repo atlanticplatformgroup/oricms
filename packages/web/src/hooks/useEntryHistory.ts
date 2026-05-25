@@ -70,14 +70,14 @@ export function useEntryHistory({
 
   const historyHashes = useMemo(
     () =>
-      (entryHistoryQuery.data || []).map((item: Record<string, unknown>, index: number) =>
-        String(item.hash || item.commit || item.id || `rev-${index}`),
+      (entryHistoryQuery.data || []).map((item, index) =>
+        String(item.hash || (item as unknown as Record<string, unknown>).commit || (item as unknown as Record<string, unknown>).id || `rev-${index}`),
       ),
     [entryHistoryQuery.data],
   );
 
   const historyTimelineItems = useMemo(
-    () => (entryHistoryQuery.data || []).map((item: Record<string, unknown>, index: number) => normalizeHistoryItem(item, index)),
+    () => (entryHistoryQuery.data || []).map((item, index) => normalizeHistoryItem(item, index)),
     [entryHistoryQuery.data],
   );
 

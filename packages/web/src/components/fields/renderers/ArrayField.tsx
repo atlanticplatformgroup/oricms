@@ -19,11 +19,12 @@ interface ArrayFieldItemProps {
   actions: FieldRendererProps['context']['structuredActions'];
   drag: FieldRendererProps['context']['structuredDrag'];
   renderFrame: (props: { eyebrow?: React.ReactNode; title: React.ReactNode; description?: React.ReactNode; actionsNode?: React.ReactNode; children: React.ReactNode }) => React.ReactNode;
+  totalItems: number;
 }
 
 const ArrayFieldItem = memo(function ArrayFieldItem({
   fieldKey, index, item, itemType, label, disabled, dragItem, itemState, isDropTarget,
-  getTitle, actions, drag, renderFrame,
+  getTitle, actions, drag, renderFrame, totalItems,
 }: ArrayFieldItemProps) {
   const itemLabel = `${label} ${index + 1}`;
 
@@ -98,7 +99,7 @@ const ArrayFieldItem = memo(function ArrayFieldItem({
               </>
             ),
             title: getTitle(item, `${label} ${index + 1}`),
-            description: `Item ${index + 1} of ${items.length}`,
+            description: `Item ${index + 1} of ${totalItems}`,
             actionsNode: (
               <>
                 <ActionIcon variant="default" disabled={disabled} aria-label="Duplicate array item" onClick={handleDuplicate}>
@@ -211,6 +212,7 @@ export function ArrayField({ field, value, error, disabled, onChange, context }:
               actions={actions}
               drag={drag}
               renderFrame={renderFrame}
+              totalItems={items.length}
             />
           );
         })

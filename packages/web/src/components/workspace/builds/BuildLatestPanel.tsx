@@ -1,6 +1,6 @@
 import { Button, Group, Stack, Text } from '@mantine/core';
 import { WorkspaceMetricBadge, WorkspacePanel, WorkspaceSection } from '../../ui/WorkspacePrimitives';
-import type { BuildRecord } from './types';
+import type { BuildRecord } from '@ori/shared';
 
 export function BuildLatestPanel({
   build,

@@ -7,6 +7,7 @@ import type {
   ContentType,
   EntryBranchTransferApplyRequest,
   EntryBranchTransferPreview,
+  GitCommit,
 } from '@ori/shared';
 import { request } from './core';
 
@@ -83,7 +84,7 @@ export const collectionsApi = {
     });
   },
 
-  async getEntryHistory(projectId: string, collectionId: string, id: string, branch?: string): Promise<{ history: any[] }> {
+  async getEntryHistory(projectId: string, collectionId: string, id: string, branch?: string): Promise<{ history: GitCommit[] }> {
     const params = branch ? `?branch=${encodeURIComponent(branch)}` : '';
     return request(`/api/v1/projects/${projectId}/schemas/${collectionId}/entries/${id}/history${params}`);
   },

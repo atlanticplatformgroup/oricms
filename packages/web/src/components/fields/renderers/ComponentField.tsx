@@ -19,11 +19,12 @@ interface ComponentFieldItemProps {
   drag: FieldRendererProps['context']['structuredDrag'];
   renderEmbedded: NonNullable<FieldRendererProps['context']['renderEmbeddedFieldControl']>;
   renderFrame: (props: { eyebrow?: React.ReactNode; title: React.ReactNode; description?: React.ReactNode; actionsNode?: React.ReactNode; children: React.ReactNode }) => React.ReactNode;
+  totalItems: number;
 }
 
 const ComponentFieldItem = memo(function ComponentFieldItem({
   fieldKey, index, item, componentSchema, disabled, dragItem, itemState, isDropTarget,
-  getTitle, actions, drag, renderEmbedded, renderFrame,
+  getTitle, actions, drag, renderEmbedded, renderFrame, totalItems,
 }: ComponentFieldItemProps) {
   const handleDuplicate = useCallback(() => {
     actions?.duplicateRepeatableComponent?.(fieldKey, index);
@@ -84,7 +85,7 @@ const ComponentFieldItem = memo(function ComponentFieldItem({
               </>
             ),
             title: getTitle(item, `${componentSchema.label || componentSchema.name} ${index + 1}`),
-            description: `Item ${index + 1} of ${repeatableItems.length}`,
+            description: `Item ${index + 1} of ${totalItems}`,
             actionsNode: (
               <>
                 <ActionIcon variant="default" disabled={disabled} aria-label="Duplicate component item" onClick={handleDuplicate}>
@@ -203,6 +204,7 @@ export function ComponentField({ field, value, disabled, context }: FieldRendere
                 drag={drag}
                 renderEmbedded={renderEmbedded}
                 renderFrame={renderFrame}
+                totalItems={repeatableItems.length}
               />
             );
           })

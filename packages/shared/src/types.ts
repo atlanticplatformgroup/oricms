@@ -1398,6 +1398,96 @@ export interface PluginManifest {
 }
 
 // =============================================================================
+// Build Types
+// =============================================================================
+
+export type BuildStatus = 'pending' | 'running' | 'success' | 'failed' | 'cancelled';
+
+export interface BuildRecord {
+  id: string;
+  status: BuildStatus;
+  branch: string;
+  commit: string;
+  commitMessage: string;
+  commitAuthor: string;
+  triggeredBy: string;
+  startedAt?: string;
+  completedAt?: string;
+  duration?: number;
+  outputUrl?: string;
+  createdAt: string;
+}
+
+export interface BuildSummaryCounts {
+  total: number;
+  running: number;
+  pending: number;
+  success: number;
+  failed: number;
+  cancelled: number;
+}
+
+// =============================================================================
+// Pagination
+// =============================================================================
+
+export interface PaginationMeta {
+  page: number;
+  pageSize: number;
+  pageCount: number;
+  total: number;
+}
+
+// =============================================================================
+// Agent Types
+// =============================================================================
+
+export type AgentWriteMode = 'HUMAN_REVIEW' | 'AUTO_MERGE' | 'DRAFT_ONLY';
+
+export interface AgentWriteConfig {
+  id: string;
+  projectId: string;
+  collectionName: string;
+  mode: AgentWriteMode;
+  targetBranch: string;
+  autoMerge: boolean;
+  canCreate: boolean;
+  canUpdate: boolean;
+  canDelete: boolean;
+  allowedFields: string[];
+  blockedFields: string[];
+  maxWritesPerHour: number;
+  reviewerIds: string[];
+  requireValidation: boolean;
+  maxFieldsPerChange: number;
+}
+
+export type AgentChangeStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'MERGED' | 'CONFLICT';
+
+export interface AgentChange {
+  id: string;
+  projectId: string;
+  agentTokenId: string;
+  collectionName: string;
+  entryId?: string;
+  action: string;
+  before?: Record<string, unknown>;
+  after: Record<string, unknown>;
+  baseCommitSha?: string;
+  sourceBranch: string;
+  targetBranch: string;
+  status: AgentChangeStatus;
+  requestedAt: string;
+  reviewedAt?: string;
+  reviewedBy?: string;
+}
+
+export interface AgentConflict {
+  field: string;
+  message: string;
+}
+
+// =============================================================================
 // WebSocket Types
 // =============================================================================
 
