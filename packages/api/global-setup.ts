@@ -11,7 +11,7 @@ export default function setup() {
     const testDatabaseUrl = process.env.TEST_DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/oricms_test';
     process.env.DATABASE_URL = testDatabaseUrl;
     process.env.JWT_SECRET = 'test-secret-key';
-    process.env.ENCRYPTION_KEY = 'REDACTED_ENCRYPTION_KEY_PLACEHOLDER';
+    process.env.ENCRYPTION_KEY = 'TEST_ENCRYPTION_KEY_fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210';
     process.env.NODE_ENV = 'test';
 
     execFileSync(

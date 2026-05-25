@@ -44,7 +44,7 @@ const env = {
   ...process.env,
   DATABASE_URL: databaseUrl,
   JWT_SECRET: process.env.JWT_SECRET || 'fullstack-e2e-jwt-secret-change-me',
-  ENCRYPTION_KEY: process.env.ENCRYPTION_KEY || 'REDACTED_ENCRYPTION_KEY_PLACEHOLDER',
+  ENCRYPTION_KEY: process.env.ENCRYPTION_KEY || 'TEST_ENCRYPTION_KEY_fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210',
   NODE_ENV: 'test',
   RATE_LIMIT_STORE: 'memory',
 };
