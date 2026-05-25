@@ -1,5 +1,5 @@
-import { OriCmsClientError } from './errors.js';
-import type { ApiEnvelope, ContentTypeSchemaStub } from './client-types.js';
+import { OriCmsClientError } from './errors';
+import type { ApiEnvelope, ContentTypeSchemaStub } from './client-types';
 
 interface SchemasClientContext {
   normalizedApiUrl: string;

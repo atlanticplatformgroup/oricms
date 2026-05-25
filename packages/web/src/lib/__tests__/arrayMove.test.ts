@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { moveArrayItem } from '../arrayMove';
+import { moveArrayItem } from '../array-move';
 
 describe('moveArrayItem', () => {
   it('moves item between valid indexes', () => {

@@ -1,4 +1,3 @@
-import { getFieldChoiceLabel as getSharedFieldChoiceLabel, getRefId as getSharedRefId, getRefIds as getSharedRefIds } from '@ori/shared';
 import type { CollectionEntry, SchemaField } from '@ori/shared';
 import type { FieldDiff, HistoryTimelineItem } from './types';
 import { toLabel } from '../workspace/format';
@@ -53,23 +52,11 @@ export function stripSystemFields(entry: CollectionEntry): Record<string, unknow
   return clone;
 }
 
-export function getRefId(value: unknown): string {
-  return getSharedRefId(value);
-}
-
-export function getRefIds(value: unknown): string[] {
-  return getSharedRefIds(value);
-}
-
 export function isEmptyFieldValue(value: unknown): boolean {
   if (value === null || value === undefined) return true;
   if (typeof value === 'string') return value.trim() === '';
   if (Array.isArray(value)) return value.length === 0;
   return false;
-}
-
-export function getFieldChoiceLabel(field: SchemaField | undefined, value: unknown): string {
-  return getSharedFieldChoiceLabel(field, value);
 }
 
 export function inferFallbackEditorField(entry: CollectionEntry, key: string): SchemaField {

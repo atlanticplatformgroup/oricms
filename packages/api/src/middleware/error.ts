@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from 'express';
 import { logger } from './logger';
 
-export interface ApiError extends Error {
+interface ApiError extends Error {
   statusCode?: number;
   code?: string;
   details?: Record<string, string[]>;
@@ -27,17 +27,4 @@ export function errorHandler(
       ...(err.details && { details: err.details }),
     },
   });
-}
-
-export function createError(
-  message: string,
-  statusCode: number = 500,
-  code?: string,
-  details?: Record<string, string[]>
-): ApiError {
-  const error = new Error(message) as ApiError;
-  error.statusCode = statusCode;
-  error.code = code;
-  error.details = details;
-  return error;
 }

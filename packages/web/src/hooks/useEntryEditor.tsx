@@ -4,7 +4,7 @@ import type { QueryClient } from '@tanstack/react-query';
 import { resolveEditorSections } from '../lib/entries/editor';
 import { getEditorFields } from '../lib/entries/resolution';
 import { createFieldDiffs, stripSystemFields } from '../lib/entries/transforms';
-import { isSchemaFieldVisible } from '../lib/schemaFieldRules';
+import { isSchemaFieldVisible } from '@ori/shared';
 import { useEntryRelations } from './useEntryRelations';
 import { useEntryStructuredEditing } from './useEntryStructuredEditing';
 import type { GlobalAsset } from '../lib/assets/references';

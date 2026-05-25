@@ -1,5 +1,5 @@
-import { OriCmsClientError } from './errors.js';
-import type { ApiEnvelope } from './client-types.js';
+import { OriCmsClientError } from './errors';
+import type { ApiEnvelope } from './client-types';
 
 export type ClientTransportMode = 'management' | 'delivery';
 

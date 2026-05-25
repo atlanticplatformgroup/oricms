@@ -1,5 +1,5 @@
 import type { CollectionEntry, ComponentSchema, SchemaField } from '@ori/shared';
-import { moveArrayItem } from '../lib/arrayMove';
+import { moveArrayItem } from '../lib/array-move';
 import { createStructuredValueFromSchemaFields } from '../lib/schemas/factory';
 import { deepClone } from './structuredEditingSupport';
 

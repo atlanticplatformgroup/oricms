@@ -88,11 +88,4 @@ export function applyDerivedSchemaFieldValues(
   return nextValues;
 }
 
-export function buildSchemaFieldDefaults(fields: SchemaField[]): Record<string, unknown> {
-  const base = fields.reduce<Record<string, unknown>>((acc, field) => {
-    acc[field.key] = getSchemaFieldDefaultValue(field);
-    return acc;
-  }, {});
 
-  return applyDerivedSchemaFieldValues(fields, base, { isCreate: true });
-}

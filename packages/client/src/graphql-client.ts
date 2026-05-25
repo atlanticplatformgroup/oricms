@@ -1,12 +1,12 @@
-import { OriCmsClientError } from './errors.js';
+import { OriCmsClientError } from './errors';
 import type {
   GraphQlExecuteOptions,
   GraphQlIntrospectionResult,
   GraphQlSchemaSnapshot,
   GraphQlSchemaSnapshotMeta,
   PersistedQueryDefinitionInput,
-} from './client-types.js';
-import type { ClientTransport } from './transport.js';
+} from './client-types';
+import type { ClientTransport } from './transport';
 
 interface GraphqlClientContext {
   mode: 'management' | 'delivery';

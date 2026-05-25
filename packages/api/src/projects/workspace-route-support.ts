@@ -39,7 +39,7 @@ export async function persistUiGroups(
     data: { settings: nextSettings as never },
   });
 
-  const configService = new (await import('./configService')).ProjectConfigService(projectId);
+  const configService = new (await import('./config-service')).ProjectConfigService(projectId);
   await configService.save(
     {
       name: existingProject.name,

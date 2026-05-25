@@ -3,7 +3,7 @@ import type { CollectionConfig, CollectionEntry, ContentType, SchemaField } from
 import { collectionsApi } from '../lib/api/collections';
 import { toRelationOption, type RelationOption } from '../lib/entries/displayResolver';
 import { isMultiRelationField, resolveTargetCollectionId } from '../lib/entries/resolution';
-import { getRefId, getRefIds } from '../lib/entries/transforms';
+import { getRefId, getRefIds } from '@ori/shared';
 
 interface UseEntryRelationsOptions {
   projectId: string | null;

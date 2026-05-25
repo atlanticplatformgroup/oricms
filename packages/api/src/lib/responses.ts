@@ -53,10 +53,6 @@ export function serviceUnavailable(res: Response, message = 'Service unavailable
   sendError(res, 503, { code, message });
 }
 
-export function unprocessableEntity(res: Response, message = 'Request could not be processed', code = 'UNPROCESSABLE_ENTITY'): void {
-  sendError(res, 422, { code, message });
-}
-
 export function internalError(res: Response, message = 'Request failed', code = 'INTERNAL_ERROR'): void {
   sendError(res, 500, { code, message });
 }

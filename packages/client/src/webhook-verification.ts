@@ -3,7 +3,7 @@ import type {
   VerifyPluginHookRequestResult,
   VerifyRevalidationWebhookRequestInput,
   VerifyRevalidationWebhookRequestResult,
-} from './client-types.js';
+} from './client-types';
 
 function readHeader(headers: Record<string, string | string[] | undefined>, name: string): string | null {
   const target = name.toLowerCase();

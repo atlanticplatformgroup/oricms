@@ -1,23 +1,23 @@
 import type {
   CollectionEntry,
 } from '@ori/shared';
-import { OriCmsClientError } from './errors.js';
-import { createGraphqlClient } from './graphql-client.js';
-import { createPluginsClient } from './plugins-client.js';
-import { createResourcesClient } from './resources-client.js';
-import { createSchemasClient } from './schemas-client.js';
-import { createClientTransport } from './transport.js';
-import { createWorkspaceClient } from './workspace-client.js';
+import { OriCmsClientError } from './errors';
+import { createGraphqlClient } from './graphql-client';
+import { createPluginsClient } from './plugins-client';
+import { createResourcesClient } from './resources-client';
+import { createSchemasClient } from './schemas-client';
+import { createClientTransport } from './transport';
+import { createWorkspaceClient } from './workspace-client';
 import {
   verifyPluginHookRequest,
   verifyRevalidationWebhookRequest,
-} from './webhook-verification.js';
+} from './webhook-verification';
 import type {
   ApiEnvelope,
   CollectionsListResponse,
   CreateClientOptions,
   QueryOptions,
-} from './client-types.js';
+} from './client-types';
 
 export type {
   CollectionsListResponse,
@@ -48,10 +48,10 @@ export type {
   VerifyPluginHookRequestResult,
   VerifyRevalidationWebhookRequestInput,
   VerifyRevalidationWebhookRequestResult,
-} from './client-types.js';
-export { OriCmsClientError } from './errors.js';
-export { generateSchemaTypeStubs } from './schemas-client.js';
-export { verifyPluginHookRequest, verifyRevalidationWebhookRequest } from './webhook-verification.js';
+} from './client-types';
+export { OriCmsClientError } from './errors';
+export { generateSchemaTypeStubs } from './schemas-client';
+export { verifyPluginHookRequest, verifyRevalidationWebhookRequest } from './webhook-verification';
 
 interface ResolvedProjectIdentity {
   projectId: string;
