@@ -1,7 +1,8 @@
+import { memo } from 'react';
 import { Textarea } from '@mantine/core';
 import type { FieldRendererProps } from '../contracts';
 
-export function TextareaField({ field, value, error, disabled, onChange }: FieldRendererProps) {
+export const TextareaField = memo(function TextareaField({ field, value, error, disabled, onChange }: FieldRendererProps) {
   return (
     <Textarea
       aria-label={field.label || field.key}
@@ -13,4 +14,4 @@ export function TextareaField({ field, value, error, disabled, onChange }: Field
       onChange={(event) => onChange(event.currentTarget.value)}
     />
   );
-}
+});

@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { ActionIcon, Badge, Button, Group, Select, Stack, Text } from '@mantine/core';
 import { getAssetTags, type Asset } from '@ori/shared';
 import { resolveFieldLabel, type FieldRendererProps } from '../contracts';
@@ -8,7 +9,7 @@ import { AuthenticatedImage } from '../../ui/AuthenticatedImage';
 import { WorkspaceComplexFieldSurface } from '../../ui/WorkspacePrimitives';
 import { getAssetIdentifier } from '../../../lib/assets/display';
 
-export function MediaField({ field, value, error, disabled, onChange, context }: FieldRendererProps) {
+export const MediaField = memo(function MediaField({ field, value, error, disabled, onChange, context }: FieldRendererProps) {
   const selectedAssetReference = normalizeAssetReference(value);
   const selectedAssetPath = getProjectAssetPath(value);
   const selectedAssetKey = selectedAssetReference?.scope === 'global'
@@ -105,4 +106,4 @@ export function MediaField({ field, value, error, disabled, onChange, context }:
       </Stack>
     </WorkspaceComplexFieldSurface>
   );
-}
+});

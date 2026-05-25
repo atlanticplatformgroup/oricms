@@ -1,10 +1,11 @@
+import { memo } from 'react';
 import { Alert } from '@mantine/core';
 import { createStructuredValueFromSchemaFields } from '../../../lib/schemas/factory';
 import { resolveEditorFieldWidth } from '../../../lib/entries/editor';
 import { WorkspaceComplexFieldSurface, WorkspaceEditorFieldGrid } from '../../ui/WorkspacePrimitives';
 import type { FieldRendererProps } from '../contracts';
 
-export function ObjectField({ field, value, context }: FieldRendererProps) {
+export const ObjectField = memo(function ObjectField({ field, value, context }: FieldRendererProps) {
   const renderEmbedded = context.renderEmbeddedFieldControl;
   const actions = context.structuredActions;
 
@@ -35,4 +36,4 @@ export function ObjectField({ field, value, context }: FieldRendererProps) {
       />
     </WorkspaceComplexFieldSurface>
   );
-}
+});

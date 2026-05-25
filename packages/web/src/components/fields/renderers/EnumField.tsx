@@ -1,7 +1,8 @@
+import { memo } from 'react';
 import { Autocomplete, MultiSelect, Select, TagsInput } from '@mantine/core';
 import type { FieldRendererProps } from '../contracts';
 
-export function EnumField({ field, value, error, disabled, onChange, context }: FieldRendererProps) {
+export const EnumField = memo(function EnumField({ field, value, error, disabled, onChange, context }: FieldRendererProps) {
   const choices = [
     ...((field.enumValues ?? []).map((choice) => ({ value: choice.value, label: choice.label ?? choice.value }))),
     ...((field.options?.choices ?? []).map((choice) => ({ value: choice.value, label: choice.label ?? choice.value }))),
@@ -52,4 +53,4 @@ export function EnumField({ field, value, error, disabled, onChange, context }: 
   }
 
   return <Select aria-label={label} data={choices} value={typeof value === 'string' ? value : null} error={error} disabled={disabled} onChange={(nextValue) => onChange(nextValue || '')} clearable />;
-}
+});
