@@ -2,7 +2,7 @@ import { Router, type Request, type Response } from 'express';
 import { body } from 'express-validator';
 import { prisma } from '../lib/prisma';
 import { logger } from '../middleware/logger';
-import { badRequest, conflict, created, forbidden, ok } from '../lib/responses';
+import { badRequest, conflict, created, forbidden, ok, unauthorized } from '../lib/responses';
 import { requirePermission } from '../permissions/middleware';
 import type { ProjectRole } from '@ori/shared';
 import { sendInternalError } from './shared';
@@ -80,7 +80,11 @@ router.post(
         return;
       }
       const { email, role } = req.body;
-      const invitedById = req.user!.id;
+      if (!req.user) {
+        unauthorized(res, 'Authentication required');
+        return;
+      }
+      const invitedById = req.user.id;
       const result = await inviteProjectMember({
         projectId,
         email,
@@ -114,7 +118,11 @@ router.patch('/:projectId/members/:userId', requirePermission('members', 'update
       return;
     }
     const { role } = req.body;
-    const currentUserId = req.user!.id;
+    if (!req.user) {
+      unauthorized(res, 'Authentication required');
+      return;
+    }
+    const currentUserId = req.user.id;
 
     const validation = await validateMemberRoleChange({
       projectId,
@@ -152,7 +160,11 @@ router.delete('/:projectId/members/:userId', requirePermission('members', 'delet
     if (!(await ensureMembersUnlocked(req, res, projectId))) {
       return;
     }
-    const currentUserId = req.user!.id;
+    if (!req.user) {
+      unauthorized(res, 'Authentication required');
+      return;
+    }
+    const currentUserId = req.user.id;
 
     const validation = validateMemberRemoval(currentUserId, userId);
     if (!validation.ok) {

@@ -2,7 +2,7 @@ import { Router, type Request, type Response } from 'express';
 import { body, query, validationResult } from 'express-validator';
 import { requirePermission } from '../permissions/middleware';
 import { logger } from '../middleware/logger';
-import { internalError, ok } from '../lib/responses';
+import { internalError, ok, unauthorized } from '../lib/responses';
 import { formatGitError, respondValidationError } from './helpers';
 import {
   type PromotionResolution,
@@ -64,7 +64,11 @@ export function createPromotionRoutes(gitService: GitService): Router {
         }
 
         const { projectId } = req.params;
-        const user = req.user!;
+        if (!req.user) {
+          unauthorized(res, 'Authentication required');
+          return;
+        }
+        const user = req.user;
         const { sourceBranch, targetBranch, reason } = req.body as { sourceBranch: string; targetBranch: string; reason?: string };
         const requestRecord = await createPromotionRequestOrRespond(req, res, projectId, user, {
           sourceBranch,
@@ -85,7 +89,11 @@ export function createPromotionRoutes(gitService: GitService): Router {
   router.post('/promotions/:requestId/approve', requirePermission('collections', 'publish'), async (req: Request, res: Response) => {
     try {
       const { projectId, requestId } = req.params;
-      const user = req.user!;
+      if (!req.user) {
+        unauthorized(res, 'Authentication required');
+        return;
+      }
+      const user = req.user;
       const approvedRecord = await approvePromotionRequestOrRespond(req, res, projectId, requestId, user);
       if (!approvedRecord) {
         return;
@@ -110,7 +118,11 @@ export function createPromotionRoutes(gitService: GitService): Router {
         }
 
         const { projectId, requestId } = req.params;
-        const user = req.user!;
+        if (!req.user) {
+          unauthorized(res, 'Authentication required');
+          return;
+        }
+        const user = req.user;
         const { reason } = req.body as { reason?: string };
         const rejectedRecord = await rejectPromotionRequestOrRespond(req, res, projectId, requestId, user, reason);
         if (!rejectedRecord) {
@@ -169,7 +181,11 @@ export function createPromotionRoutes(gitService: GitService): Router {
         }
 
         const { projectId } = req.params;
-        const user = req.user!;
+        if (!req.user) {
+          unauthorized(res, 'Authentication required');
+          return;
+        }
+        const user = req.user;
         const { sourceBranch, targetBranch, resolutions } = req.body as {
           sourceBranch: string;
           targetBranch: string;
@@ -210,7 +226,11 @@ export function createPromotionRoutes(gitService: GitService): Router {
         }
 
         const { projectId } = req.params;
-        const user = req.user!;
+        if (!req.user) {
+          unauthorized(res, 'Authentication required');
+          return;
+        }
+        const user = req.user;
         const { sourceBranch, targetBranch, approvalId, message } = req.body as { sourceBranch: string; targetBranch: string; approvalId: string; message?: string };
         const result = await promoteBranchesOrRespond(req, res, gitService, projectId, user, {
           sourceBranch,

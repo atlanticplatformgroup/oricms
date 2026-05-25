@@ -44,11 +44,13 @@ import router from '../routes';
 const app = express();
 app.use(express.json());
 app.use((req, _res, next) => {
-  (req as express.Request & { user?: unknown }).user = {
+  (req as express.Request & { user?: unknown; userId?: string; projectRole?: string }).user = {
     id: 'user-1',
     name: 'Test User',
     email: 'test@example.com',
   };
+  (req as express.Request & { user?: unknown; userId?: string; projectRole?: string }).userId = 'user-1';
+  (req as express.Request & { user?: unknown; userId?: string; projectRole?: string }).projectRole = 'owner';
   next();
 });
 app.use('/api/v1/projects/:projectId/content-types', router);

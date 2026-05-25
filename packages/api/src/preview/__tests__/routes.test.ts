@@ -55,6 +55,11 @@ import router from '../routes';
 
 const app = express();
 app.use(express.json());
+app.use((req, _res, next) => {
+  (req as express.Request & { userId?: string; projectRole?: string }).userId = 'test-user-id';
+  (req as express.Request & { userId?: string; projectRole?: string }).projectRole = 'owner';
+  next();
+});
 app.use('/api/v1/projects/:projectId/preview', router);
 
 const projectId = '550e8400-e29b-41d4-a716-446655440000';

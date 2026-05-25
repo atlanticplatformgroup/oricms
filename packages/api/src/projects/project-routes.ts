@@ -1,7 +1,7 @@
 import { Router, type Request, type Response } from 'express';
 import { body, param, validationResult } from 'express-validator';
 import { logger } from '../middleware/logger';
-import { conflict, created, ok } from '../lib/responses';
+import { conflict, created, ok, unauthorized } from '../lib/responses';
 import { ensureResourceNotLocked } from '../locks/middleware';
 import { requirePermission, requireOwnerOrAdmin } from '../permissions/middleware';
 import {
@@ -25,7 +25,11 @@ const router = Router({ mergeParams: true });
 
 router.get('/', async (req: Request, res: Response) => {
   try {
-    const userId = req.user!.id;
+    if (!req.user) {
+      unauthorized(res, 'Authentication required');
+      return;
+    }
+    const userId = req.user.id;
     ok(res, { projects: await listProjectsForUser(userId) });
   } catch (error) {
     logger.error({ msg: 'List projects error', error });
@@ -50,7 +54,11 @@ router.post(
       }
 
       const { name, slug, repoUrl, description, repoProvider = 'github' } = req.body;
-      const userId = req.user!.id;
+      if (!req.user) {
+        unauthorized(res, 'Authentication required');
+        return;
+      }
+      const userId = req.user.id;
 
       if (!(await ensureProjectSlugAvailable(slug))) {
         conflict(res, 'This slug is already taken', 'SLUG_EXISTS');
@@ -147,7 +155,11 @@ router.delete(
       }))) {
         return;
       }
-      const userId = req.user!.id;
+      if (!req.user) {
+        unauthorized(res, 'Authentication required');
+        return;
+      }
+      const userId = req.user.id;
 
       if (!(await ensureOwnerProjectDeleteAccess(userId, projectId, res))) {
         return;

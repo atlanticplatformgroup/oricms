@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { requirePermission } from '../permissions/middleware';
 import { pageContentSchema } from '../lib/validation';
 import { logger } from '../middleware/logger';
-import { internalError, notFound, ok } from '../lib/responses';
+import { internalError, notFound, ok, unauthorized } from '../lib/responses';
 import { saveSchema } from '../application/schemas/save-schema';
 import { deleteSchema } from '../application/schemas/delete-schema';
 import { formatGitError, isLifecycleHookError, normalizeSchemaPath, respondLifecycleBlocked, respondValidationError } from './helpers';
@@ -94,7 +94,11 @@ export function createSchemaRoutes(gitService: GitService): Router {
     try {
       const { projectId } = req.params;
       const schemaPath = req.params[0];
-      const user = req.user!;
+      if (!req.user) {
+        unauthorized(res, 'Authentication required');
+        return;
+      }
+      const user = req.user;
       if (!schemaPath || schemaPath.includes('..')) {
         respondValidationError(res, 'Invalid schema path');
         return;
@@ -142,7 +146,11 @@ export function createSchemaRoutes(gitService: GitService): Router {
     try {
       const { projectId } = req.params;
       const schemaPath = req.params[0];
-      const user = req.user!;
+      if (!req.user) {
+        unauthorized(res, 'Authentication required');
+        return;
+      }
+      const user = req.user;
       if (!schemaPath || schemaPath.includes('..')) {
         respondValidationError(res, 'Invalid schema path');
         return;

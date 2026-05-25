@@ -138,6 +138,36 @@ describe('Auth Routes', () => {
 
       expect(response.status).toBe(401);
     });
+
+    it('should reject login with missing fields', async () => {
+      const response = await request(app)
+        .post('/api/v1/auth/login')
+        .send({ email: 'test@example.com' });
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+    });
+
+    it('should use bcrypt with proper rounds', async () => {
+      const hashedPassword = await bcrypt.hash('Password123!', 10);
+      await prisma.user.create({
+        data: {
+          email: 'bcrypt-test@example.com',
+          name: 'Bcrypt Test',
+          password: hashedPassword,
+        },
+      });
+
+      const response = await request(app)
+        .post('/api/v1/auth/login')
+        .send({
+          email: 'bcrypt-test@example.com',
+          password: 'Password123!',
+        });
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+    });
   });
 
   describe('POST /api/v1/auth/refresh', () => {

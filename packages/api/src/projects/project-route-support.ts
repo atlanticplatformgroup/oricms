@@ -145,8 +145,8 @@ export async function saveProjectConfigToGit(
         email: user?.email || 'system@oricms.local',
       },
     );
-  } catch (err) {
-    logger.error({ msg: 'Failed to save project config to git', error: err, projectId: project.id });
+  } catch (error) {
+    logger.error({ msg: 'Failed to save project config to git', error, projectId: project.id });
   }
 }
 

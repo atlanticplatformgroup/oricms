@@ -76,8 +76,8 @@ export class CDNExportService {
               failedFiles: accumulator.failedFiles,
               currentFile: relativePath,
             }));
-          } catch (err) {
-            recordExportFailure(accumulator, filePath, err);
+          } catch (error) {
+            recordExportFailure(accumulator, filePath, error);
           }
         })
       );
@@ -86,9 +86,9 @@ export class CDNExportService {
     if (accumulator.urls.length > 0 && this.provider.invalidateCache) {
       try {
         await this.provider.invalidateCache(getInvalidationKeys(accumulator.urls));
-      } catch (err) {
+      } catch (error) {
         accumulator.errors.push(
-          `Cache invalidation failed: ${err instanceof Error ? err.message : String(err)}`
+          `Cache invalidation failed: ${error instanceof Error ? error.message : String(error)}`
         );
       }
     }
@@ -133,8 +133,8 @@ export class CDNExportService {
           failedFiles: accumulator.failedFiles,
           currentFile: relativePath,
         }));
-      } catch (err) {
-        recordExportFailure(accumulator, filePath, err);
+      } catch (error) {
+        recordExportFailure(accumulator, filePath, error);
       }
     }
 
