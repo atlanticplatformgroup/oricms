@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Box, Divider, Group, SimpleGrid, Stack, Text } from '@mantine/core';
 import type { ReactNode } from 'react';
 import { WorkspaceMobileSectionButton, WorkspacePrimaryRailButton, WorkspaceSidebarBoundaryToggle, WorkspaceSidebarGroupLabel, WorkspaceSidebarNavItem, WorkspaceSidebarSection, workspaceShellChromeStyles } from '../ui/WorkspacePrimitives';
@@ -103,7 +104,7 @@ type SectionOption = {
   label: string;
 };
 
-export function WorkspacePrimaryRail(props: {
+export const WorkspacePrimaryRail = memo(function WorkspacePrimaryRail(props: {
   activeSection: SectionKey;
   availableSections: SectionOption[];
   onSectionChange: (section: SectionKey) => void;
@@ -139,9 +140,9 @@ export function WorkspacePrimaryRail(props: {
       })}
     </Stack>
   );
-}
+});
 
-export function WorkspaceSecondaryRail(props: {
+export const WorkspaceSecondaryRail = memo(function WorkspaceSecondaryRail(props: {
   activeProjectSlug: string | null;
   activeSchemaMode: 'types' | 'components';
   activeSection: SectionKey;
@@ -178,9 +179,9 @@ export function WorkspaceSecondaryRail(props: {
       {groupedSecondaryRailItems}
     </WorkspaceSidebarSection>
   );
-}
+});
 
-export function WorkspaceDrawerNavigation(props: {
+export const WorkspaceDrawerNavigation = memo(function WorkspaceDrawerNavigation(props: {
   activeProjectSlug: string | null;
   activeSchemaMode: 'types' | 'components';
   activeSection: SectionKey;
@@ -245,9 +246,9 @@ export function WorkspaceDrawerNavigation(props: {
       ) : null}
     </Stack>
   );
-}
+});
 
-export function WorkspaceSecondaryRailBoundaryToggle(props: {
+export const WorkspaceSecondaryRailBoundaryToggle = memo(function WorkspaceSecondaryRailBoundaryToggle(props: {
   onExpandInline?: () => void;
   onExpandDrawer?: () => void;
   secondaryRailCollapsed: boolean;
@@ -264,4 +265,4 @@ export function WorkspaceSecondaryRailBoundaryToggle(props: {
       ) : null}
     </>
   );
-}
+});

@@ -1,8 +1,8 @@
-import type { ChangeEvent } from 'react';
+import { memo, type ChangeEvent } from 'react';
 import { Button, Group, PasswordInput, Stack, Text, TextInput } from '@mantine/core';
 import type { FieldRendererProps } from '../contracts';
 
-export function StringField({ field, value, error, disabled, onChange, context }: FieldRendererProps) {
+export const StringField = memo(function StringField({ field, value, error, disabled, onChange, context }: FieldRendererProps) {
   const identifierState = context.identifierStateByField?.[field.key];
   const sharedProps = {
     'aria-label': field.label || field.key,
@@ -44,4 +44,4 @@ export function StringField({ field, value, error, disabled, onChange, context }
       ) : null}
     </Stack>
   );
-}
+});

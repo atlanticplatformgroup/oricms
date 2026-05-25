@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Box, Button, Group, MultiSelect, Select, Stack, Text } from '@mantine/core';
 import { getRefId, getRefIds } from '@ori/shared';
 import { isMultiRelationField } from '../../../lib/entries/resolution';
@@ -5,7 +6,7 @@ import { toLabel } from '../../../lib/workspace/format';
 import { resolveFieldLabel, type FieldRendererProps } from '../contracts';
 import { WorkspaceComplexFieldSurface } from '../../ui/WorkspacePrimitives';
 
-export function RelationField({ field, value, error, disabled, onChange, context }: FieldRendererProps) {
+export const RelationField = memo(function RelationField({ field, value, error, disabled, onChange, context }: FieldRendererProps) {
   const options = context.relationOptionsByField?.[field.key] ?? [];
   const isMultiple = isMultiRelationField(field);
   const selectedCount = isMultiple ? getRefIds(value).length : getRefId(value) ? 1 : 0;
@@ -77,4 +78,4 @@ export function RelationField({ field, value, error, disabled, onChange, context
       </Stack>
     </WorkspaceComplexFieldSurface>
   );
-}
+});

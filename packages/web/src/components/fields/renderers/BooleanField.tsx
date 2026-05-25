@@ -1,7 +1,8 @@
+import { memo } from 'react';
 import { Switch } from '@mantine/core';
 import type { FieldRendererProps } from '../contracts';
 
-export function BooleanField({ field, value, disabled, onChange }: FieldRendererProps) {
+export const BooleanField = memo(function BooleanField({ field, value, disabled, onChange }: FieldRendererProps) {
   const checked = Boolean(value);
 
   return (
@@ -16,4 +17,4 @@ export function BooleanField({ field, value, disabled, onChange }: FieldRenderer
       onChange={(event) => onChange(event.currentTarget.checked)}
     />
   );
-}
+});

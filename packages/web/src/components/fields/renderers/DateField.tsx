@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import dayjs from 'dayjs';
 import { DateInput, DateTimePicker } from '@mantine/dates';
 import type { FieldRendererProps } from '../contracts';
@@ -8,7 +9,7 @@ function parseFieldDate(value: unknown): Date | null {
   return parsed.isValid() ? parsed.toDate() : null;
 }
 
-export function DateField({ field, value, error, disabled, onChange }: FieldRendererProps) {
+export const DateField = memo(function DateField({ field, value, error, disabled, onChange }: FieldRendererProps) {
   const commonProps = {
     'aria-label': field.label || field.key,
     value: parseFieldDate(value),
@@ -34,4 +35,4 @@ export function DateField({ field, value, error, disabled, onChange }: FieldRend
       onChange={(nextValue) => onChange(nextValue ? dayjs(nextValue).format('YYYY-MM-DD') : '')}
     />
   );
-}
+});

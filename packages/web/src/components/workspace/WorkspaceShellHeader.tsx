@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Badge, Box, Group, Menu, Select, Stack } from '@mantine/core';
 import { CircleUserRound, Menu as MenuIcon } from 'lucide-react';
 import { WorkspaceBranchSwitcher } from '../ui/WorkspaceBranchSwitcher';
@@ -36,7 +37,7 @@ type WorkspaceShellHeaderProps = {
   user: UserSummary | null | undefined;
 };
 
-export function WorkspaceShellHeader({
+export const WorkspaceShellHeader = memo(function WorkspaceShellHeader({
   activeCollectionSettingsView,
   activeEntryId,
   activeHistoryView,
@@ -194,4 +195,4 @@ export function WorkspaceShellHeader({
       </Box>
     </Group>
   );
-}
+});
