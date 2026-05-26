@@ -359,7 +359,7 @@ Out-of-scope / follow-ups (chronological):
 | P1-PERF-06 | P1 | Add concurrency limit to delivery projection reconciler | ✅ Already done |
 | P1-TEST-03 | P1 | Hook tests (`packages/web/src/hooks/` — 26 files) | ✅ Done — 26 hooks/modules tested, 257 tests |
 | P1-TEST-04 | P1 | Context provider tests (`packages/web/src/contexts/` — 16 files) | ✅ #32 |
-| P1-TEST-06 | P1 | `crypto.ts` hash/verify roundtrip + token uniqueness tests | — |
+| P1-TEST-06 | P1 | `crypto.ts` hash/verify roundtrip + token uniqueness tests | ✅ #33 |
 | P1-DEAD-01 | P1 | Delete `packages/api/src/lib/semver.ts` | ✅ Already done |
 | P1-DEAD-02 | P1 | Remove `secureCompare` from `crypto.ts` | ✅ Already done |
 | P1-DEAD-03 | P1 | Remove `unprocessableEntity` helper | ✅ Already done |
@@ -480,3 +480,4 @@ For PRs with Prisma schema changes:
 | 29 | `feature/p1-test-03-hook-tests-batch-6` | ✅ Merged | #29 | 4 files, 40 tests — useEntryRelations, useEntryBranchTransfer, useEntryHistory, usePresence |
 | 30 | `feature/p1-test-03-hook-tests-batch-7` | ✅ Merged | #30 | 4 files, 45 tests — useCollectionBrowseModel, useCollectionManager, useSchemaEditor, useWorkspaceData |
 | 31 | `feature/p1-test-04-context-tests` | ✅ Merged | #32 | 58 context provider tests + DarkModeContext bugfix |
+| 32 | `feature/p1-test-06-crypto-tests` | ✅ Merged | #33 | 20 crypto tests + setup.ts DB cleanup resilience |
