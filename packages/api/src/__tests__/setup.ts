@@ -3,7 +3,6 @@
  */
 
 import { vi, afterAll } from 'vitest';
-import { PrismaClient } from '@prisma/client';
 
 // Test database URL
 process.env.DATABASE_URL = process.env.TEST_DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/oricms_test';
@@ -28,13 +27,22 @@ vi.mock('../lib/github', () => ({
 
 // Clean up after all tests
 afterAll(async () => {
-  const prisma = new PrismaClient({
-    datasources: {
-      db: {
-        url: process.env.DATABASE_URL,
+  let prisma: import('@prisma/client').PrismaClient;
+  try {
+    const { PrismaClient: PrismaClientCtor } = await import('@prisma/client');
+    prisma = new PrismaClientCtor({
+      datasources: {
+        db: {
+          url: process.env.DATABASE_URL,
+        },
       },
-    },
-  });
+    });
+    // Test connection — if DB is unreachable, skip cleanup
+    await prisma.$connect();
+  } catch {
+    // Prisma client not available or DB unreachable — skip cleanup
+    return;
+  }
 
   const ignoreMissingTable = async (operation: Promise<unknown>) => {
     try {

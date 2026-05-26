@@ -1,83 +1,179 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import crypto from 'crypto';
-import { encrypt, decrypt, hash, generateToken } from '../crypto';
 
-describe('Crypto utilities', () => {
-  beforeAll(() => {
-    if (!process.env.ENCRYPTION_KEY) {
-      process.env.ENCRYPTION_KEY = crypto.randomUUID().replace(/-/g, '') + crypto.randomUUID().replace(/-/g, '');
-    }
+// We need to test the lazy key loading, so we'll manipulate process.env
+// and use dynamic imports to get fresh module state
+
+describe('crypto', () => {
+  const originalEnv = process.env;
+
+  beforeEach(() => {
+    vi.resetModules();
   });
 
-  describe('encrypt / decrypt', () => {
-    it('round-trips plain text', () => {
-      const original = 'hello world';
-      const encrypted = encrypt(original);
+  afterEach(() => {
+    process.env = originalEnv;
+  });
+
+  describe('encrypt / decrypt roundtrip', () => {
+    it('encrypts and decrypts a simple string', async () => {
+      const { encrypt, decrypt } = await import('../crypto');
+      const plaintext = 'hello world';
+      const encrypted = encrypt(plaintext);
       const decrypted = decrypt(encrypted);
-      expect(decrypted).toBe(original);
+      expect(decrypted).toBe(plaintext);
     });
 
-    it('round-trips unicode text', () => {
-      const original = 'Hello 🌍 世界 émojis! ñoño';
-      const encrypted = encrypt(original);
+    it('encrypts and decrypts unicode characters', async () => {
+      const { encrypt, decrypt } = await import('../crypto');
+      const plaintext = 'Hello 世界 🌍 ñoño';
+      const encrypted = encrypt(plaintext);
       const decrypted = decrypt(encrypted);
-      expect(decrypted).toBe(original);
+      expect(decrypted).toBe(plaintext);
     });
 
-    it('round-trips empty string', () => {
-      const original = '';
-      const encrypted = encrypt(original);
+    it('encrypts and decrypts empty string', async () => {
+      const { encrypt, decrypt } = await import('../crypto');
+      const plaintext = '';
+      const encrypted = encrypt(plaintext);
       const decrypted = decrypt(encrypted);
-      expect(decrypted).toBe(original);
+      expect(decrypted).toBe(plaintext);
     });
 
-    it('produces different ciphertexts for same plaintext', () => {
-      const original = 'same text';
-      const encrypted1 = encrypt(original);
-      const encrypted2 = encrypt(original);
+    it('encrypts and decrypts a long string', async () => {
+      const { encrypt, decrypt } = await import('../crypto');
+      const plaintext = 'a'.repeat(10000);
+      const encrypted = encrypt(plaintext);
+      const decrypted = decrypt(encrypted);
+      expect(decrypted).toBe(plaintext);
+    });
+
+    it('produces different ciphertexts for same plaintext (IV randomness)', async () => {
+      const { encrypt } = await import('../crypto');
+      const plaintext = 'same text';
+      const encrypted1 = encrypt(plaintext);
+      const encrypted2 = encrypt(plaintext);
       expect(encrypted1).not.toBe(encrypted2);
-      expect(decrypt(encrypted1)).toBe(original);
-      expect(decrypt(encrypted2)).toBe(original);
     });
 
-    it('throws on invalid encrypted data format', () => {
-      expect(() => decrypt('not-enough-parts')).toThrow('Invalid encrypted data format');
-    });
-
-    it('throws on tampered ciphertext', () => {
-      const encrypted = encrypt('secret');
+    it('produces ciphertext in expected format (iv:authTag:encrypted)', async () => {
+      const { encrypt } = await import('../crypto');
+      const encrypted = encrypt('test');
       const parts = encrypted.split(':');
-      parts[2] = parts[2].slice(0, -2) + 'ff';
-      expect(() => decrypt(parts.join(':'))).toThrow();
+      expect(parts).toHaveLength(3);
+      expect(parts[0]).toHaveLength(32); // IV = 16 bytes = 32 hex chars
+      expect(parts[1]).toHaveLength(32); // Auth tag = 16 bytes = 32 hex chars
+      expect(parts[2].length).toBeGreaterThan(0);
+    });
+
+    it('throws on invalid format (missing parts)', async () => {
+      const { decrypt } = await import('../crypto');
+      expect(() => decrypt('invalid')).toThrow('Invalid encrypted data format');
+      expect(() => decrypt('one:two')).toThrow('Invalid encrypted data format');
+    });
+
+    it('throws on tampered ciphertext', async () => {
+      const { encrypt, decrypt } = await import('../crypto');
+      const plaintext = 'secret data';
+      const encrypted = encrypt(plaintext);
+      const parts = encrypted.split(':');
+      parts[2] = parts[2].slice(0, -2) + '00';
+      const tampered = parts.join(':');
+      expect(() => decrypt(tampered)).toThrow();
+    });
+
+    it('throws on tampered auth tag', async () => {
+      const { encrypt, decrypt } = await import('../crypto');
+      const plaintext = 'secret data';
+      const encrypted = encrypt(plaintext);
+      const parts = encrypted.split(':');
+      parts[1] = parts[1].slice(0, -2) + '00';
+      const tampered = parts.join(':');
+      expect(() => decrypt(tampered)).toThrow();
     });
   });
 
   describe('hash', () => {
-    it('produces deterministic SHA-256 hex', () => {
-      const value = 'test-value';
-      const h1 = hash(value);
-      const h2 = hash(value);
-      expect(h1).toBe(h2);
-      expect(h1).toMatch(/^[a-f0-9]{64}$/);
+    it('produces consistent hashes for same input', async () => {
+      const { hash } = await import('../crypto');
+      const input = 'test@example.com';
+      const hash1 = hash(input);
+      const hash2 = hash(input);
+      expect(hash1).toBe(hash2);
     });
 
-    it('produces different hashes for different inputs', () => {
-      expect(hash('a')).not.toBe(hash('b'));
+    it('produces different hashes for different inputs', async () => {
+      const { hash } = await import('../crypto');
+      const hash1 = hash('input1');
+      const hash2 = hash('input2');
+      expect(hash1).not.toBe(hash2);
+    });
+
+    it('produces a 64-character hex string', async () => {
+      const { hash } = await import('../crypto');
+      const result = hash('anything');
+      expect(result).toHaveLength(64);
+      expect(result).toMatch(/^[a-f0-9]{64}$/);
+    });
+
+    it('handles empty string', async () => {
+      const { hash } = await import('../crypto');
+      const result = hash('');
+      expect(result).toHaveLength(64);
+      expect(result).toMatch(/^[a-f0-9]{64}$/);
+    });
+
+    it('handles unicode characters', async () => {
+      const { hash } = await import('../crypto');
+      const result = hash('Hello 世界 🌍');
+      expect(result).toHaveLength(64);
     });
   });
 
   describe('generateToken', () => {
-    it('generates unique tokens', () => {
-      const tokens = new Set<string>();
+    it('generates a token of default length', async () => {
+      const { generateToken } = await import('../crypto');
+      const token = generateToken();
+      expect(token.length).toBeGreaterThan(40);
+      expect(token).toMatch(/^[A-Za-z0-9_-]+$/);
+    });
+
+    it('generates a token of specified length', async () => {
+      const { generateToken } = await import('../crypto');
+      const token = generateToken(64);
+      expect(token.length).toBeGreaterThan(80);
+      expect(token).toMatch(/^[A-Za-z0-9_-]+$/);
+    });
+
+    it('generates unique tokens', async () => {
+      const { generateToken } = await import('../crypto');
+      const tokens = new Set();
       for (let i = 0; i < 100; i++) {
         tokens.add(generateToken());
       }
       expect(tokens.size).toBe(100);
     });
 
-    it('respects custom length', () => {
-      const token = generateToken(16);
-      expect(token.length).toBeGreaterThanOrEqual(20);
+    it('generates tokens with only base64url characters', async () => {
+      const { generateToken } = await import('../crypto');
+      const token = generateToken();
+      expect(token).toMatch(/^[A-Za-z0-9_-]+$/);
+    });
+  });
+
+  describe('ENCRYPTION_KEY validation', () => {
+    it('throws when ENCRYPTION_KEY is missing', async () => {
+      delete process.env.ENCRYPTION_KEY;
+      vi.resetModules();
+      const { encrypt: encryptFresh } = await import('../crypto');
+      expect(() => encryptFresh('test')).toThrow('ENCRYPTION_KEY environment variable is required');
+    });
+
+    it('throws when ENCRYPTION_KEY is wrong length', async () => {
+      process.env.ENCRYPTION_KEY = 'tooshort';
+      vi.resetModules();
+      const { encrypt: encryptFresh } = await import('../crypto');
+      expect(() => encryptFresh('test')).toThrow('ENCRYPTION_KEY must be 64 hex characters');
     });
   });
 });
