@@ -30,7 +30,7 @@
 | ID | File | Fix |
 |---|---|---|
 | P0-SEC-01 | `packages/api/src/app.ts:52` | Remove `contentSecurityPolicy: false` or configure proper CSP directives |
-| P0-SEC-02 | `packages/api/src/webhooks/generic-routes.ts` | Add project-level webhook secret validation (HMAC-SHA256) |
+| P0-SEC-02 | `packages/api/src/webhooks/generic-routes.ts` | Add project-level webhook secret validation (HMAC-SHA256) | ✅ #34 |
 | P0-SEC-03 | `packages/api/src/auth/middleware.ts:71-72` | Remove query parameter JWT support; header only |
 | P0-SEC-05 | `packages/api/src/system/routes.ts` | Require auth for setup status or return generic response |
 | P0-SEC-09 | `packages/api/src/graphql/routes.ts` | Disable introspection in production |
@@ -481,3 +481,4 @@ For PRs with Prisma schema changes:
 | 30 | `feature/p1-test-03-hook-tests-batch-7` | ✅ Merged | #30 | 4 files, 45 tests — useCollectionBrowseModel, useCollectionManager, useSchemaEditor, useWorkspaceData |
 | 31 | `feature/p1-test-04-context-tests` | ✅ Merged | #32 | 58 context provider tests + DarkModeContext bugfix |
 | 32 | `feature/p1-test-06-crypto-tests` | ✅ Merged | #33 | 20 crypto tests + setup.ts DB cleanup resilience |
+| 33 | `feature/p0-sec-02-webhook-hmac-validation` | ✅ Merged | #34 | HMAC-SHA256 webhook secret validation for generic + GitLab |
