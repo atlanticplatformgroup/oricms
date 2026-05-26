@@ -68,6 +68,7 @@ export async function populateCollectionRelationsForEntries(input: {
   populate: string | string[];
   getContentType: (typeName: string) => Promise<ContentType | null>;
   findOne: (collectionId: string, id: string) => Promise<CollectionEntry | null>;
+  findManyById?: (collectionId: string, ids: string[]) => Promise<CollectionEntry[]>;
 }): Promise<void> {
   return populateCollectionEntriesRelations(input);
 }

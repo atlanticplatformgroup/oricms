@@ -168,11 +168,13 @@ export async function populateCollectionEntriesRelations(input: {
   populate: string | string[];
   getContentType: (typeName: string) => Promise<ContentType | null>;
   findOne: (collectionId: string, id: string) => Promise<CollectionEntry | null>;
+  findManyById?: (collectionId: string, ids: string[]) => Promise<CollectionEntry[]>;
 }): Promise<void> {
   await populateCollectionRelations({
     entries: input.entries,
     populate: input.populate,
     getContentType: input.getContentType,
     findOne: input.findOne,
+    findManyById: input.findManyById,
   });
 }

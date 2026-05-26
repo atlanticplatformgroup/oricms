@@ -148,6 +148,7 @@ export async function findCollectionEntryWithRevision(args: {
 export async function populateCollectionRelations(args: {
   entries: CollectionEntry[];
   findOne: (collectionId: string, id: string) => Promise<CollectionEntry | null>;
+  findManyById?: (collectionId: string, ids: string[]) => Promise<CollectionEntry[]>;
   getContentType: (typeName: string) => Promise<ContentType | null>;
   populate: string | string[];
 }) {
@@ -156,5 +157,6 @@ export async function populateCollectionRelations(args: {
     populate: args.populate,
     getContentType: args.getContentType,
     findOne: args.findOne,
+    findManyById: args.findManyById,
   });
 }

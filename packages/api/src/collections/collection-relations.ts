@@ -25,6 +25,7 @@ export async function populateCollectionRelations(options: {
   populate: string | string[];
   getContentType: (typeName: string) => Promise<ContentType | null>;
   findOne: (collectionId: string, id: string) => Promise<CollectionEntry | null>;
+  findManyById?: (collectionId: string, ids: string[]) => Promise<CollectionEntry[]>;
 }): Promise<void> {
   const fieldsToPopulate = Array.isArray(options.populate) ? options.populate : [options.populate];
 
@@ -64,16 +65,26 @@ export async function populateCollectionRelations(options: {
     }
   }
 
-  // Batch 3: fetch all related entries in parallel
+  // Batch 3: fetch all related entries in parallel (batched findMany when available)
   const relatedEntries = new Map<string, Map<string, CollectionEntry | null>>();
   await Promise.all(
     Array.from(relationTargets.entries()).map(async ([target, ids]) => {
       const entries = new Map<string, CollectionEntry | null>();
-      await Promise.all(
-        Array.from(ids).map(async (id) => {
-          entries.set(id, await options.findOne(target, id));
-        }),
-      );
+      const idList = Array.from(ids);
+
+      if (options.findManyById) {
+        const found = await options.findManyById(target, idList);
+        for (const item of found) {
+          entries.set(item.$id, item);
+        }
+      } else {
+        await Promise.all(
+          idList.map(async (id) => {
+            entries.set(id, await options.findOne(target, id));
+          }),
+        );
+      }
+
       relatedEntries.set(target, entries);
     }),
   );

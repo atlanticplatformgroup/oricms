@@ -169,6 +169,20 @@ export class CollectionService {
     });
   }
 
+  async findManyById(collectionId: string, ids: string[]): Promise<CollectionEntry[]> {
+    const config = await this.getCollectionConfig(collectionId);
+    if (!config) return [];
+    const entriesById = await this.getIndexedEntriesById(config);
+    const result: CollectionEntry[] = [];
+    for (const id of ids) {
+      const entry = entriesById.get(id);
+      if (entry) {
+        result.push({ ...entry });
+      }
+    }
+    return result;
+  }
+
   async findOneWithRevision(
     collectionId: string,
     id: string,
@@ -331,6 +345,7 @@ export class CollectionService {
       populate,
       getContentType: (typeName) => this.getContentType(typeName),
       findOne: (collectionId, id) => this.findOne(collectionId, id),
+      findManyById: (collectionId, ids) => this.findManyById(collectionId, ids),
     });
   }
 
