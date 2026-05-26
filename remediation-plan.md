@@ -381,7 +381,7 @@ Out-of-scope / follow-ups (chronological):
 | P2-TEST-01 | P2 | CLI command handler tests | — |
 | P2-TEST-02 | P2 | Astro/NextJS adapter integration tests | — |
 | P2-TEST-03 | P2 | Pure utility function tests | ✅ #39 |
-| P2-TEST-04 | P2 | Middleware unit tests with mocked req/res/next | — |
+| P2-TEST-04 | P2 | Middleware unit tests with mocked req/res/next | ✅ #40 |
 
 ### Partially Complete
 
@@ -487,3 +487,4 @@ For PRs with Prisma schema changes:
 | 36 | `feature/p2-style-01-kebab-case-cleanup` | ✅ Merged | #37 | Rename camelCase files to kebab-case (P2-STYLE-01 + P2-STYLE-04) |
 | 37 | `feature/p2-style-02-barrel-file` | ✅ Merged | #38 | Add index.ts barrel file for centralized lib exports |
 | 38 | `feature/p2-test-03-utility-tests` | ✅ Merged | #39 | 69 pure utility function tests across 5 modules |
+| 39 | `feature/p2-test-04-middleware-tests` | ✅ Merged | #40 | 37 middleware unit tests (error, logger, permissions) |
