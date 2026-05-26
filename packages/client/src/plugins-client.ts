@@ -1,4 +1,4 @@
-import { OriCmsClientError } from './errors.js';
+import { OriCmsClientError } from './errors';
 import type {
   PluginExecutionPolicy,
   PluginHealthSummary,
@@ -12,8 +12,8 @@ import type {
   PluginUiContributionsSummary,
   PluginUiPolicy,
   PluginUiPolicyPreview,
-} from './client-types.js';
-import type { ClientTransport } from './transport.js';
+} from './client-types';
+import type { ClientTransport } from './transport';
 
 interface PluginsClientContext {
   transport: ClientTransport;
