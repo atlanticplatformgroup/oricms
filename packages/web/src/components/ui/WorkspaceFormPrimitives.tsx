@@ -10,7 +10,7 @@ import {
   WORKSPACE_FORM_SURFACE_BG,
   WORKSPACE_SHELL_DESCRIPTION_TEXT,
 } from './workspace-primitives.shared';
-import { WorkspaceActionGroup } from './WorkspaceShellPrimitives';
+import { WorkspaceActionGroup } from './workspace-shell-actions';
 
 export function WorkspaceFormSurface({
   children,

@@ -2,7 +2,7 @@ import type { DragEventHandler, ReactNode } from 'react';
 import { ActionIcon, Alert, alpha, Badge, Box, Button, Center, Divider, Flex, Group, Loader, ScrollArea, Stack, Table, Text, UnstyledButton } from '@mantine/core';
 import { GripVertical } from 'lucide-react';
 import { WORKSPACE_SHELL_BORDER_COLOR, WORKSPACE_SHELL_TEXT } from './workspace-primitives.shared';
-import { WorkspaceActionGroup } from './WorkspaceShellPrimitives';
+import { WorkspaceActionGroup } from './workspace-shell-actions';
 import { WorkspaceInset } from './WorkspaceFormPrimitives';
 
 export {
@@ -17,19 +17,21 @@ export {
   WorkspaceHeader,
   WorkspaceHeaderActionIcon,
   WorkspaceIconTooltip,
-  WorkspaceMobileSectionButton,
   WorkspacePage,
-  WorkspacePrimaryRailButton,
   WorkspaceRecordLink,
+  WorkspaceToolbar,
+  WorkspaceToolbarButton,
+} from './workspace-shell-actions';
+export {
+  WorkspaceMobileSectionButton,
+  WorkspacePrimaryRailButton,
   WorkspaceSidebarBoundaryToggle,
   WorkspaceSidebarGroupLabel,
   WorkspaceSidebarNavItem,
   WorkspaceSidebarSection,
   WorkspaceSidebarToggle,
   WorkspaceSortableHeader,
-  WorkspaceToolbar,
-  WorkspaceToolbarButton,
-} from './WorkspaceShellPrimitives';
+} from './workspace-shell-sidebar';
 export {
   WorkspaceComplexFieldSurface,
   WorkspaceContentRail,
