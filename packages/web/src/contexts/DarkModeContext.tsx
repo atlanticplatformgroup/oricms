@@ -19,12 +19,17 @@ function announceThemeChange(theme: 'light' | 'dark' | 'system', isDarkMode: boo
 }
 
 export function DarkModeProvider({ children }: { children: React.ReactNode }) {
-  const preferencesContext = useUserPreferences?.();
+  let preferencesContext: ReturnType<typeof useUserPreferences> | undefined;
+  try {
+    preferencesContext = useUserPreferences();
+  } catch {
+    preferencesContext = undefined;
+  }
   const hasUserPreferences = preferencesContext !== undefined;
   
   // Get theme from UserPreferences or fallback to localStorage
   const getInitialTheme = (): 'light' | 'dark' | 'system' => {
-    if (hasUserPreferences) {
+    if (hasUserPreferences && preferencesContext) {
       return preferencesContext.preferences.theme;
     }
     // Fallback to localStorage for non-authenticated users
@@ -53,7 +58,7 @@ export function DarkModeProvider({ children }: { children: React.ReactNode }) {
 
   // Sync with UserPreferences when they load from DB
   useEffect(() => {
-    if (hasUserPreferences && !preferencesContext.isLoading) {
+    if (hasUserPreferences && preferencesContext && !preferencesContext.isLoading) {
       const dbTheme = preferencesContext.preferences.theme;
       const nextIsDarkMode = calculateDarkMode(dbTheme);
       setThemeState(dbTheme);
@@ -91,7 +96,7 @@ export function DarkModeProvider({ children }: { children: React.ReactNode }) {
     setIsDarkMode(nextIsDarkMode);
     announceThemeChange(newTheme, nextIsDarkMode);
     
-    if (hasUserPreferences) {
+    if (hasUserPreferences && preferencesContext) {
       // Sync to database via UserPreferencesContext
       preferencesContext.updatePreferences({ theme: newTheme });
     } else {
