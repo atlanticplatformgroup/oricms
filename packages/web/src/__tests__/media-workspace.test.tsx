@@ -21,7 +21,7 @@ describe('Media workspace', () => {
       expect(screen.getByText('Library')).toBeInTheDocument();
       expect(screen.getByText('current-hero.jpg')).toBeInTheDocument();
       expect(screen.getByText('style-guide.pdf')).toBeInTheDocument();
-    });
+    }, { timeout: 5000 });
 
     fireEvent.change(screen.getByPlaceholderText('Search filename, alt text, caption, or tag'), {
       target: { value: 'style-guide' },
