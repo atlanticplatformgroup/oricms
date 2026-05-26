@@ -380,7 +380,7 @@ Out-of-scope / follow-ups (chronological):
 | P2-STYLE-04 | P2 | Rename `workspaceTestHarness.tsx` → `workspace-test-harness.tsx` | ✅ #37 |
 | P2-TEST-01 | P2 | CLI command handler tests | — |
 | P2-TEST-02 | P2 | Astro/NextJS adapter integration tests | — |
-| P2-TEST-03 | P2 | Pure utility function tests | — |
+| P2-TEST-03 | P2 | Pure utility function tests | ✅ #39 |
 | P2-TEST-04 | P2 | Middleware unit tests with mocked req/res/next | — |
 
 ### Partially Complete
@@ -486,3 +486,4 @@ For PRs with Prisma schema changes:
 | 35 | `feature/p2-dead-01-focused-cleanup` | ✅ Merged | #36 | Remove unused deps + deduplicate workspace primitive exports |
 | 36 | `feature/p2-style-01-kebab-case-cleanup` | ✅ Merged | #37 | Rename camelCase files to kebab-case (P2-STYLE-01 + P2-STYLE-04) |
 | 37 | `feature/p2-style-02-barrel-file` | ✅ Merged | #38 | Add index.ts barrel file for centralized lib exports |
+| 38 | `feature/p2-test-03-utility-tests` | ✅ Merged | #39 | 69 pure utility function tests across 5 modules |
