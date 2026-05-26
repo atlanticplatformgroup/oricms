@@ -8,13 +8,13 @@ describe('gitApi', () => {
   });
 
   it('gets status', async () => {
-    const requestSpy = vi.spyOn(core, 'request').mockResolvedValueOnce({ status: { ahead: 0, behind: 0, modified: [], staged: [] } });
+    const _requestSpy = vi.spyOn(core, 'request').mockResolvedValueOnce({ status: { ahead: 0, behind: 0, modified: [], staged: [] } });
     await gitApi.getStatus('p1');
-    expect(requestSpy).toHaveBeenCalledWith('/api/v1/projects/p1/git/status');
+    expect(_requestSpy).toHaveBeenCalledWith('/api/v1/projects/p1/git/status');
   });
 
   it('gets branches with fallback current', async () => {
-    const requestSpy = vi.spyOn(core, 'request').mockResolvedValueOnce({
+    vi.spyOn(core, 'request').mockResolvedValueOnce({
       branches: [{ name: 'main', isCurrent: true }],
       current: null,
     });
@@ -61,7 +61,7 @@ describe('gitApi', () => {
   });
 
   it('switches branch', async () => {
-    const requestSpy = vi.spyOn(core, 'request').mockResolvedValueOnce({ branches: [], current: 'dev' });
+    vi.spyOn(core, 'request').mockResolvedValueOnce({ branches: [], current: 'dev' });
     const result = await gitApi.switchBranch('p1', 'dev');
     expect(result.current).toBe('dev');
   });
@@ -100,19 +100,19 @@ describe('gitApi', () => {
   });
 
   it('requests promotion approval', async () => {
-    const requestSpy = vi.spyOn(core, 'request').mockResolvedValueOnce({ request: { id: 'r1', sourceBranch: 'dev', targetBranch: 'main', status: 'pending' } });
+    vi.spyOn(core, 'request').mockResolvedValueOnce({ request: { id: 'r1', sourceBranch: 'dev', targetBranch: 'main', status: 'pending' } });
     const result = await gitApi.requestPromotionApproval('p1', 'dev', 'main', 'reason');
     expect(result.request?.id).toBe('r1');
   });
 
   it('approves promotion request', async () => {
-    const requestSpy = vi.spyOn(core, 'request').mockResolvedValueOnce({ request: { id: 'r1', status: 'approved' } });
+    vi.spyOn(core, 'request').mockResolvedValueOnce({ request: { id: 'r1', status: 'approved' } });
     const result = await gitApi.approvePromotionRequest('p1', 'r1');
     expect(result.request?.status).toBe('approved');
   });
 
   it('rejects promotion request', async () => {
-    const requestSpy = vi.spyOn(core, 'request').mockResolvedValueOnce({ request: { id: 'r1', status: 'rejected' } });
+    vi.spyOn(core, 'request').mockResolvedValueOnce({ request: { id: 'r1', status: 'rejected' } });
     const result = await gitApi.rejectPromotionRequest('p1', 'r1', 'no');
     expect(result.request?.status).toBe('rejected');
   });

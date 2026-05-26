@@ -80,10 +80,10 @@ describe('globalAssetsApi', () => {
   });
 
   it('gets a global asset', async () => {
-    const requestSpy = vi.spyOn(core, 'request').mockResolvedValueOnce({ asset: { id: 'ga1' } });
+    const requestSpy = vi.spyOn(core, 'request').mockResolvedValueOnce({ asset: { assetId: 'ga1' } as any });
 
     const result = await globalAssetsApi.get('p1', 'ga1');
-    expect(result.asset.id).toBe('ga1');
+    expect(result.asset.assetId).toBe('ga1');
     expect(requestSpy).toHaveBeenCalledWith('/api/v1/projects/p1/global-assets/ga1');
   });
 

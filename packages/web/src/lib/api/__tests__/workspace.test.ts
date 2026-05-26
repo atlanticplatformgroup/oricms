@@ -20,9 +20,9 @@ describe('workspaceApi', () => {
   });
 
   it('gets a ui group', async () => {
-    const requestSpy = vi.spyOn(core, 'request').mockResolvedValueOnce({ uiGroup: { id: 'ug1' } });
+    const requestSpy = vi.spyOn(core, 'request').mockResolvedValueOnce({ uiGroup: { group: { id: 'ug1' } } as any });
     const result = await workspaceApi.getUiGroup('p1', 'ug1');
-    expect(result.uiGroup.id).toBe('ug1');
+    expect(result.uiGroup.group.id).toBe('ug1');
     expect(requestSpy).toHaveBeenCalledWith('/api/v1/projects/p1/ui-groups/ug1');
   });
 

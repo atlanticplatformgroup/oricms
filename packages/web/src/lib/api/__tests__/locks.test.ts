@@ -10,12 +10,12 @@ describe('locksApi', () => {
   });
 
   it('acquires a lock', async () => {
-    const requestSpy = vi.spyOn(core, 'request').mockResolvedValueOnce({ lockId: 'l1', token: 'tok' });
-    const result = await locksApi.acquire('p1', { resourceType: 'entry', resourceId: 'e1' });
-    expect(result.lockId).toBe('l1');
+    const requestSpy = vi.spyOn(core, 'request').mockResolvedValueOnce({ lock: { id: 'l1' } as any, lockToken: 'tok' });
+    const result = await locksApi.acquire('p1', { resourceType: 'entry', resourceId: 'e1', mode: 'hard', reason: 'editing' });
+    expect(result.lock.id).toBe('l1');
     expect(requestSpy).toHaveBeenCalledWith('/api/v1/projects/p1/locks/acquire', {
       method: 'POST',
-      body: { resourceType: 'entry', resourceId: 'e1' },
+      body: { resourceType: 'entry', resourceId: 'e1', mode: 'hard', reason: 'editing' },
       headers: { [ORI_SESSION_ID_HEADER]: 'sess-123' },
     });
   });

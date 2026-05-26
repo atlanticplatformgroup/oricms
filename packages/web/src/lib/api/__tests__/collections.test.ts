@@ -14,9 +14,9 @@ describe('contentTypesApi', () => {
   });
 
   it('gets a content type', async () => {
-    const requestSpy = vi.spyOn(core, 'request').mockResolvedValueOnce({ contentType: { id: 'ct1' } });
+    const requestSpy = vi.spyOn(core, 'request').mockResolvedValueOnce({ contentType: { $id: 'ct1' } as any });
     const result = await contentTypesApi.get('p1', 'ct1');
-    expect(result.contentType.id).toBe('ct1');
+    expect(result.contentType.$id).toBe('ct1');
     expect(requestSpy).toHaveBeenCalledWith('/api/v1/projects/p1/content-types/ct1');
   });
 
@@ -149,12 +149,12 @@ describe('collectionsApi', () => {
   });
 
   it('applies branch transfer', async () => {
-    const requestSpy = vi.spyOn(core, 'request').mockResolvedValueOnce({ committed: true, hash: 'h1', message: 'm', appliedPointerCount: 1 });
-    const result = await collectionsApi.applyEntryBranchTransfer('p1', 'c1', 'e1', { sourceBranch: 'dev', targetBranch: 'main', resolutions: {} });
+    const requestSpy = vi.spyOn(core, 'request').mockResolvedValueOnce({ committed: true, hash: 'h1', message: 'm', appliedPointerCount: 1 } as any);
+    const result = await collectionsApi.applyEntryBranchTransfer('p1', 'c1', 'e1', { sourceBranch: 'dev', targetBranch: 'main', resolutions: [], mode: 'entire_entry', message: 'test' });
     expect(result.committed).toBe(true);
     expect(requestSpy).toHaveBeenCalledWith('/api/v1/projects/p1/schemas/c1/entries/e1/branch-transfer/apply', {
       method: 'POST',
-      body: { sourceBranch: 'dev', targetBranch: 'main', resolutions: {} },
+      body: { sourceBranch: 'dev', targetBranch: 'main', resolutions: [], mode: 'entire_entry', message: 'test' },
     });
   });
 });
