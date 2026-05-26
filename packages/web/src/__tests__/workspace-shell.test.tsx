@@ -1,6 +1,6 @@
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { mocks, renderApp, setupWorkspaceTestHarness, waitForCollectionsHeading } from '../test-utils/workspaceTestHarness';
+import { mocks, renderApp, setupWorkspaceTestHarness, waitForCollectionsHeading } from '../test-utils/workspace-test-harness';
 import { request } from '../lib/api/core';
 
 setupWorkspaceTestHarness();

@@ -1,6 +1,6 @@
 import type { CollectionEntry, ContentType, SchemaField } from '@ori/shared';
 import { getDisplayText } from '../lib/workspace/format';
-import { deriveSchemaFieldValue } from '../lib/schemaFieldComputed';
+import { deriveSchemaFieldValue } from '../lib/schema-field-computed';
 import { getEditorFieldError } from '../lib/entries/editor';
 
 export type IdentifierState = Record<string, { auto: boolean; sourceLabel?: string }>;

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import type { Asset, CollectionConfig, CollectionEntry, ContentType } from '@ori/shared';
 import { resolveRegisteredFieldCapability } from '../lib/fields/capabilities';
-import { resolveBrowseRelationLabelsByField } from '../lib/entries/displayResolver';
+import { resolveBrowseRelationLabelsByField } from '../lib/entries/display-resolver';
 import { getCollectionTableColumns } from '../lib/entries/resolution';
 import { useBrowseSearch } from './useBrowseSearch';
 import { useCollectionEntries } from './queries/useCollectionQueries';

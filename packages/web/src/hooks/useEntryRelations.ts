@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { CollectionConfig, CollectionEntry, ContentType, SchemaField } from '@ori/shared';
 import { collectionsApi } from '../lib/api/collections';
-import { toRelationOption, type RelationOption } from '../lib/entries/displayResolver';
+import { toRelationOption, type RelationOption } from '../lib/entries/display-resolver';
 import { isMultiRelationField, resolveTargetCollectionId } from '../lib/entries/resolution';
 import { getRefId, getRefIds } from '@ori/shared';
 
