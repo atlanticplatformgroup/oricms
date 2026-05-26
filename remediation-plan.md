@@ -35,7 +35,7 @@
 | P0-SEC-05 | `packages/api/src/system/routes.ts` | Require auth for setup status or return generic response |
 | P0-SEC-09 | `packages/api/src/graphql/routes.ts` | Disable introspection in production |
 | P1-SEC-01 | 6 route files (collections, schemas, content-types, assets, branch-mapping, preview) | Add `requireAuth` + `requirePermission('read')` middleware |
-| P1-SEC-02 | `packages/api/src/auth/routes.ts` | Add zod schema validation on refresh token body |
+| P1-SEC-02 | `packages/api/src/auth/routes.ts` | Add zod schema validation on refresh token body | ✅ Direct commit |
 | P1-SEC-03 | Auth routes, agent gateway, webhooks | Add `express-rate-limit` (auth: 5/min, API: 100/min) |
 
 **Risk:** Low-to-medium. Each change is localized and additive.
