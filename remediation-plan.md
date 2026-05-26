@@ -375,9 +375,9 @@ Out-of-scope / follow-ups (chronological):
 | P1-STYLE-05 | P1 | Remove `.js` import extensions | ⏭️ N/A — Required by `NodeNext` moduleResolution |
 | P1-CSS-01 | P1 | Remaining inline styles (partially done in PR #20) | ✅ Complete — see note below |
 | P2-DEAD-01 | P2 | Remove `export` from unused functions | ✅ #36 |
-| P2-STYLE-01 | P2 | Rename camelCase → kebab-case in `packages/web/src/lib/` | — |
+| P2-STYLE-01 | P2 | Rename camelCase → kebab-case in `packages/web/src/lib/` | ✅ #37 |
 | P2-STYLE-02 | P2 | Add `index.ts` barrel file | — |
-| P2-STYLE-04 | P2 | Rename `workspaceTestHarness.tsx` → `workspace-test-harness.tsx` | — |
+| P2-STYLE-04 | P2 | Rename `workspaceTestHarness.tsx` → `workspace-test-harness.tsx` | ✅ #37 |
 | P2-TEST-01 | P2 | CLI command handler tests | — |
 | P2-TEST-02 | P2 | Astro/NextJS adapter integration tests | — |
 | P2-TEST-03 | P2 | Pure utility function tests | — |
@@ -484,3 +484,4 @@ For PRs with Prisma schema changes:
 | 33 | `feature/p0-sec-02-webhook-hmac-validation` | ✅ Merged | #34 | HMAC-SHA256 webhook secret validation for generic + GitLab |
 | 34 | `feature/p1-style-05-mark-na` | ✅ Merged | #35 | Mark P1-STYLE-05 as N/A (NodeNext requires .js extensions) |
 | 35 | `feature/p2-dead-01-focused-cleanup` | ✅ Merged | #36 | Remove unused deps + deduplicate workspace primitive exports |
+| 36 | `feature/p2-style-01-kebab-case-cleanup` | ✅ Merged | #37 | Rename camelCase files to kebab-case (P2-STYLE-01 + P2-STYLE-04) |
