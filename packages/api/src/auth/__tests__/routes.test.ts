@@ -217,6 +217,27 @@ describe('Auth Routes', () => {
 
       expect(response.status).toBe(401);
     });
+
+    it('should reject missing refresh token with validation error', async () => {
+      const response = await request(app)
+        .post('/api/v1/auth/refresh')
+        .send({});
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('VALIDATION_ERROR');
+      expect(response.body.error.details).toBeDefined();
+    });
+
+    it('should reject non-string refresh token with validation error', async () => {
+      const response = await request(app)
+        .post('/api/v1/auth/refresh')
+        .send({ refreshToken: 12345 });
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.error.code).toBe('VALIDATION_ERROR');
+    });
   });
 
   describe('POST /api/v1/auth/logout', () => {

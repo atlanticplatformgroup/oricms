@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { body } from 'express-validator';
+import { z } from 'zod';
 import { authenticate, optionalAuth } from './middleware';
 import { logger } from '../middleware/logger';
 import {
@@ -24,6 +25,10 @@ import {
 } from './preferences-route-support';
 
 const router = Router();
+
+const refreshTokenSchema = z.object({
+  refreshToken: z.string().min(1, 'refreshToken is required'),
+});
 
 router.post(
   '/register',
@@ -78,8 +83,19 @@ router.post(
 
 router.post('/refresh', async (req: Request, res: Response) => {
   try {
-    const refreshToken = req.body.refreshToken || req.cookies?.ori_refresh_token;
-    if (!refreshToken || typeof refreshToken !== 'string') {
+    const parseResult = refreshTokenSchema.safeParse(req.body);
+    if (!parseResult.success) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: parseResult.error.errors[0]?.message || 'Invalid refresh token',
+          details: parseResult.error.errors,
+        },
+      });
+    }
+    const refreshToken = parseResult.data.refreshToken || req.cookies?.ori_refresh_token;
+    if (!refreshToken) {
       return res.status(400).json({ success: false, error: { code: 'VALIDATION_ERROR', message: 'refreshToken is required' } });
     }
     await refreshSessionOrRespond(res, refreshToken);
