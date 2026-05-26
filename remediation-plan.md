@@ -126,7 +126,7 @@
 | P1-STYLE-01 | `packages/api/src/projects/configService.ts` | Rename to `config-service.ts`; update imports |
 | P1-STYLE-02 | 5 hook files | Rename to `usePascalCase` convention |
 | P1-STYLE-03 | 3 E2E files | Rename `*.spec.ts` → `*.test.ts`; update vitest config |
-| P1-STYLE-05 | `packages/client/src/index.ts` + others | Remove `.js` import extensions |
+| P1-STYLE-05 | `packages/client/src/index.ts` + others | Remove `.js` import extensions | ⏭️ N/A — Required by `NodeNext` moduleResolution in CLI/adapters packages |
 | P2-STYLE-01 | 4 files in `packages/web/src/lib/` | Rename camelCase → kebab-case |
 | P2-STYLE-02 | `packages/web/src/` | Add `index.ts` barrel file |
 | P2-STYLE-04 | `packages/web/src/testing/workspaceTestHarness.tsx` | Rename to `workspace-test-harness.tsx` |
@@ -372,7 +372,7 @@ Out-of-scope / follow-ups (chronological):
 | P1-STYLE-01 | P1 | Rename `configService.ts` → `config-service.ts` | ✅ Already done |
 | P1-STYLE-02 | P1 | Rename hooks to `usePascalCase` | ✅ Already done |
 | P1-STYLE-03 | P1 | Rename E2E `*.spec.ts` → `*.test.ts` | ✅ Already done |
-| P1-STYLE-05 | P1 | Remove `.js` import extensions | — |
+| P1-STYLE-05 | P1 | Remove `.js` import extensions | ⏭️ N/A — Required by `NodeNext` moduleResolution |
 | P1-CSS-01 | P1 | Remaining inline styles (partially done in PR #20) | ✅ Complete — see note below |
 | P2-DEAD-01 | P2 | Remove `export` from unused functions | — |
 | P2-STYLE-01 | P2 | Rename camelCase → kebab-case in `packages/web/src/lib/` | — |
