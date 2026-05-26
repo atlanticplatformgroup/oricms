@@ -1,7 +1,7 @@
 import { useEffect, type MutableRefObject, type Dispatch, type SetStateAction } from 'react';
 import type { CollectionEntry } from '@ori/shared';
 import type { SchemaField } from '@ori/shared';
-import { applyDerivedSchemaFieldValues, deriveSchemaFieldValue } from '../lib/schemaFieldComputed';
+import { applyDerivedSchemaFieldValues, deriveSchemaFieldValue } from '../lib/schema-field-computed';
 import { getDisplayText } from '../lib/workspace/format';
 import type { DerivedIdentifierConfig, IdentifierState } from './entryEditorSupport';
 import { buildIdentifierState, cloneEntry } from './entryEditorSupport';

@@ -1,6 +1,6 @@
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import { mocks, renderApp, setupWorkspaceTestHarness } from '../test-utils/workspaceTestHarness';
+import { mocks, renderApp, setupWorkspaceTestHarness } from '../test-utils/workspace-test-harness';
 
 setupWorkspaceTestHarness();
 

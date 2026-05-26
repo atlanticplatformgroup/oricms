@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import type { CollectionEntry, ContentType } from '@ori/shared';
 import { MantineProvider } from '@mantine/core';
-import { defaultEntriesByCollection, mocks, renderApp, setupWorkspaceTestHarness } from '../test-utils/workspaceTestHarness';
+import { defaultEntriesByCollection, mocks, renderApp, setupWorkspaceTestHarness } from '../test-utils/workspace-test-harness';
 import { SchemasWorkspace } from '../components/workspace/SchemasWorkspace';
 import { SCHEMA_FIELD_TYPE_GROUPS, SCHEMA_FIELD_TYPE_OPTIONS } from '../lib/workspace/constants';
 import { makeSchemaField } from '../lib/schemas/factory';

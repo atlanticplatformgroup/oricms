@@ -1,6 +1,6 @@
 import { screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { mocks, renderApp, setupWorkspaceTestHarness } from '../test-utils/workspaceTestHarness';
+import { mocks, renderApp, setupWorkspaceTestHarness } from '../test-utils/workspace-test-harness';
 
 setupWorkspaceTestHarness();
 

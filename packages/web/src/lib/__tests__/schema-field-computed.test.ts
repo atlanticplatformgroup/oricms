@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { SchemaField } from '@ori/shared';
-import { applyDerivedSchemaFieldValues, getSchemaFieldDefaultValue } from '../schemaFieldComputed';
+import { applyDerivedSchemaFieldValues, getSchemaFieldDefaultValue } from '../schema-field-computed';
 
 describe('schemaFieldComputed', () => {
   it('returns typed defaults from schema options', () => {

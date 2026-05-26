@@ -1,4 +1,4 @@
-import { mocks, renderApp, setupWorkspaceTestHarness } from '../test-utils/workspaceTestHarness';
+import { mocks, renderApp, setupWorkspaceTestHarness } from '../test-utils/workspace-test-harness';
 import { screen, waitFor } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 

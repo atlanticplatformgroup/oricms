@@ -1,7 +1,7 @@
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import type { CollectionEntry, ContentType } from '@ori/shared';
-import { defaultEntriesByCollection, mocks, renderApp, setupWorkspaceTestHarness } from '../test-utils/workspaceTestHarness';
+import { defaultEntriesByCollection, mocks, renderApp, setupWorkspaceTestHarness } from '../test-utils/workspace-test-harness';
 
 setupWorkspaceTestHarness();
 
