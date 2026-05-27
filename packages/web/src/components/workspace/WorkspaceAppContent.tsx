@@ -55,7 +55,7 @@ function EntryHistoryProviderMount(props: EntryHistoryProviderMountProps) {
   );
 }
 
-export function WorkspaceAppContent(props: WorkspaceAppContentProps) {
+export default function WorkspaceAppContent(props: WorkspaceAppContentProps) {
   const {
     activeProjectSlug,
     currentBranchName,

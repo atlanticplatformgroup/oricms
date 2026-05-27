@@ -55,13 +55,17 @@ export async function getCollectionEntriesOrRespond(
   return initialized.service.findMany(collectionId, queryParams);
 }
 
-export async function listCollectionsOrRespond(projectId: string, res: Response) {
+export async function listCollectionsOrRespond(
+  projectId: string,
+  res: Response,
+  pagination?: { page: number; limit: number },
+) {
   const initialized = await getCollectionServiceForProject(projectId, res);
   if (!initialized) {
     return null;
   }
 
-  const collections = (await initialized.service.listCollections()).map((collection) => ({
+  const allCollections = (await initialized.service.listCollections()).map((collection) => ({
     ...collection,
     resource: createResourceCollectionLink(
       getContentResourceCollectionId(collection.id),
@@ -70,7 +74,18 @@ export async function listCollectionsOrRespond(projectId: string, res: Response)
     ),
   }));
 
-  return { collections };
+  if (!pagination) {
+    return { collections: allCollections };
+  }
+
+  const { page, limit } = pagination;
+  const total = allCollections.length;
+  const pageCount = Math.ceil(total / limit) || 1;
+  const start = (page - 1) * limit;
+  const end = start + limit;
+  const collections = allCollections.slice(start, end);
+
+  return { collections, page, limit, total, pageCount };
 }
 
 export async function getCollectionEntryOrRespond(

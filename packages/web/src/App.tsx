@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useState, type FormEvent, lazy, Suspense } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { Alert, Button, Center, Container, Group, Loader, Paper, Stack, Text, TextInput, Title } from '@mantine/core';
@@ -16,8 +16,9 @@ import { useCollectionConfigPersistence } from './hooks/useCollectionConfigPersi
 import { useWorkspaceBranchSync } from './hooks/useWorkspaceBranchSync';
 import { useWorkspaceCapabilities } from './hooks/useWorkspaceCapabilities';
 import { useWorkspaceRouteNormalization } from './hooks/useWorkspaceRouteNormalization';
-import { WorkspaceAppContent } from './components/workspace/WorkspaceAppContent';
 import { projectsApi } from './lib/api/projects';
+
+const WorkspaceAppContent = lazy(() => import('./components/workspace/WorkspaceAppContent'));
 
 function slugifyProjectName(name: string) {
   return name
@@ -262,140 +263,148 @@ function AppWithRouter() {
   }
 
   return (
-    <WorkspaceAppContent
-      activeProjectSlug={activeProjectSlug}
-      currentBranchName={currentBranchName}
-      collectionManagerProps={{
-        selectedCollection,
-        collections,
-        contentTypes,
-        selectedCollectionEntryCount: collectionBrowse.selectedCollectionEntryCount,
-        showToast,
-        onPersistCreate: async (nextCollection, headers) => {
-          await updateCollectionsConfigMutation.mutateAsync({
-            nextCollections: [...collections, nextCollection],
-            nextCollectionId: nextCollection.id,
-            action: 'save',
-            headers,
-          });
-        },
-        onPersistSaveSettings: async (nextCollections, nextCollectionId, headers) => {
-          await updateCollectionsConfigMutation.mutateAsync({
-            nextCollections,
-            nextCollectionId,
-            action: 'save',
-            headers,
-          });
-        },
-        onPersistDelete: async (collectionId, nextCollectionId, headers) => {
-          await deleteCollectionMutation.mutateAsync({
-            collectionId,
-            nextCollectionId,
-            headers,
-          });
-        },
-      }}
-      editorProps={{
-        projectId: currentProject.id,
-        selectedCollection,
-        selectedContentType,
-        selectedEntry,
-        selectedEntryRevision,
-        entries: collectionBrowse.entries,
-        primaryField,
-        collections,
-        contentTypes,
-        componentSchemaMap,
-        assetOptions,
-        assetMap,
-        assetsLoading: assetsQuery.isLoading || globalAssetsQuery.isLoading,
-        assetRecords: assetsQuery.data?.assets ?? [],
-        globalAssetRecords,
-        canCreateEntries: capabilities.canCreateEntries,
-        canUpdateEntries: capabilities.canUpdateEntries,
-        canDeleteEntries: capabilities.canDeleteEntries,
-        showToast,
-        queryClient,
-        onNavigateToEntry: (entryId: string) => {
-          if (!activeProjectSlug || !selectedCollection) return;
-          navigateTo(buildWorkspacePath(activeProjectSlug, 'collections', selectedCollection.id, { entryId, branchName: currentBranchName }));
-        },
-        onNavigateToCollection: () => {
-          if (!activeProjectSlug || !selectedCollection) return;
-          navigateTo(buildWorkspacePath(activeProjectSlug, 'collections', selectedCollection.id, { branchName: currentBranchName }), true);
-        },
-      }}
-      entryHistoryProps={{
-        projectId: currentProject.id,
-        selectedCollection,
-        selectedEntry,
-        activeHistoryView,
-        canUpdateEntries: capabilities.canUpdateEntries,
-        currentBranchName,
-      }}
-      schemaEditorProps={{
-        projectId: currentProject.id,
-        activeSchemaMode,
-        selectedSchema,
-        selectedSchemaDocument,
-        showToast,
-        queryClient,
-      }}
-      navigateTo={navigateTo}
-      workspaceShellProps={{
-        currentProject,
-        projects,
-        setCurrentProject,
-        isLoadingProjects,
-        user,
-        logout,
-        gitStatus,
-        availableSections,
-        activeSection,
-        activeSectionLabel,
-        secondaryRailCollapsed,
-        setSecondaryRailCollapsed,
-        canCreateCollections: capabilities.canCreateCollections,
-        activeSchemaMode,
-        componentSchemaData: componentSchemasQuery.data ?? [],
-        contentTypes,
-        collections,
-        activeProjectSlug,
-        navigateTo,
-        secondaryOptions,
-        activeSecondaryId,
-        selectedSecondaryOption,
-        showToast,
-        refreshGitStatus,
-        canCreateAssets: capabilities.canCreateAssets,
-        canUpdateAssets: capabilities.canUpdateAssets,
-        canDeleteAssets: capabilities.canDeleteAssets,
-        canManageGlobalMedia: capabilities.canManageGlobalMedia,
-        currentBranchName,
-        selectedCollection,
-        activeEntryId,
-        activeHistoryView,
-        activeCollectionSettingsView,
-        selectedEntry,
-        primaryField,
-        secondaryField,
-        collectionBrowse,
-        canCreateEntries: capabilities.canCreateEntries,
-        canUpdateEntries: capabilities.canUpdateEntries,
-        canDeleteEntries: capabilities.canDeleteEntries,
-        canUpdateCollections: capabilities.canUpdateCollections,
-        canDeleteCollections: capabilities.canDeleteCollections,
-        selectedEntryLoading,
-        selectedEntryError,
-        retrySelectedEntry: () => {
-          collectionBrowse.retryEntries();
-          void selectedEntryQuery.refetch();
-        },
-        selectedSchemaDocument,
-        updateCollectionsConfigPending: updateCollectionsConfigMutation.isPending,
-        assetsQueryLoading: assetsQuery.isLoading || globalAssetsQuery.isLoading,
-      }}
-    />
+    <Suspense
+      fallback={
+        <Center py="xl">
+          <Loader size="sm" />
+        </Center>
+      }
+    >
+      <WorkspaceAppContent
+        activeProjectSlug={activeProjectSlug}
+        currentBranchName={currentBranchName}
+        collectionManagerProps={{
+          selectedCollection,
+          collections,
+          contentTypes,
+          selectedCollectionEntryCount: collectionBrowse.selectedCollectionEntryCount,
+          showToast,
+          onPersistCreate: async (nextCollection, headers) => {
+            await updateCollectionsConfigMutation.mutateAsync({
+              nextCollections: [...collections, nextCollection],
+              nextCollectionId: nextCollection.id,
+              action: 'save',
+              headers,
+            });
+          },
+          onPersistSaveSettings: async (nextCollections, nextCollectionId, headers) => {
+            await updateCollectionsConfigMutation.mutateAsync({
+              nextCollections,
+              nextCollectionId,
+              action: 'save',
+              headers,
+            });
+          },
+          onPersistDelete: async (collectionId, nextCollectionId, headers) => {
+            await deleteCollectionMutation.mutateAsync({
+              collectionId,
+              nextCollectionId,
+              headers,
+            });
+          },
+        }}
+        editorProps={{
+          projectId: currentProject.id,
+          selectedCollection,
+          selectedContentType,
+          selectedEntry,
+          selectedEntryRevision,
+          entries: collectionBrowse.entries,
+          primaryField,
+          collections,
+          contentTypes,
+          componentSchemaMap,
+          assetOptions,
+          assetMap,
+          assetsLoading: assetsQuery.isLoading || globalAssetsQuery.isLoading,
+          assetRecords: assetsQuery.data?.assets ?? [],
+          globalAssetRecords,
+          canCreateEntries: capabilities.canCreateEntries,
+          canUpdateEntries: capabilities.canUpdateEntries,
+          canDeleteEntries: capabilities.canDeleteEntries,
+          showToast,
+          queryClient,
+          onNavigateToEntry: (entryId: string) => {
+            if (!activeProjectSlug || !selectedCollection) return;
+            navigateTo(buildWorkspacePath(activeProjectSlug, 'collections', selectedCollection.id, { entryId, branchName: currentBranchName }));
+          },
+          onNavigateToCollection: () => {
+            if (!activeProjectSlug || !selectedCollection) return;
+            navigateTo(buildWorkspacePath(activeProjectSlug, 'collections', selectedCollection.id, { branchName: currentBranchName }), true);
+          },
+        }}
+        entryHistoryProps={{
+          projectId: currentProject.id,
+          selectedCollection,
+          selectedEntry,
+          activeHistoryView,
+          canUpdateEntries: capabilities.canUpdateEntries,
+          currentBranchName,
+        }}
+        schemaEditorProps={{
+          projectId: currentProject.id,
+          activeSchemaMode,
+          selectedSchema,
+          selectedSchemaDocument,
+          showToast,
+          queryClient,
+        }}
+        navigateTo={navigateTo}
+        workspaceShellProps={{
+          currentProject,
+          projects,
+          setCurrentProject,
+          isLoadingProjects,
+          user,
+          logout,
+          gitStatus,
+          availableSections,
+          activeSection,
+          activeSectionLabel,
+          secondaryRailCollapsed,
+          setSecondaryRailCollapsed,
+          canCreateCollections: capabilities.canCreateCollections,
+          activeSchemaMode,
+          componentSchemaData: componentSchemasQuery.data ?? [],
+          contentTypes,
+          collections,
+          activeProjectSlug,
+          navigateTo,
+          secondaryOptions,
+          activeSecondaryId,
+          selectedSecondaryOption,
+          showToast,
+          refreshGitStatus,
+          canCreateAssets: capabilities.canCreateAssets,
+          canUpdateAssets: capabilities.canUpdateAssets,
+          canDeleteAssets: capabilities.canDeleteAssets,
+          canManageGlobalMedia: capabilities.canManageGlobalMedia,
+          currentBranchName,
+          selectedCollection,
+          activeEntryId,
+          activeHistoryView,
+          activeCollectionSettingsView,
+          selectedEntry,
+          primaryField,
+          secondaryField,
+          collectionBrowse,
+          canCreateEntries: capabilities.canCreateEntries,
+          canUpdateEntries: capabilities.canUpdateEntries,
+          canDeleteEntries: capabilities.canDeleteEntries,
+          canUpdateCollections: capabilities.canUpdateCollections,
+          canDeleteCollections: capabilities.canDeleteCollections,
+          selectedEntryLoading,
+          selectedEntryError,
+          retrySelectedEntry: () => {
+            collectionBrowse.retryEntries();
+            void selectedEntryQuery.refetch();
+          },
+          selectedSchemaDocument,
+          updateCollectionsConfigPending: updateCollectionsConfigMutation.isPending,
+          assetsQueryLoading: assetsQuery.isLoading || globalAssetsQuery.isLoading,
+        }}
+      />
+    </Suspense>
   );
 }
 

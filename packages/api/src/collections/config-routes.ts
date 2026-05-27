@@ -1,5 +1,5 @@
 import { Router, type Request, type Response } from 'express';
-import { body, param, validationResult } from 'express-validator';
+import { body, param, query, validationResult } from 'express-validator';
 import { logger } from '../middleware/logger';
 import {
   badRequest,
@@ -21,10 +21,22 @@ export function registerCollectionConfigRoutes(router: Router): void {
   router.get(
     '/',
     requirePermission('collections', 'read'),
+    [
+      query('page').optional().isInt({ min: 1 }).toInt(),
+      query('limit').optional().isInt({ min: 1, max: 100 }).toInt(),
+    ],
     async (req: Request, res: Response) => {
       try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+          badRequest(res, 'Invalid pagination parameters', 'INVALID_PAGINATION');
+          return;
+        }
+
         const { projectId } = req.params as { projectId: string };
-        const result = await listCollectionsOrRespond(projectId, res);
+        const page = typeof req.query.page === 'number' ? req.query.page : 1;
+        const limit = typeof req.query.limit === 'number' ? req.query.limit : 50;
+        const result = await listCollectionsOrRespond(projectId, res, { page, limit });
         if (!result) {
           logger.warn({ msg: 'Project not found while listing collections', projectId });
           return;

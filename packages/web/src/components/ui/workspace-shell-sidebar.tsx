@@ -59,7 +59,7 @@ export function WorkspaceSidebarNavItem({
           borderRadius: WORKSPACE_SIDEBAR_ROW_RADIUS,
           paddingBlock: description ? '9px' : '11px',
           paddingInline: '12px',
-          minHeight: description ? 58 : 44,
+          minHeight: description ? '58px' : '44px',
           transition: `${WORKSPACE_TRANSITION_BG}, ${WORKSPACE_TRANSITION_COLOR}, ${WORKSPACE_TRANSITION_SHADOW}`,
           color: WORKSPACE_SHELL_TEXT,
           boxShadow: 'inset 0 0 0 1px transparent',
