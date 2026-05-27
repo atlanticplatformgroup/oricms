@@ -12,7 +12,7 @@ import {
   duplicateArrayItem,
   buildObjectFieldFallback,
   patchComponentRoot,
-} from '../structuredEditingMutations';
+} from '../useStructuredEditingMutations';
 
 function createEntry(overrides: Record<string, unknown> = {}): CollectionEntry {
   return {

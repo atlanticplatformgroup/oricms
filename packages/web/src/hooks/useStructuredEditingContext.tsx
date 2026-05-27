@@ -3,7 +3,7 @@ import { type Asset, type ComponentSchema, type CollectionEntry, type SchemaFiel
 import { EditorField } from '../components/fields/EditorField';
 import type { FieldRendererContext } from '../components/fields/contracts';
 import type { StructuredDragItem } from '../lib/entries/types';
-import { getStructuredItemState, getStructuredItemTitle } from './structuredEditingSupport';
+import { getStructuredItemState, getStructuredItemTitle } from './useStructuredEditingSupport';
 
 export function createStructuredDragContext(args: {
   draggedStructuredItem: StructuredDragItem | null;

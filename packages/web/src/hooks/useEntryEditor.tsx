@@ -9,7 +9,7 @@ import { useEntryRelations } from './useEntryRelations';
 import { useEntryStructuredEditing } from './useEntryStructuredEditing';
 import type { GlobalAsset } from '../lib/assets/references';
 import { useEntryPersistence } from './useEntryPersistence';
-import { buildDerivedIdentifierConfig, buildEditorFieldErrors, type IdentifierState } from './entryEditorSupport';
+import { buildDerivedIdentifierConfig, buildEditorFieldErrors, type IdentifierState } from './useEntryEditorSupport';
 import {
   buildIdentifierResetHandler,
   createEntryFieldChangeHandler,
@@ -17,7 +17,7 @@ import {
   useEntrySaveShortcut,
   useEntrySelectionSync,
   useIdentifierStateSync,
-} from './entryEditorEffects';
+} from './useEntryEditorEffects';
 
 interface UseEntryEditorOptions {
   projectId: string | null;

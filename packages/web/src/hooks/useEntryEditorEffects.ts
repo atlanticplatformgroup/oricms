@@ -3,8 +3,8 @@ import type { CollectionEntry } from '@ori/shared';
 import type { SchemaField } from '@ori/shared';
 import { applyDerivedSchemaFieldValues, deriveSchemaFieldValue } from '../lib/schema-field-computed';
 import { getDisplayText } from '../lib/workspace/format';
-import type { DerivedIdentifierConfig, IdentifierState } from './entryEditorSupport';
-import { buildIdentifierState, cloneEntry } from './entryEditorSupport';
+import type { DerivedIdentifierConfig, IdentifierState } from './useEntryEditorSupport';
+import { buildIdentifierState, cloneEntry } from './useEntryEditorSupport';
 
 export function useEntrySelectionSync(args: {
   isDirty: boolean;

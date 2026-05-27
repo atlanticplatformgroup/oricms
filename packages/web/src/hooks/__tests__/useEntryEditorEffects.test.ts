@@ -8,7 +8,7 @@ import {
   useEntrySaveShortcut,
   createEntryFieldChangeHandler,
   buildIdentifierResetHandler,
-} from '../entryEditorEffects';
+} from '../useEntryEditorEffects';
 
 vi.mock('../lib/schemaFieldComputed', () => ({
   applyDerivedSchemaFieldValues: vi.fn((_fields, values) => values),
@@ -22,7 +22,7 @@ vi.mock('../lib/workspace/format', () => ({
   getDisplayText: vi.fn((value: unknown) => (typeof value === 'string' ? value : String(value ?? ''))),
 }));
 
-vi.mock('../entryEditorSupport', () => ({
+vi.mock('../useEntryEditorSupport', () => ({
   buildIdentifierState: vi.fn((_entry, configs) => {
     const state: Record<string, { auto: boolean; sourceLabel: string }> = {};
     configs.forEach((config: { fieldKey: string; sourceLabel: string }) => {
