@@ -1,5 +1,5 @@
 export const SUPPORTED_PREVIEW_LOCALES = ['en', 'es'] as const;
-export type PreviewLocale = (typeof SUPPORTED_PREVIEW_LOCALES)[number];
+type PreviewLocale = (typeof SUPPORTED_PREVIEW_LOCALES)[number];
 
 interface LocalizedContentEntry {
   body?: unknown;

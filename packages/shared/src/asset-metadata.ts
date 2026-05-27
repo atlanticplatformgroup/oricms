@@ -32,7 +32,7 @@ export function getAssetTags(metadata?: AssetMetadata | null): string[] {
   return [];
 }
 
-export function getPrimaryAssetTag(metadata?: AssetMetadata | null): string | null {
+function getPrimaryAssetTag(metadata?: AssetMetadata | null): string | null {
   return getAssetTags(metadata)[0] || null;
 }
 
