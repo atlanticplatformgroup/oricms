@@ -11,6 +11,7 @@ export type RateLimitPolicyName =
   | 'authCredentials'
   | 'authRegistration'
   | 'authSession'
+  | 'authGuestToken'
   | 'api'
   | 'delivery'
   | 'agent'
@@ -156,6 +157,12 @@ function defaultPolicyDefinitions(isProduction: boolean): RateLimitPolicyMap {
         const token = parseBearerToken(req.headers.authorization);
         return token ? `token:${stableFingerprint(token)}` : undefined;
       },
+    },
+    authGuestToken: {
+      name: 'authGuestToken',
+      windowMs: 60 * 1000,
+      limit: isProduction ? 30 : 500,
+      message: 'Too many guest token requests. Please try again later.',
     },
     api: {
       name: 'api',
@@ -495,6 +502,10 @@ export async function createRateLimitRuntime(options: RateLimitRuntimeOptions = 
       authSession: buildLimiter(
         config.policies.authSession,
         storeFactory.createStore(config.policies.authSession),
+      ),
+      authGuestToken: buildLimiter(
+        config.policies.authGuestToken,
+        storeFactory.createStore(config.policies.authGuestToken),
       ),
       api: buildLimiter(config.policies.api, storeFactory.createStore(config.policies.api)),
       delivery: buildLimiter(config.policies.delivery, storeFactory.createStore(config.policies.delivery)),

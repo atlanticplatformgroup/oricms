@@ -134,6 +134,7 @@ export async function createApiRuntime(options: ApiAppOptions = {}): Promise<Api
   app.use('/api/v1/auth/refresh', rateLimitRuntime.middleware.authRegistration);
   app.use('/api/v1/auth/logout', rateLimitRuntime.middleware.authSession);
   app.use('/api/v1/auth/me', rateLimitRuntime.middleware.authSession);
+  app.use('/api/v1/auth/guest-token', rateLimitRuntime.middleware.authGuestToken);
   app.use('/api/v1/auth', authRoutes);
 
   const projectSubRouter = express.Router({ mergeParams: true });
