@@ -57,8 +57,8 @@ export function WorkspaceSidebarNavItem({
       styles={{
         root: {
           borderRadius: WORKSPACE_SIDEBAR_ROW_RADIUS,
-          paddingBlock: description ? 9 : 11,
-          paddingInline: 12,
+          paddingBlock: description ? '9px' : '11px',
+          paddingInline: '12px',
           minHeight: description ? 58 : 44,
           transition: `${WORKSPACE_TRANSITION_BG}, ${WORKSPACE_TRANSITION_COLOR}, ${WORKSPACE_TRANSITION_SHADOW}`,
           color: WORKSPACE_SHELL_TEXT,
@@ -75,7 +75,7 @@ export function WorkspaceSidebarNavItem({
           },
         },
         body: {
-          gap: 3,
+          gap: '3px',
         },
         label: {
           fontWeight: active ? 600 : 500,
@@ -83,7 +83,7 @@ export function WorkspaceSidebarNavItem({
         },
         description: {
           color: active ? WORKSPACE_SHELL_ACTIVE_TEXT : WORKSPACE_SHELL_MUTED_TEXT,
-          marginTop: 1,
+          marginTop: '1px',
           opacity: active ? 0.78 : 1,
         },
       }}
@@ -169,7 +169,7 @@ export function WorkspaceMobileSectionButton({
       ta="left"
       p="xs"
       style={{
-        borderRadius: 12,
+        borderRadius: 'var(--mantine-radius-xl)',
         border: `1px solid ${active ? WORKSPACE_SHELL_ACTIVE_HOVER : WORKSPACE_SHELL_CONTROL_BORDER}`,
         backgroundColor: active ? WORKSPACE_SHELL_ACTIVE_BG : WORKSPACE_SHELL_CONTROL_BG,
         color: active ? WORKSPACE_SHELL_ACTIVE_TEXT : WORKSPACE_SHELL_TEXT,
@@ -181,7 +181,7 @@ export function WorkspaceMobileSectionButton({
           h={34}
           display="flex"
           style={{
-            borderRadius: 10,
+            borderRadius: 'var(--mantine-radius-lg)',
             backgroundColor: active ? WORKSPACE_SHELL_ACTIVE_HOVER : 'transparent',
             color: active ? WORKSPACE_SHELL_ACTIVE_TEXT : WORKSPACE_SHELL_MUTED_TEXT,
             flexShrink: 0,
@@ -279,7 +279,7 @@ export function WorkspaceSidebarSection({
       >
         <Group justify="space-between" align="center" wrap="nowrap" mih={40}>
           <Title order={5}>{title}</Title>
-          <Group gap="xs" wrap="nowrap" style={{ flexShrink: 0 }}>
+          <Group gap="xs" wrap="nowrap" flex="0 0 auto">
             {action ? <WorkspaceActionGroup>{action}</WorkspaceActionGroup> : null}
             {onToggleCollapsed ? (
               <Flex
@@ -287,7 +287,7 @@ export function WorkspaceSidebarSection({
                 h={WORKSPACE_SIDEBAR_TOGGLE_SLOT}
                 align="center"
                 justify="flex-end"
-                style={{ paddingRight: 2 }}
+                style={{ paddingRight: '2px' }}
               >
                 <WorkspaceSidebarToggle collapsed={false} onClick={onToggleCollapsed} />
               </Flex>

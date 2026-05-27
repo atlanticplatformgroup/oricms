@@ -220,7 +220,7 @@ export function SchemasWorkspace(props: SchemasWorkspaceProps) {
                     />
                     <Text size="xs" c="dimmed">{newFieldGuidance}</Text>
                   </Stack>
-                  <Button variant="default" size="xs" onClick={onAddSchemaField} disabled={schemaBusy} style={{ flexShrink: 0 }}>Add field</Button>
+                  <Button variant="default" size="xs" onClick={onAddSchemaField} disabled={schemaBusy} flex="0 0 auto">Add field</Button>
                 </Group>
               ) : undefined
             }

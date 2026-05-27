@@ -375,7 +375,7 @@ export function WorkspaceToggleRow({
               </Text>
             ) : null}
           </Stack>
-          <Box style={{ flexShrink: 0 }}>
+          <Box flex="0 0 auto">
             {control}
           </Box>
         </Group>

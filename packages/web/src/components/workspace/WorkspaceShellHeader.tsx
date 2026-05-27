@@ -143,12 +143,12 @@ export const WorkspaceShellHeader = memo(function WorkspaceShellHeader({
               <WorkspaceToolbarButton
                 onClick={onOpenWorkspaceDrawer}
                 leftSection={<MenuIcon size={16} />}
-                style={{ flexShrink: 0 }}
+                flex="0 0 auto"
                 data-testid="workspace-nav-trigger"
               >
                 {activeSectionLabel}
               </WorkspaceToolbarButton>
-              <Group gap="xs" wrap="nowrap" miw={0} style={{ flexShrink: 0 }}>
+              <Group gap="xs" wrap="nowrap" miw={0} flex="0 0 auto">
                 <WorkspaceBranchSwitcher
                   projectId={currentProject.id}
                   currentBranchName={currentBranchName}

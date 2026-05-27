@@ -1,5 +1,5 @@
 import { Suspense, lazy, useCallback, useEffect, useState } from 'react';
-import { AppShell, Center, Loader } from '@mantine/core';
+import { AppShell, Center, Flex, Loader } from '@mantine/core';
 import { useWorkspaceShellMode } from '../../hooks/useWorkspaceShellMode';
 import { useCollectionManagerContext } from '../../contexts/workspace/CollectionManagerContext';
 import { useEditorContext } from '../../contexts/workspace/EditorContext';
@@ -158,7 +158,7 @@ export function AppShellLayout(props: AppShellLayoutProps) {
       </AppShell.Header>
       {showInlinePrimaryRail ? (
         <AppShell.Navbar px={0} py={0}>
-          <div style={{ display: 'flex', alignItems: 'stretch', height: '100%', gap: 0, minWidth: 0 }}>
+          <Flex align="stretch" h="100%" gap={0} miw={0}>
             <WorkspacePrimaryRail
               activeSection={props.activeSection}
               availableSections={props.availableSections}
@@ -172,12 +172,10 @@ export function AppShellLayout(props: AppShellLayoutProps) {
               onExpandDrawer={() => setSecondaryDrawerOpened(true)}
             />
             {showInlineSecondaryRail ? (
-              <div
-                style={{
-                  flex: 1,
-                  minWidth: 0,
-                  backgroundColor: workspaceShellChromeStyles.secondaryRailBackground,
-                }}
+              <Flex
+                flex={1}
+                miw={0}
+                style={{ backgroundColor: workspaceShellChromeStyles.secondaryRailBackground }}
               >
                 {props.secondaryRailCollapsed ? null : (
                   <WorkspaceSecondaryRail
@@ -195,9 +193,9 @@ export function AppShellLayout(props: AppShellLayoutProps) {
                     showInlineSecondaryRail={showInlineSecondaryRail}
                   />
                 )}
-              </div>
+              </Flex>
             ) : null}
-          </div>
+          </Flex>
         </AppShell.Navbar>
       ) : null}
       <AppShell.Main style={{ minWidth: 0, overflowX: 'auto' }}>
