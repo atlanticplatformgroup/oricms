@@ -1,6 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { Command } from 'commander';
-import { projectCommand } from '../project';
+import { projectCommand } from '../project.js';
 
 describe('projectCommand', () => {
   let program: Command;

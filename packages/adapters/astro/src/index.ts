@@ -102,7 +102,7 @@ export default function oricms(options: OriCMSOptions = {}): AstroIntegration {
             await generateTypesFromSchemas(resolvedContentPath, config.srcDir);
             logger.info('Generated OriCMS types');
           } catch (error) {
-            logger.warn(`Failed to generate types: ${err}`);
+            logger.warn(`Failed to generate types: ${error}`);
           }
         }
       },

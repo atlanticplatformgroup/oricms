@@ -1,6 +1,6 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { Command } from 'commander';
-import { authCommand } from '../auth';
+import { authCommand } from '../auth.js';
 
 vi.mock('../lib/config.js', () => ({
   loadConfig: vi.fn(),

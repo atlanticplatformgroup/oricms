@@ -14,17 +14,20 @@ import { DarkModeContext } from './dark-mode-context';
 const FALLBACK_STORAGE_KEY = 'oricms-dark-mode';
 export const ORICMS_THEME_CHANGE_EVENT = 'oricms-theme-change';
 
+function useUserPreferencesSafe() {
+  try {
+    return useUserPreferences();
+  } catch {
+    return undefined;
+  }
+}
+
 function announceThemeChange(theme: 'light' | 'dark' | 'system', isDarkMode: boolean) {
   window.dispatchEvent(new CustomEvent(ORICMS_THEME_CHANGE_EVENT, { detail: { theme, isDarkMode } }));
 }
 
 export function DarkModeProvider({ children }: { children: React.ReactNode }) {
-  let preferencesContext: ReturnType<typeof useUserPreferences> | undefined;
-  try {
-    preferencesContext = useUserPreferences();
-  } catch {
-    preferencesContext = undefined;
-  }
+  const preferencesContext = useUserPreferencesSafe();
   const hasUserPreferences = preferencesContext !== undefined;
   
   // Get theme from UserPreferences or fallback to localStorage
