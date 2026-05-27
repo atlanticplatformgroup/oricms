@@ -118,15 +118,27 @@ export async function applyFileChangesOnBranchWorkflow(
   const branchSummary = await git.branch(['-a']);
   await checkoutExistingBranch(git, branchSummary.all, branch);
 
-  await git.pull('origin', branch).catch(() => {});
+  try {
+    await git.pull('origin', branch);
+  } catch {
+    // no-op: pull failure is acceptable, continue with local state
+  }
 
   for (const change of changes) {
     const normalizedPath = change.path.replace(/^\/+/, '');
     const resolvedPath = validateWorkspacePath(workspacePath, normalizedPath);
 
     if (change.content === null) {
-      await fs.unlink(resolvedPath).catch(() => {});
-      await git.rm(normalizedPath).catch(() => {});
+      try {
+        await fs.unlink(resolvedPath);
+      } catch {
+        // no-op: file may not exist locally
+      }
+      try {
+        await git.rm(normalizedPath);
+      } catch {
+        // no-op: file may not be tracked
+      }
       continue;
     }
 

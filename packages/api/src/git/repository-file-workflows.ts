@@ -85,8 +85,16 @@ export async function writeFilesBatchWorkflow(
       const fullPath = validateWorkspacePath(workspacePath, file.path);
 
       if (file.action === 'delete') {
-        await fs.unlink(fullPath).catch(() => {});
-        await git.rm(file.path).catch(() => {});
+        try {
+          await fs.unlink(fullPath);
+        } catch {
+          // no-op: file may not exist locally
+        }
+        try {
+          await git.rm(file.path);
+        } catch {
+          // no-op: file may not be tracked
+        }
       } else {
         await fs.mkdir(path.dirname(fullPath), { recursive: true });
         if (typeof file.content === 'string') {

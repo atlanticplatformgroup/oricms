@@ -40,7 +40,12 @@ export async function deleteContentType(
   });
 
   if (deleteRecords) {
-    const files = await deps.gitService.listFiles(context.projectId, `content/${contentType.name}`, undefined, true).catch(() => []);
+    let files: Array<{ path: string; type: string }> = [];
+    try {
+      files = await deps.gitService.listFiles(context.projectId, `content/${contentType.name}`, undefined, true);
+    } catch {
+      // no-op: content directory may not exist
+    }
     const deleteTargets = [
       { path, content: '', action: 'delete' as const },
       ...files.filter((file) => file.type === 'file').map((file) => ({ path: file.path, content: '', action: 'delete' as const })),
