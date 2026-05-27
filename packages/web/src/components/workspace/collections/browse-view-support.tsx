@@ -144,7 +144,7 @@ export function CollectionBrowseToolbar(props: {
               </Fragment>
             ))}
           </Group>
-          <Text size="sm" c="dimmed" style={{ flexShrink: 0 }}>
+          <Text size="sm" c="dimmed" flex="0 0 auto">
             {props.mobileEntryCountLabel}
           </Text>
         </Group>
@@ -207,7 +207,7 @@ const MobileEntryItem = memo(function MobileEntryItem({ entry, selectedContentTy
       meta={(
         <Group justify="space-between" align="center" wrap="nowrap" miw={0}>
           <CollectionStatusBadge status={entry.$status} />
-          <Text size="xs" c="dimmed" style={{ flexShrink: 0 }}>
+          <Text size="xs" c="dimmed" flex="0 0 auto">
             {new Date(entry.$updatedAt).toLocaleDateString(undefined, {
               month: 'short',
               day: 'numeric',
