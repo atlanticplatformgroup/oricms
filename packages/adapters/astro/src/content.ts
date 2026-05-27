@@ -197,7 +197,7 @@ export async function loadCollectionRoot(contentPath: string, collectionId: stri
       return loadPage(contentPath, config.routing.homepageId);
     }
   } catch (error) {
-    console.warn(`Failed to load collection root for ${collectionId}:`, err);
+    console.warn(`Failed to load collection root for ${collectionId}:`, error);
   }
   return null;
 }
@@ -241,7 +241,7 @@ export async function loadSchemas(contentPath: string): Promise<Schema[]> {
           })),
         });
       } catch (error) {
-        console.warn(`Failed to parse schema ${file}:`, err);
+        console.warn(`Failed to parse schema ${file}:`, error);
       }
     }
 
@@ -261,7 +261,7 @@ export async function loadSchemas(contentPath: string): Promise<Schema[]> {
         const schema = YAML.parse(content) as Schema;
         schemas.push(schema);
       } catch (error) {
-        console.warn(`Failed to parse schema ${file}:`, err);
+        console.warn(`Failed to parse schema ${file}:`, error);
       }
     }
   } catch {
@@ -331,7 +331,7 @@ async function loadModernEntries(contentPath: string): Promise<Page[]> {
           content: body,
         });
       } catch (error) {
-        console.warn(`Failed to parse ${file}:`, err);
+        console.warn(`Failed to parse ${file}:`, error);
       }
     }
   }
@@ -387,7 +387,7 @@ async function loadLegacyPages(contentPath: string): Promise<Page[]> {
 
       pages.push(page);
     } catch (error) {
-      console.warn(`Failed to parse ${file}:`, err);
+      console.warn(`Failed to parse ${file}:`, error);
     }
   }
 
