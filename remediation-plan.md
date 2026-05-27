@@ -379,7 +379,7 @@ Out-of-scope / follow-ups (chronological):
 | P2-STYLE-02 | P2 | Add `index.ts` barrel file | ✅ #38 |
 | P2-STYLE-04 | P2 | Rename `workspaceTestHarness.tsx` → `workspace-test-harness.tsx` | ✅ #37 |
 | P2-TEST-01 | P2 | CLI command handler tests | ✅ #41 |
-| P2-TEST-02 | P2 | Astro/NextJS adapter integration tests | — |
+| P2-TEST-02 | P2 | Astro/NextJS adapter integration tests | ✅ #42 |
 | P2-TEST-03 | P2 | Pure utility function tests | ✅ #39 |
 | P2-TEST-04 | P2 | Middleware unit tests with mocked req/res/next | ✅ #40 |
 
@@ -489,3 +489,4 @@ For PRs with Prisma schema changes:
 | 38 | `feature/p2-test-03-utility-tests` | ✅ Merged | #39 | 69 pure utility function tests across 5 modules |
 | 39 | `feature/p2-test-04-middleware-tests` | ✅ Merged | #40 | 37 middleware unit tests (error, logger, permissions) |
 | 40 | `feature/p2-test-01-cli-tests` | ✅ Merged | #41 | 15 CLI config utility tests with testable API |
+| 41 | `feature/p2-test-02-adapter-tests` | ✅ Merged | #42 | 25 Astro/Next.js adapter integration tests |
