@@ -55,18 +55,22 @@ Requirements:
 Setup:
 
 ```bash
-nvm use
-npm install
-cp .env.example .env
-cp packages/api/.env.example packages/api/.env
-docker-compose up -d postgres
-npm run build -w @ori/shared
-npm run db:generate -w @ori/api
-npm run db:migrate -w @ori/api
-npm run db:verify-migrations -w @ori/api
+node scripts/setup.mjs
 ```
 
-Use the compose stack for Postgres in local development, then run the API and web app with `npm run dev`. Starting the compose `api` and `web` services at the same time will conflict on ports `3001` and `5173`.
+This checks prerequisites, installs dependencies, starts Postgres, copies env files, builds shared packages, and runs migrations. If Docker isn't running, it'll tell you and exit cleanly.
+
+If you already have Postgres running locally:
+
+```bash
+node scripts/setup.mjs --skip-docker
+```
+
+To wipe and recreate the database:
+
+```bash
+node scripts/setup.mjs --reset-db
+```
 
 Start the stack:
 

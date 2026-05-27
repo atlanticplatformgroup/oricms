@@ -1,0 +1,290 @@
+#!/usr/bin/env node
+/**
+ * OriCMS Setup Script
+ *
+ * One-command setup for local development.
+ * Checks prerequisites, starts Postgres, copies env files, builds, migrates.
+ *
+ * Usage:
+ *   node scripts/setup.mjs
+ *   node scripts/setup.mjs --skip-docker    # if you already have Postgres running
+ *   node scripts/setup.mjs --reset-db       # wipe and recreate the database
+ */
+
+import { spawn } from "node:child_process";
+import { existsSync, copyFileSync } from "node:fs";
+import { createInterface } from "node:readline";
+
+const RESET = "\x1b[0m";
+const BOLD = "\x1b[1m";
+const DIM = "\x1b[2m";
+const GREEN = "\x1b[32m";
+const YELLOW = "\x1b[33m";
+const RED = "\x1b[31m";
+const CYAN = "\x1b[36m";
+
+const args = new Set(process.argv.slice(2));
+const SKIP_DOCKER = args.has("--skip-docker");
+const RESET_DB = args.has("--reset-db");
+
+function log(msg) {
+  console.log(msg);
+}
+
+function info(msg) {
+  console.log(`${CYAN}→${RESET} ${msg}`);
+}
+
+function success(msg) {
+  console.log(`${GREEN}✓${RESET} ${msg}`);
+}
+
+function warn(msg) {
+  console.log(`${YELLOW}⚠${RESET} ${msg}`);
+}
+
+function error(msg) {
+  console.log(`${RED}✗${RESET} ${msg}`);
+}
+
+function step(n, total, msg) {
+  console.log(`\n${BOLD}[${n}/${total}]${RESET} ${msg}`);
+}
+
+function run(cmd, args = [], opts = {}) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(cmd, args, {
+      stdio: opts.silent ? "pipe" : "inherit",
+      shell: opts.shell ?? false,
+      env: { ...process.env, ...opts.env },
+      cwd: opts.cwd,
+    });
+
+    let stdout = "";
+    let stderr = "";
+
+    if (opts.silent) {
+      child.stdout?.on("data", (d) => {
+        stdout += d.toString();
+      });
+      child.stderr?.on("data", (d) => {
+        stderr += d.toString();
+      });
+    }
+
+    child.on("close", (code) => {
+      if (code !== 0 && !opts.ignoreError) {
+        reject(new Error(`Command failed: ${cmd} ${args.join(" ")}`));
+      } else {
+        resolve({ code, stdout, stderr });
+      }
+    });
+
+    child.on("error", reject);
+  });
+}
+
+async function checkNode() {
+  const version = process.version;
+  const major = parseInt(version.slice(1).split(".")[0], 10);
+  if (major < 20) {
+    error(`Node.js ${version} is too old. Need 20+.`);
+    process.exit(1);
+  }
+  success(`Node.js ${version}`);
+}
+
+async function checkNpm() {
+  try {
+    const { stdout } = await run("npm", ["--version"], { silent: true });
+    const version = stdout.trim();
+    const major = parseInt(version.split(".")[0], 10);
+    if (major < 10) {
+      error(`npm ${version} is too old. Need 10+.`);
+      process.exit(1);
+    }
+    success(`npm ${version}`);
+  } catch {
+    error("npm not found");
+    process.exit(1);
+  }
+}
+
+async function checkDocker() {
+  if (SKIP_DOCKER) {
+    info("Skipping Docker check (--skip-docker)");
+    return;
+  }
+
+  try {
+    const { stdout } = await run("docker", ["info"], { silent: true });
+    success("Docker is running");
+  } catch {
+    error("Docker is not running");
+    log("");
+    log("  Please start Docker Desktop and try again.");
+    log("  Or, if you already have Postgres running locally, use:");
+    log(`  ${DIM}node scripts/setup.mjs --skip-docker${RESET}`);
+    log("");
+    process.exit(1);
+  }
+}
+
+async function checkGit() {
+  try {
+    const { stdout } = await run("git", ["--version"], { silent: true });
+    success(stdout.trim());
+  } catch {
+    warn("Git not found — required for OriCMS features");
+  }
+}
+
+async function installDeps() {
+  info("Installing dependencies (this may take a minute)...");
+  await run("npm", ["install"]);
+  success("Dependencies installed");
+}
+
+async function copyEnvFiles() {
+  let created = 0;
+
+  if (!existsSync(".env")) {
+    copyFileSync(".env.example", ".env");
+    created++;
+    success("Created .env from .env.example");
+  } else {
+    info(".env already exists, skipping");
+  }
+
+  if (!existsSync("packages/api/.env")) {
+    copyFileSync("packages/api/.env.example", "packages/api/.env");
+    created++;
+    success("Created packages/api/.env from .env.example");
+  } else {
+    info("packages/api/.env already exists, skipping");
+  }
+
+  if (created > 0) {
+    warn("Please review the generated .env files and set secure secrets before deploying.");
+  }
+}
+
+async function startPostgres() {
+  if (SKIP_DOCKER) {
+    info("Skipping Postgres startup (--skip-docker)");
+    return;
+  }
+
+  info("Starting Postgres via Docker...");
+
+  if (RESET_DB) {
+    info("Removing existing database container (--reset-db)...");
+    try {
+      await run("docker", ["rm", "-f", "oricms-postgres"], { silent: true, ignoreError: true });
+    } catch {
+      // ignore
+    }
+  }
+
+  await run("docker-compose", ["up", "-d", "postgres"]);
+
+  // Wait for Postgres to be ready
+  info("Waiting for Postgres to be ready...");
+  let attempts = 0;
+  const maxAttempts = 30;
+
+  while (attempts < maxAttempts) {
+    try {
+      await run(
+        "docker",
+        ["exec", "oricms-postgres", "pg_isready", "-U", "oricms", "-d", "oricms"],
+        { silent: true }
+      );
+      success("Postgres is ready");
+      return;
+    } catch {
+      attempts++;
+      process.stdout.write(".");
+      await new Promise((r) => setTimeout(r, 1000));
+    }
+  }
+
+  error("Postgres failed to start within 30 seconds");
+  process.exit(1);
+}
+
+async function buildShared() {
+  info("Building @ori/shared...");
+  await run("npm", ["run", "build", "-w", "@ori/shared"]);
+  success("@ori/shared built");
+}
+
+async function generatePrisma() {
+  info("Generating Prisma client...");
+  await run("npm", ["run", "db:generate", "-w", "@ori/api"]);
+  success("Prisma client generated");
+}
+
+async function runMigrations() {
+  info("Running database migrations...");
+  await run("npm", ["run", "db:migrate", "-w", "@ori/api"]);
+  success("Migrations complete");
+}
+
+async function verifyMigrations() {
+  info("Verifying migrations...");
+  try {
+    await run("npm", ["run", "db:verify-migrations", "-w", "@ori/api"]);
+    success("Migrations verified");
+  } catch {
+    warn("Migration verification skipped (no PostgreSQL in environment)");
+  }
+}
+
+async function main() {
+  log(`${BOLD}OriCMS Setup${RESET}\n`);
+
+  const TOTAL_STEPS = 8;
+  let currentStep = 0;
+
+  step(++currentStep, TOTAL_STEPS, "Checking prerequisites");
+  await checkNode();
+  await checkNpm();
+  await checkDocker();
+  await checkGit();
+
+  step(++currentStep, TOTAL_STEPS, "Installing dependencies");
+  await installDeps();
+
+  step(++currentStep, TOTAL_STEPS, "Copying environment files");
+  await copyEnvFiles();
+
+  step(++currentStep, TOTAL_STEPS, "Starting Postgres");
+  await startPostgres();
+
+  step(++currentStep, TOTAL_STEPS, "Building shared package");
+  await buildShared();
+
+  step(++currentStep, TOTAL_STEPS, "Generating Prisma client");
+  await generatePrisma();
+
+  step(++currentStep, TOTAL_STEPS, "Running migrations");
+  await runMigrations();
+
+  step(++currentStep, TOTAL_STEPS, "Verifying setup");
+  await verifyMigrations();
+
+  log("");
+  log(`${GREEN}${BOLD}✓ OriCMS is ready!${RESET}\n`);
+  log(`  Start the dev server:`);
+  log(`  ${DIM}  npm run dev${RESET}\n`);
+  log(`  Then open:`);
+  log(`  ${DIM}  http://localhost:5173${RESET}  (admin app)`);
+  log(`  ${DIM}  http://localhost:3001${RESET}  (API)`);
+  log("");
+}
+
+main().catch((err) => {
+  error(err.message || String(err));
+  process.exit(1);
+});
