@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
-import { AppShell } from '@mantine/core';
+import { Suspense, lazy, useCallback, useEffect, useState } from 'react';
+import { AppShell, Center, Loader } from '@mantine/core';
 import { useWorkspaceShellMode } from '../../hooks/useWorkspaceShellMode';
 import { useCollectionManagerContext } from '../../contexts/workspace/CollectionManagerContext';
 import { useEditorContext } from '../../contexts/workspace/EditorContext';
@@ -11,8 +11,9 @@ import { buildWorkspacePath } from '../../lib/workspace/routing';
 import { WorkspaceShellHeader } from './WorkspaceShellHeader';
 import { WorkspacePrimaryRail, WorkspaceSecondaryRail, WorkspaceSecondaryRailBoundaryToggle } from './WorkspaceShellNavigation';
 import { WorkspaceShellDrawers } from './WorkspaceShellDrawers';
-import { WorkspaceShellMainContent } from './WorkspaceShellMainContent';
 import type { AppShellLayoutProps } from './WorkspaceShellLayout.types';
+
+const WorkspaceShellMainContent = lazy(() => import('./WorkspaceShellMainContent').then((m) => ({ default: m.WorkspaceShellMainContent })));
 
 export function AppShellLayout(props: AppShellLayoutProps) {
   const {
@@ -200,11 +201,13 @@ export function AppShellLayout(props: AppShellLayoutProps) {
         </AppShell.Navbar>
       ) : null}
       <AppShell.Main style={{ minWidth: 0, overflowX: 'auto' }}>
-        <WorkspaceShellMainContent
-          layout={props}
-          guardedNavigate={guardedNavigate}
-          handleSelectEntry={handleSelectEntry}
-        />
+        <Suspense fallback={<Center py="xl"><Loader size="sm" /></Center>}>
+          <WorkspaceShellMainContent
+            layout={props}
+            guardedNavigate={guardedNavigate}
+            handleSelectEntry={handleSelectEntry}
+          />
+        </Suspense>
       </AppShell.Main>
       <WorkspaceShellDrawers
         layout={props}

@@ -3,7 +3,7 @@ import { Center, Loader } from '@mantine/core';
 import { EMPTY_SECONDARY } from '../../lib/workspace/constants';
 import { buildWorkspacePath } from '../../lib/workspace/routing';
 import { WorkspaceFeatureBoundary } from '../error/WorkspaceFeatureBoundary';
-import { AssetPickerModalMount, CollectionModalsMount, CollectionsSection, RelationPickerModalMount, RestoreConfirmModalMount } from './CollectionsShellSection';
+import { AssetPickerModalMount, CollectionModalsMount, RelationPickerModalMount, RestoreConfirmModalMount } from './CollectionsShellSection';
 import { CreateSchemaModal } from './modals/CreateSchemaModal';
 import { PlaceholderWorkspace } from './PlaceholderWorkspace';
 import { SchemaDeleteModal } from './schema/SchemaDeleteModal';
@@ -11,6 +11,7 @@ import { SchemaHistoryModal } from './schema/SchemaHistoryModal';
 import { SchemaJsonModal } from './schema/SchemaJsonModal';
 import { useSchemaEditorContext } from '../../contexts/workspace/SchemaEditorContext';
 
+const CollectionsSection = lazy(() => import('./CollectionsShellSection').then((m) => ({ default: m.CollectionsSection })));
 const SchemasWorkspace = lazy(() => import('./SchemasWorkspace').then((m) => ({ default: m.SchemasWorkspace })));
 const MediaWorkspace = lazy(() => import('./MediaWorkspace').then((m) => ({ default: m.MediaWorkspace })));
 const BuildsWorkspace = lazy(() => import('./BuildsWorkspace').then((m) => ({ default: m.BuildsWorkspace })));
