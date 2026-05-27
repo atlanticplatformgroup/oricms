@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, type Request, type Response } from 'express';
 import { requirePermission } from '../permissions/middleware';
 import { pageContentSchema } from '../lib/validation';
 import { logger } from '../middleware/logger';
@@ -8,14 +8,27 @@ import { deleteSchema } from '../application/schemas/delete-schema';
 import { formatGitError, isLifecycleHookError, normalizeSchemaPath, respondLifecycleBlocked, respondValidationError } from './helpers';
 import type { GitService } from './service';
 import { ensureResourceNotLocked } from '../locks/middleware';
+import { query, validationResult } from 'express-validator';
 
 export function createSchemaRoutes(gitService: GitService): Router {
   const router = Router({ mergeParams: true });
 
-  router.get('/', requirePermission('collections', 'read'), async (req, res) => {
+  router.get('/', requirePermission('collections', 'read'), [
+    query('page').optional().isInt({ min: 1 }).toInt(),
+    query('limit').optional().isInt({ min: 1, max: 100 }).toInt(),
+  ], async (req: Request, res: Response) => {
     try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        respondValidationError(res, 'Invalid schema list parameters', errors.array());
+        return;
+      }
+
       const { projectId } = req.params;
       const { branch } = req.query;
+      const page = typeof req.query.page === 'number' ? req.query.page : 1;
+      const limit = Math.min(typeof req.query.limit === 'number' ? req.query.limit : 50, 100);
+
       const listSchemaDir = async (directory: string) => {
         try {
           return await gitService.listFiles(projectId, directory, branch as string);
@@ -27,8 +40,15 @@ export function createSchemaRoutes(gitService: GitService): Router {
         listSchemaDir('schemas/components'),
         listSchemaDir('schemas/types'),
       ]);
-      const schemas = [...componentSchemas, ...typeSchemas].sort((a, b) => a.path.localeCompare(b.path));
-      ok(res, { schemas });
+      const allSchemas = [...componentSchemas, ...typeSchemas].sort((a, b) => a.path.localeCompare(b.path));
+      const total = allSchemas.length;
+      const start = (page - 1) * limit;
+      const schemas = allSchemas.slice(start, start + limit);
+
+      ok(res, {
+        schemas,
+        pagination: { page, limit, total, pageCount: Math.ceil(total / limit) },
+      });
     } catch (error) {
       logger.error({ msg: 'List schemas error', error });
       const { code, message } = formatGitError(error);
@@ -36,12 +56,30 @@ export function createSchemaRoutes(gitService: GitService): Router {
     }
   });
 
-  router.get('/types', requirePermission('collections', 'read'), async (req, res) => {
+  router.get('/types', requirePermission('collections', 'read'), [
+    query('page').optional().isInt({ min: 1 }).toInt(),
+    query('limit').optional().isInt({ min: 1, max: 100 }).toInt(),
+  ], async (req: Request, res: Response) => {
     try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        respondValidationError(res, 'Invalid schema list parameters', errors.array());
+        return;
+      }
+
       const { projectId } = req.params;
       const { branch } = req.query;
-      const schemas = await gitService.listFiles(projectId, 'schemas/types', branch as string);
-      ok(res, { schemas });
+      const page = typeof req.query.page === 'number' ? req.query.page : 1;
+      const limit = Math.min(typeof req.query.limit === 'number' ? req.query.limit : 50, 100);
+      const allSchemas = await gitService.listFiles(projectId, 'schemas/types', branch as string);
+      const total = allSchemas.length;
+      const start = (page - 1) * limit;
+      const schemas = allSchemas.slice(start, start + limit);
+
+      ok(res, {
+        schemas,
+        pagination: { page, limit, total, pageCount: Math.ceil(total / limit) },
+      });
     } catch (error) {
       logger.error({ msg: 'List type schemas error', error });
       const { code, message } = formatGitError(error);
@@ -49,12 +87,30 @@ export function createSchemaRoutes(gitService: GitService): Router {
     }
   });
 
-  router.get('/components', requirePermission('collections', 'read'), async (req, res) => {
+  router.get('/components', requirePermission('collections', 'read'), [
+    query('page').optional().isInt({ min: 1 }).toInt(),
+    query('limit').optional().isInt({ min: 1, max: 100 }).toInt(),
+  ], async (req: Request, res: Response) => {
     try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        respondValidationError(res, 'Invalid schema list parameters', errors.array());
+        return;
+      }
+
       const { projectId } = req.params;
       const { branch } = req.query;
-      const schemas = await gitService.listFiles(projectId, 'schemas/components', branch as string);
-      ok(res, { schemas });
+      const page = typeof req.query.page === 'number' ? req.query.page : 1;
+      const limit = Math.min(typeof req.query.limit === 'number' ? req.query.limit : 50, 100);
+      const allSchemas = await gitService.listFiles(projectId, 'schemas/components', branch as string);
+      const total = allSchemas.length;
+      const start = (page - 1) * limit;
+      const schemas = allSchemas.slice(start, start + limit);
+
+      ok(res, {
+        schemas,
+        pagination: { page, limit, total, pageCount: Math.ceil(total / limit) },
+      });
     } catch (error) {
       logger.error({ msg: 'List component schemas error', error });
       const { code, message } = formatGitError(error);
@@ -62,7 +118,7 @@ export function createSchemaRoutes(gitService: GitService): Router {
     }
   });
 
-  router.get('/*', requirePermission('collections', 'read'), async (req, res) => {
+  router.get('/*', requirePermission('collections', 'read'), async (req: Request, res: Response) => {
     try {
       const { projectId } = req.params;
       const schemaPath = req.params[0];
@@ -90,7 +146,7 @@ export function createSchemaRoutes(gitService: GitService): Router {
     }
   });
 
-  router.post('/*', requirePermission('collections', 'update'), async (req, res) => {
+  router.post('/*', requirePermission('collections', 'update'), async (req: Request, res: Response) => {
     try {
       const { projectId } = req.params;
       const schemaPath = req.params[0];
@@ -142,7 +198,7 @@ export function createSchemaRoutes(gitService: GitService): Router {
     }
   });
 
-  router.delete('/*', requirePermission('collections', 'update'), async (req, res) => {
+  router.delete('/*', requirePermission('collections', 'update'), async (req: Request, res: Response) => {
     try {
       const { projectId } = req.params;
       const schemaPath = req.params[0];

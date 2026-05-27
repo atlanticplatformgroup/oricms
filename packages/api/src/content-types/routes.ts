@@ -1,5 +1,5 @@
 import { Router, type Request, type Response } from 'express';
-import { param, body, validationResult } from 'express-validator';
+import { param, body, query, validationResult } from 'express-validator';
 import { requirePermission } from '../permissions/middleware';
 import { logger } from '../middleware/logger';
 import { conflict, created, internalError, normalizeValidationDetails, notFound, ok, validationError } from '../lib/responses';
@@ -39,8 +39,17 @@ function respondLifecycleBlocked(res: Response, error: Error) {
   });
 }
 
-router.get('/', requirePermission('contentTypes', 'read'), async (req: Request, res: Response) => {
+router.get('/', requirePermission('contentTypes', 'read'), [
+  query('page').optional().isInt({ min: 1 }).toInt(),
+  query('limit').optional().isInt({ min: 1, max: 100 }).toInt(),
+], async (req: Request, res: Response) => {
   try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      validationError(res, 'Invalid input', normalizeValidationDetails(errors.mapped()));
+      return;
+    }
+
     const { projectId } = req.params as { projectId: string };
     const workspace = await resolveContentTypesWorkspace(projectId);
     if (!workspace) {
@@ -48,10 +57,16 @@ router.get('/', requirePermission('contentTypes', 'read'), async (req: Request, 
       respondProjectNotFound(res);
       return;
     }
-    const contentTypes = await listContentTypeDefinitions(workspace.workspacePath);
+    const allContentTypes = await listContentTypeDefinitions(workspace.workspacePath);
+    const page = typeof req.query.page === 'number' ? req.query.page : 1;
+    const limit = Math.min(typeof req.query.limit === 'number' ? req.query.limit : 50, 100);
+    const total = allContentTypes.length;
+    const start = (page - 1) * limit;
+    const contentTypes = allContentTypes.slice(start, start + limit);
 
     ok(res, {
       contentTypes: contentTypes.map(attachContentTypeResource),
+      pagination: { page, limit, total, pageCount: Math.ceil(total / limit) },
     });
   } catch (error) {
     logger.error({ msg: 'List content types error', error });

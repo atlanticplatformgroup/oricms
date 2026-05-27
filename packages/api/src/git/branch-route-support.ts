@@ -38,10 +38,23 @@ export function formatBranchMutationError(error: unknown): { status: number; cod
 export async function getBranchListResponse(
   gitService: GitService,
   projectId: string,
-): Promise<{ branches: Awaited<ReturnType<GitService['listBranches']>>; current: string | null }> {
-  const branches = await gitService.listBranches(projectId);
-  const current = branches.find((branch) => branch.isCurrent)?.name || null;
-  return { branches, current };
+  options: { page?: number; limit?: number } = {},
+): Promise<{
+  branches: Awaited<ReturnType<GitService['listBranches']>>;
+  current: string | null;
+  pagination: { page: number; limit: number; total: number; pageCount: number };
+}> {
+  const allBranches = await gitService.listBranches(projectId);
+  const current = allBranches.find((branch) => branch.isCurrent)?.name || null;
+
+  const page = Math.max(options.page ?? 1, 1);
+  const limit = Math.min(options.limit ?? 50, 100);
+  const total = allBranches.length;
+  const pageCount = Math.ceil(total / limit);
+  const start = (page - 1) * limit;
+  const branches = allBranches.slice(start, start + limit);
+
+  return { branches, current, pagination: { page, limit, total, pageCount } };
 }
 
 export async function ensureBranchSettingsUnlocked(

@@ -1,4 +1,5 @@
 import type { Request, Response } from 'express';
+import { query, validationResult } from 'express-validator';
 import { apiServices } from '../lib/api-services';
 import { badRequest, created, internalError, notFound, ok } from '../lib/responses';
 import { ensureResourceNotLocked } from '../locks/middleware';
@@ -11,22 +12,44 @@ export async function listAgentTokens(req: Request, res: Response): Promise<void
       return;
     }
 
-    const tokens = await apiServices.prisma.agentToken.findMany({
-      where: { projectId },
-      select: {
-        id: true,
-        userId: true,
-        name: true,
-        description: true,
-        createdAt: true,
-        lastUsedAt: true,
-        expiresAt: true,
-        revokedAt: true,
-        sessionId: true,
-      },
-      orderBy: { createdAt: 'desc' },
+    await Promise.all([
+      query('page').optional().isInt({ min: 1 }).toInt().run(req),
+      query('limit').optional().isInt({ min: 1, max: 100 }).toInt().run(req),
+    ]);
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      badRequest(res, 'Invalid pagination parameters', 'INVALID_PARAMS');
+      return;
+    }
+
+    const page = typeof req.query.page === 'number' ? req.query.page : 1;
+    const limit = Math.min(typeof req.query.limit === 'number' ? req.query.limit : 50, 100);
+    const skip = (page - 1) * limit;
+
+    const [tokens, total] = await Promise.all([
+      apiServices.prisma.agentToken.findMany({
+        where: { projectId },
+        select: {
+          id: true,
+          userId: true,
+          name: true,
+          description: true,
+          createdAt: true,
+          lastUsedAt: true,
+          expiresAt: true,
+          revokedAt: true,
+          sessionId: true,
+        },
+        orderBy: { createdAt: 'desc' },
+        take: limit,
+        skip,
+      }),
+      apiServices.prisma.agentToken.count({ where: { projectId } }),
+    ]);
+    ok(res, {
+      tokens: tokens.map(serializeAgentToken),
+      pagination: { page, limit, total, pageCount: Math.ceil(total / limit) },
     });
-    ok(res, { tokens: tokens.map(serializeAgentToken) });
   } catch (error) {
     apiServices.logger.error({ msg: 'Agent tokens error', error });
     internalError(res, 'Failed to get tokens');

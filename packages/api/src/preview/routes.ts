@@ -18,7 +18,7 @@ const router = Router({ mergeParams: true });
 /**
  * GET /api/v1/projects/:projectId/preview/content
  * Get content for preview (by branch or commit)
- * 
+ *
  * Query params:
  * - branch: Branch name (default: main)
  * - ref: Specific commit SHA (optional, overrides branch)
@@ -96,6 +96,8 @@ router.get(
     query('branch').optional().trim(),
     query('ref').optional().trim().isLength({ min: 7, max: 40 }),
     query('locale').optional().trim().isIn(SUPPORTED_PREVIEW_LOCALES),
+    query('page').optional().isInt({ min: 1 }).toInt(),
+    query('limit').optional().isInt({ min: 1, max: 100 }).toInt(),
   ],
   async (req: Request, res: Response) => {
     try {
@@ -109,16 +111,22 @@ router.get(
       const branch = (req.query.branch as string) || 'main';
       const ref = req.query.ref as string | undefined;
       const locale = req.query.locale as string | undefined;
+      const page = typeof req.query.page === 'number' ? req.query.page : 1;
+      const limit = Math.min(typeof req.query.limit === 'number' ? req.query.limit : 50, 100);
 
       const workspace = await resolvePreviewWorkspace(projectId, branch, ref);
       if (!workspace) {
         notFound(res, 'Project not found', 'PROJECT_NOT_FOUND');
         return;
       }
-      const pages = await listPreviewPages(workspace.workspacePath, locale);
+      const allPages = await listPreviewPages(workspace.workspacePath, locale);
+      const total = allPages.length;
+      const start = (page - 1) * limit;
+      const pages = allPages.slice(start, start + limit);
 
       ok(res, {
         pages,
+        pagination: { page, limit, total, pageCount: Math.ceil(total / limit) },
         meta: {
           branch,
           ref: ref || null,

@@ -1,4 +1,5 @@
 import type { Request, Response } from 'express';
+import { query, validationResult } from 'express-validator';
 import { apiServices } from '../lib/api-services';
 import { getPrismaErrorResponse } from '../lib/prisma';
 import { badRequest, conflict, created, internalError, notFound, ok } from '../lib/responses';
@@ -61,12 +62,34 @@ export async function listAgentConsentHistory(req: Request, res: Response): Prom
       return;
     }
 
-    const consents = await apiServices.prisma.agentConsent.findMany({
-      where: { projectId },
-      orderBy: { termsAcceptedAt: 'desc' },
-      include: { user: { select: { name: true, email: true } } },
+    await Promise.all([
+      query('page').optional().isInt({ min: 1 }).toInt().run(req),
+      query('limit').optional().isInt({ min: 1, max: 100 }).toInt().run(req),
+    ]);
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      badRequest(res, 'Invalid pagination parameters', 'INVALID_PARAMS');
+      return;
+    }
+
+    const page = typeof req.query.page === 'number' ? req.query.page : 1;
+    const limit = Math.min(typeof req.query.limit === 'number' ? req.query.limit : 50, 100);
+    const skip = (page - 1) * limit;
+
+    const [consents, total] = await Promise.all([
+      apiServices.prisma.agentConsent.findMany({
+        where: { projectId },
+        orderBy: { termsAcceptedAt: 'desc' },
+        include: { user: { select: { name: true, email: true } } },
+        take: limit,
+        skip,
+      }),
+      apiServices.prisma.agentConsent.count({ where: { projectId } }),
+    ]);
+    ok(res, {
+      consents,
+      pagination: { page, limit, total, pageCount: Math.ceil(total / limit) },
     });
-    ok(res, { consents });
   } catch (error) {
     apiServices.logger.error({ msg: 'Agent consent history error', error });
     internalError(res, 'Failed to get consent history');

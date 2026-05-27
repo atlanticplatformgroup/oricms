@@ -19,16 +19,32 @@ import {
 export function createBranchRoutes(gitService: GitService): Router {
   const router = Router({ mergeParams: true });
 
-  router.get('/', requirePermission('collections', 'read'), async (req: Request, res: Response) => {
-    try {
-      const { projectId } = req.params;
-      ok(res, await getBranchListResponse(gitService, projectId));
-    } catch (error) {
-      logger.error({ msg: 'List branches error', error });
-      const { code, message } = formatGitError(error);
-      internalError(res, message, code);
+  router.get(
+    '/',
+    requirePermission('collections', 'read'),
+    [
+      query('page').optional().isInt({ min: 1 }).toInt(),
+      query('limit').optional().isInt({ min: 1, max: 100 }).toInt(),
+    ],
+    async (req: Request, res: Response) => {
+      try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+          respondValidationError(res, 'Invalid branch list parameters', errors.array());
+          return;
+        }
+
+        const { projectId } = req.params;
+        const page = typeof req.query.page === 'number' ? req.query.page : 1;
+        const limit = typeof req.query.limit === 'number' ? req.query.limit : 50;
+        ok(res, await getBranchListResponse(gitService, projectId, { page, limit }));
+      } catch (error) {
+        logger.error({ msg: 'List branches error', error });
+        const { code, message } = formatGitError(error);
+        internalError(res, message, code);
+      }
     }
-  });
+  );
 
   router.get(
     '/compare',
