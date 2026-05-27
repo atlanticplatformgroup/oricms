@@ -3,6 +3,7 @@ import { dispatchLifecycleEvent } from '../../plugins/dispatcher';
 import { dispatchPluginHook } from '../../plugins/hook-dispatcher';
 import { apiServices } from '../../lib/api-services';
 import { prisma } from '../../lib/prisma';
+import { getPrismaErrorResponse } from '../../lib/prisma';
 import type { AssetMutationContext, AssetMutationDeps, AssetMutationOptions, AssetMutationResult } from './types';
 
 function getAuthor(actor: AssetMutationContext['actor']) {
@@ -39,15 +40,23 @@ export async function deleteAsset(
   });
 
   if (options.audit) {
-    await prismaClient.auditLog.create({
-      data: {
-        projectId: context.projectId,
-        userId: options.audit.userId,
-        action: options.audit.action,
-        resourceType: 'asset',
-        resourceId: assetPath,
-      },
-    });
+    try {
+      await prismaClient.auditLog.create({
+        data: {
+          projectId: context.projectId,
+          userId: options.audit.userId,
+          action: options.audit.action,
+          resourceType: 'asset',
+          resourceId: assetPath,
+        },
+      });
+    } catch (error) {
+      const prismaError = getPrismaErrorResponse(error);
+      if (prismaError) {
+        throw Object.assign(new Error(prismaError.message), { statusCode: prismaError.statusCode, code: prismaError.code });
+      }
+      throw error;
+    }
   }
 
   apiServices.runBackgroundTask(
