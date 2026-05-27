@@ -142,13 +142,15 @@ export function useEntryEditor({
   useDirtyEntryUnloadPrompt(isDirty);
 
   const handleFieldChange = useCallback(
-    createEntryFieldChangeHandler({
-      derivedIdentifierConfig,
-      editorFields,
-      identifierStateByField,
-      setDraftEntry,
-      setIdentifierStateByField,
-    }),
+    (fieldKey: string, value: unknown) => {
+      createEntryFieldChangeHandler({
+        derivedIdentifierConfig,
+        editorFields,
+        identifierStateByField,
+        setDraftEntry,
+        setIdentifierStateByField,
+      })(fieldKey, value);
+    },
     [derivedIdentifierConfig, editorFields, identifierStateByField, setDraftEntry, setIdentifierStateByField],
   );
 
@@ -267,12 +269,14 @@ export function useEntryEditor({
   const handleSaveEntry = useCallback(rawHandleSaveEntry, [rawHandleSaveEntry]);
 
   const handleResetIdentifierToAuto = useCallback(
-    buildIdentifierResetHandler({
-      derivedIdentifierConfig,
-      draftEntry,
-      setDraftEntry,
-      setIdentifierStateByField,
-    }),
+    (fieldKey: string) => {
+      buildIdentifierResetHandler({
+        derivedIdentifierConfig,
+        draftEntry,
+        setDraftEntry,
+        setIdentifierStateByField,
+      })(fieldKey);
+    },
     [derivedIdentifierConfig, draftEntry, setDraftEntry, setIdentifierStateByField],
   );
 
