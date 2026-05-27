@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { createContext, useContext, type ReactNode } from 'react';
 import { useCollectionManager } from '../../hooks/useCollectionManager';
 
@@ -6,7 +7,8 @@ const CollectionManagerContext = createContext<CollectionManagerValue | null>(nu
 
 export function CollectionManagerProvider({ children, ...options }: { children: ReactNode } & Parameters<typeof useCollectionManager>[0]) {
   const value = useCollectionManager(options);
-  return <CollectionManagerContext.Provider value={value}>{children}</CollectionManagerContext.Provider>;
+  const memoizedValue = useMemo(() => value, Object.values(value));
+  return <CollectionManagerContext.Provider value={memoizedValue}>{children}</CollectionManagerContext.Provider>;
 }
 
 export function useCollectionManagerContext() {

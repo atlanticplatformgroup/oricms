@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { createContext, useContext, type ReactNode } from 'react';
 import { useEntryEditor } from '../../hooks/useEntryEditor';
 
@@ -6,7 +7,8 @@ const EditorContext = createContext<EditorValue | null>(null);
 
 export function EditorProvider({ children, ...options }: { children: ReactNode } & Parameters<typeof useEntryEditor>[0]) {
   const value = useEntryEditor(options);
-  return <EditorContext.Provider value={value}>{children}</EditorContext.Provider>;
+  const memoizedValue = useMemo(() => value, Object.values(value));
+  return <EditorContext.Provider value={memoizedValue}>{children}</EditorContext.Provider>;
 }
 
 export function useEditorContext() {
