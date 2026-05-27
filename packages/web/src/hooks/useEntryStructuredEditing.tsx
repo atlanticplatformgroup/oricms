@@ -2,9 +2,9 @@ import { type Dispatch, type SetStateAction, useMemo, useState } from 'react';
 import { type Asset, type ComponentSchema, type CollectionEntry, type SchemaField } from '@ori/shared';
 import type { GlobalAsset } from '../lib/assets/references';
 import type { StructuredDragItem } from '../lib/entries/types';
-import { getStructuredItemKey, getStructuredValidationCount } from './structuredEditingSupport';
+import { getStructuredItemKey, getStructuredValidationCount } from './useStructuredEditingSupport';
 import { useStructuredAssetPicker } from './useStructuredAssetPicker';
-import { buildStructuredFieldRendererContext, createStructuredDragContext } from './structuredEditingContext';
+import { buildStructuredFieldRendererContext, createStructuredDragContext } from './useStructuredEditingContext';
 import {
   addArrayItem,
   addRepeatableStructuredItem,
@@ -17,7 +17,7 @@ import {
   patchObjectChild,
   removeIndexedStructuredItem,
   reorderIndexedStructuredItem,
-} from './structuredEditingMutations';
+} from './useStructuredEditingMutations';
 
 interface UseEntryStructuredEditingOptions {
   editorFields: SchemaField[];

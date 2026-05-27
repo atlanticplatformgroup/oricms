@@ -138,7 +138,7 @@ export async function saveProjectConfigToGit(
       {
         name: project.name,
         description: project.description,
-        settings: project.settings as never,
+        settings: project.settings as unknown as Record<string, unknown>,
       },
       {
         name: user?.name || 'System',

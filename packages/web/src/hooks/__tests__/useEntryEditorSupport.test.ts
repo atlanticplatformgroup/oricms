@@ -6,7 +6,7 @@ import {
   buildEditorFieldErrors,
   buildIdentifierState,
   resolveInitialEditorValue,
-} from '../entryEditorSupport';
+} from '../useEntryEditorSupport';
 
 function createEntry(overrides: Record<string, unknown> = {}): CollectionEntry {
   return {

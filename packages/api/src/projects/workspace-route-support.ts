@@ -1,5 +1,6 @@
 import type { Request } from 'express';
 import type { UiGroup } from '@ori/shared';
+import type { Prisma } from '@prisma/client';
 import { prisma } from '../lib/prisma';
 export { buildWorkspaceCatalog } from './workspace-catalog';
 export { createCapabilities, SYSTEM_SURFACES } from './workspace-capabilities';
@@ -36,7 +37,7 @@ export async function persistUiGroups(
 
   const project = await prisma.project.update({
     where: { id: projectId },
-    data: { settings: nextSettings as never },
+    data: { settings: nextSettings as unknown as Prisma.JsonObject },
   });
 
   const configService = new (await import('./config-service')).ProjectConfigService(projectId);
@@ -44,7 +45,7 @@ export async function persistUiGroups(
     {
       name: existingProject.name,
       description: existingProject.description,
-      settings: project.settings as never,
+      settings: project.settings as unknown as Record<string, unknown>,
     },
     {
       name: req.user?.name || 'System',

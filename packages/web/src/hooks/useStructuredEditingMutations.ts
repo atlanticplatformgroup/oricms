@@ -1,7 +1,7 @@
 import type { CollectionEntry, ComponentSchema, SchemaField } from '@ori/shared';
 import { moveArrayItem } from '../lib/array-move';
 import { createStructuredValueFromSchemaFields } from '../lib/schemas/factory';
-import { deepClone } from './structuredEditingSupport';
+import { deepClone } from './useStructuredEditingSupport';
 
 function cloneObjectValue(value: unknown): Record<string, unknown> {
   return value && typeof value === 'object' && !Array.isArray(value)

@@ -6,7 +6,7 @@ import {
   getStructuredItemTitle,
   getStructuredItemState,
   getStructuredValidationCount,
-} from '../structuredEditingSupport';
+} from '../useStructuredEditingSupport';
 
 describe('deepClone', () => {
   it('clones primitive values', () => {
