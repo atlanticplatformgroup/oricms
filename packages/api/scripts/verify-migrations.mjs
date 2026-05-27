@@ -1,0 +1,87 @@
+import { spawnSync } from 'node:child_process';
+
+const schemaPath = 'prisma/schema.prisma';
+const migrationsPath = 'prisma/migrations';
+const baseUrl = process.env.MIGRATION_DATABASE_URL
+  || process.env.TEST_DATABASE_URL
+  || 'postgresql://postgres:postgres@localhost:5432/oricms_test';
+
+const tempDatabaseName = `oricms_migration_check_${process.pid}_${Date.now()}`;
+
+function quoteIdentifier(value) {
+  return `"${value.replace(/"/g, '""')}"`;
+}
+
+function withDatabaseName(rawUrl, databaseName) {
+  const url = new URL(rawUrl);
+  url.pathname = `/${databaseName}`;
+  url.search = '';
+  return url.toString();
+}
+
+function run(command, args, options = {}) {
+  const result = spawnSync(command, args, {
+    cwd: options.cwd ?? process.cwd(),
+    env: options.env ?? process.env,
+    input: options.input,
+    encoding: 'utf8',
+    stdio: options.capture ? ['pipe', 'pipe', 'pipe'] : ['pipe', 'inherit', 'inherit'],
+  });
+
+  if (result.status !== 0) {
+    if (options.capture) {
+      process.stdout.write(result.stdout ?? '');
+      process.stderr.write(result.stderr ?? '');
+    }
+    throw new Error(`${command} ${args.join(' ')} failed`);
+  }
+
+  return result;
+}
+
+function executeSql(databaseUrl, sql) {
+  run('npx', ['prisma', 'db', 'execute', '--stdin', '--url', databaseUrl], { input: sql, capture: true });
+}
+
+const adminUrl = withDatabaseName(baseUrl, 'postgres');
+const tempUrl = withDatabaseName(baseUrl, tempDatabaseName);
+const tempDatabase = quoteIdentifier(tempDatabaseName);
+
+try {
+  executeSql(adminUrl, `DROP DATABASE IF EXISTS ${tempDatabase} WITH (FORCE);`);
+  executeSql(adminUrl, `CREATE DATABASE ${tempDatabase};`);
+
+  run('npx', ['prisma', 'migrate', 'deploy', '--schema', schemaPath], {
+    env: { ...process.env, DATABASE_URL: tempUrl },
+  });
+
+  const diff = run(
+    'npx',
+    [
+      'prisma',
+      'migrate',
+      'diff',
+      '--from-url',
+      tempUrl,
+      '--to-schema-datamodel',
+      schemaPath,
+      '--script',
+    ],
+    { env: { ...process.env, DATABASE_URL: tempUrl }, capture: true },
+  );
+
+  const output = `${diff.stdout ?? ''}${diff.stderr ?? ''}`.trim();
+  if (!output.includes('This is an empty migration')) {
+    process.stdout.write(output);
+    process.stdout.write('\n');
+    throw new Error('Migration history does not match prisma/schema.prisma');
+  }
+
+  console.log('Migration history matches prisma/schema.prisma.');
+} finally {
+  try {
+    executeSql(adminUrl, `DROP DATABASE IF EXISTS ${tempDatabase} WITH (FORCE);`);
+  } catch (error) {
+    console.warn(`Warning: failed to drop temporary database ${tempDatabaseName}.`);
+  }
+}

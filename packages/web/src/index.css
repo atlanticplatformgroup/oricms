@@ -1,0 +1,40 @@
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+}
+
+.mantine-Input-input::placeholder {
+  color: var(--ori-form-input-placeholder);
+}
+
+.mantine-Input-input:hover {
+  border-color: var(--ori-form-input-border-hover);
+}
+
+.mantine-Input-input:focus,
+.mantine-Input-input:focus-within {
+  border-color: var(--ori-form-input-border-focus);
+  box-shadow:
+    inset 0 0 0 1px var(--ori-form-input-border-focus),
+    0 6px 18px rgba(26, 66, 90, 0.05);
+}
+
+.mantine-Input-input[readonly] {
+  background-color: var(--ori-form-input-readonly-bg);
+  border-color: var(--ori-form-input-readonly-border);
+  color: var(--ori-form-input-readonly-text);
+  box-shadow: none;
+  cursor: default;
+}
+
+.mantine-Input-input[readonly]:hover,
+.mantine-Input-input[readonly]:focus,
+.mantine-Input-input[readonly]:focus-within {
+  border-color: var(--ori-form-input-readonly-border);
+  box-shadow: none;
+}

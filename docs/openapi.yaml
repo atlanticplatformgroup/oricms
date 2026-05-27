@@ -1,0 +1,1189 @@
+openapi: 3.0.3
+info:
+  title: OriCMS API
+  version: 2.0.0
+  description: |
+    Current OpenAPI snapshot for the main live OriCMS route families.
+
+    This spec is intentionally curated rather than exhaustive. It focuses on the
+    active project-based API model and the current agent gateway, and it avoids
+    the older site-based and tier-era contracts that used to live in this file.
+
+    Canonical routing model:
+    - management API: `/api/v1/*`
+    - project-scoped routes: `/api/v1/projects/:projectId/*`
+    - delivery routes: `/api/v1/delivery/projects/:projectId/*`
+    - agent gateway: `/api/v1/agent/v1/*`
+
+servers:
+  - url: http://localhost:3001
+    description: Local development
+
+tags:
+  - name: Health
+  - name: Authentication
+  - name: Projects
+  - name: Members
+  - name: Content Types
+  - name: Collections
+  - name: Locks
+  - name: Agent
+  - name: Delivery
+
+paths:
+  /health:
+    get:
+      tags: [Health]
+      summary: Health check
+      responses:
+        '200':
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '503':
+          description: Degraded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /api/v1/auth/register:
+    post:
+      tags: [Authentication]
+      summary: Register a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, name, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                name:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '201':
+          description: Registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthSuccessResponse'
+        '409':
+          description: Email already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+  /api/v1/auth/login:
+    post:
+      tags: [Authentication]
+      summary: Log in
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Logged in
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthSuccessResponse'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+  /api/v1/auth/refresh:
+    post:
+      tags: [Authentication]
+      summary: Refresh tokens
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refreshToken]
+              properties:
+                refreshToken:
+                  type: string
+      responses:
+        '200':
+          description: Tokens refreshed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthSuccessResponse'
+        '401':
+          description: Invalid refresh token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+  /api/v1/auth/logout:
+    post:
+      tags: [Authentication]
+      summary: Log out
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refreshToken:
+                  type: string
+      responses:
+        '200':
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessResponse'
+
+  /api/v1/auth/me:
+    get:
+      tags: [Authentication]
+      summary: Get current user
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+  /api/v1/projects:
+    get:
+      tags: [Projects]
+      summary: List projects
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Projects returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessResponse'
+    post:
+      tags: [Projects]
+      summary: Create a project
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, slug]
+              properties:
+                name:
+                  type: string
+                slug:
+                  type: string
+                defaultBranch:
+                  type: string
+      responses:
+        '201':
+          description: Project created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessResponse'
+
+  /api/v1/projects/{projectId}:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+    get:
+      tags: [Projects]
+      summary: Get a project
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Project returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessResponse'
+    patch:
+      tags: [Projects]
+      summary: Update a project
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                defaultBranch:
+                  type: string
+      responses:
+        '200':
+          description: Project updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessResponse'
+    delete:
+      tags: [Projects]
+      summary: Delete a project
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Project deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessResponse'
+
+  /api/v1/projects/{projectId}/members:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+    get:
+      tags: [Members]
+      summary: List project members
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Members returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessResponse'
+    post:
+      tags: [Members]
+      summary: Invite or add a human member
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, role]
+              properties:
+                email:
+                  type: string
+                  format: email
+                role:
+                  $ref: '#/components/schemas/ProjectRole'
+      responses:
+        '201':
+          description: Member or invite created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessResponse'
+
+  /api/v1/projects/{projectId}/members/agent:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+    post:
+      tags: [Members]
+      summary: Create an AI agent member
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, role]
+              properties:
+                name:
+                  type: string
+                role:
+                  type: string
+                  enum: [admin, editor, viewer]
+                expiresInDays:
+                  type: integer
+      responses:
+        '201':
+          description: Agent created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessResponse'
+
+  /api/v1/projects/{projectId}/content-types:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+    get:
+      tags: [Content Types]
+      summary: List content types
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Content types returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessResponse'
+    post:
+      tags: [Content Types]
+      summary: Create a content type
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContentTypeInput'
+      responses:
+        '201':
+          description: Content type created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessResponse'
+
+  /api/v1/projects/{projectId}/content-types/{typeId}:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+      - $ref: '#/components/parameters/TypeId'
+    get:
+      tags: [Content Types]
+      summary: Get a content type
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Content type returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessResponse'
+    put:
+      tags: [Content Types]
+      summary: Update a content type
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContentTypeInput'
+      responses:
+        '200':
+          description: Content type updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessResponse'
+    delete:
+      tags: [Content Types]
+      summary: Delete a content type
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Content type deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessResponse'
+
+  /api/v1/projects/{projectId}/collections:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+    get:
+      tags: [Collections]
+      summary: List collections
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Collections returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessResponse'
+    put:
+      tags: [Collections]
+      summary: Save collection configuration
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [collections]
+              properties:
+                collections:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/CollectionConfig'
+      responses:
+        '200':
+          description: Collections saved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessResponse'
+
+  /api/v1/projects/{projectId}/collections/{collectionId}:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+      - $ref: '#/components/parameters/CollectionId'
+    get:
+      tags: [Collections]
+      summary: List entries in a collection
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Entries returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessResponse'
+    post:
+      tags: [Collections]
+      summary: Create an entry
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '201':
+          description: Entry created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessResponse'
+    delete:
+      tags: [Collections]
+      summary: Delete a collection
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Collection deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessResponse'
+
+  /api/v1/projects/{projectId}/collections/{collectionId}/{entryId}:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+      - $ref: '#/components/parameters/CollectionId'
+      - $ref: '#/components/parameters/EntryId'
+    get:
+      tags: [Collections]
+      summary: Get an entry
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Entry returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessResponse'
+    put:
+      tags: [Collections]
+      summary: Update an entry
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: Entry updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessResponse'
+        '409':
+          description: Stale revision
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+    delete:
+      tags: [Collections]
+      summary: Delete an entry
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Entry deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessResponse'
+
+  /api/v1/projects/{projectId}/locks/status:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+    get:
+      tags: [Locks]
+      summary: Inspect lock status for a resource
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: resourceType
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/LockResourceType'
+        - name: resourceId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: branch
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lock status returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessResponse'
+
+  /api/v1/projects/{projectId}/locks/acquire:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+    post:
+      tags: [Locks]
+      summary: Acquire a resource lock
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LockAcquireRequest'
+      responses:
+        '200':
+          description: Lock acquired
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessResponse'
+        '409':
+          description: Resource locked
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+  /api/v1/projects/{projectId}/locks/renew:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+    post:
+      tags: [Locks]
+      summary: Renew a resource lock
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [lockId]
+              properties:
+                lockId:
+                  type: string
+      responses:
+        '200':
+          description: Lock renewed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessResponse'
+
+  /api/v1/projects/{projectId}/locks/release:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+    post:
+      tags: [Locks]
+      summary: Release a resource lock
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [lockId]
+              properties:
+                lockId:
+                  type: string
+      responses:
+        '200':
+          description: Lock released
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessResponse'
+
+  /api/v1/agent/v1/status:
+    get:
+      tags: [Agent]
+      summary: Get agent gateway status
+      security:
+        - agentBearerAuth: []
+      responses:
+        '200':
+          description: Agent status returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessResponse'
+
+  /api/v1/agent/v1/bootstrap:
+    get:
+      tags: [Agent]
+      summary: Get agent session bootstrap
+      security:
+        - agentBearerAuth: []
+      parameters:
+        - name: branch
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Bootstrap returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessResponse'
+
+  /api/v1/agent/v1/preflight:
+    post:
+      tags: [Agent]
+      summary: Preflight an agent mutation
+      security:
+        - agentBearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentPreflightRequest'
+      responses:
+        '200':
+          description: Preflight result returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessResponse'
+
+  /api/v1/agent/v1/schemas:
+    get:
+      tags: [Agent]
+      summary: List schemas available to the agent
+      security:
+        - agentBearerAuth: []
+      responses:
+        '200':
+          description: Schemas returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessResponse'
+
+  /api/v1/agent/v1/structure:
+    get:
+      tags: [Agent]
+      summary: Get repository structure for the agent
+      security:
+        - agentBearerAuth: []
+      responses:
+        '200':
+          description: Structure returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessResponse'
+
+  /api/v1/agent/v1/history:
+    get:
+      tags: [Agent]
+      summary: Get repository history for the agent
+      security:
+        - agentBearerAuth: []
+      responses:
+        '200':
+          description: History returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessResponse'
+
+  /api/v1/agent/v1/collections/{collectionName}/entries:
+    parameters:
+      - $ref: '#/components/parameters/AgentCollectionName'
+    get:
+      tags: [Agent]
+      summary: List entries available to the agent
+      security:
+        - agentBearerAuth: []
+      responses:
+        '200':
+          description: Entries returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessResponse'
+    post:
+      tags: [Agent]
+      summary: Create an entry through the agent gateway
+      security:
+        - agentBearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '201':
+          description: Mutation created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessResponse'
+        '409':
+          description: Idempotency or stale revision conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+  /api/v1/agent/v1/collections/{collectionName}/entries/{entryId}:
+    parameters:
+      - $ref: '#/components/parameters/AgentCollectionName'
+      - $ref: '#/components/parameters/EntryId'
+    get:
+      tags: [Agent]
+      summary: Get an entry through the agent gateway
+      security:
+        - agentBearerAuth: []
+      responses:
+        '200':
+          description: Entry returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessResponse'
+    put:
+      tags: [Agent]
+      summary: Update an entry through the agent gateway
+      security:
+        - agentBearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: Mutation completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessResponse'
+        '409':
+          description: Idempotency or stale revision conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+    delete:
+      tags: [Agent]
+      summary: Delete an entry through the agent gateway
+      security:
+        - agentBearerAuth: []
+      responses:
+        '200':
+          description: Entry deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessResponse'
+        '400':
+          description: Confirmation required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+  /api/v1/agent/v1/collections/{collectionName}/entries/{entryId}/transition:
+    parameters:
+      - $ref: '#/components/parameters/AgentCollectionName'
+      - $ref: '#/components/parameters/EntryId'
+    post:
+      tags: [Agent]
+      summary: Transition an entry workflow status
+      security:
+        - agentBearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [targetStatus]
+              properties:
+                targetStatus:
+                  type: string
+                  enum: [draft, published]
+                branch:
+                  type: string
+                baseRevision:
+                  type: string
+      responses:
+        '200':
+          description: Transition completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessResponse'
+        '409':
+          description: Stale revision or idempotency conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+  /api/v1/agent/v1/files/{path}:
+    get:
+      tags: [Agent]
+      summary: Read a raw file through the agent gateway
+      security:
+        - agentBearerAuth: []
+      parameters:
+        - name: path
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: branch
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: File returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericSuccessResponse'
+
+  /api/v1/delivery/projects/{projectId}/graphql:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+    post:
+      tags: [Delivery]
+      summary: Query published content through the delivery GraphQL API
+      responses:
+        '200':
+          description: GraphQL response
+          content:
+            application/json:
+              schema:
+                type: object
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    agentBearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: AgentToken
+
+  parameters:
+    ProjectId:
+      name: projectId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    TypeId:
+      name: typeId
+      in: path
+      required: true
+      schema:
+        type: string
+    CollectionId:
+      name: collectionId
+      in: path
+      required: true
+      schema:
+        type: string
+    AgentCollectionName:
+      name: collectionName
+      in: path
+      required: true
+      schema:
+        type: string
+    EntryId:
+      name: entryId
+      in: path
+      required: true
+      schema:
+        type: string
+
+  schemas:
+    SuccessEnvelope:
+      type: object
+      required: [success, data]
+      properties:
+        success:
+          type: boolean
+          enum: [true]
+        data:
+          type: object
+          additionalProperties: true
+        meta:
+          type: object
+          additionalProperties: true
+
+    GenericSuccessResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessEnvelope'
+
+    ErrorEnvelope:
+      type: object
+      required: [success, error]
+      properties:
+        success:
+          type: boolean
+          enum: [false]
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            details:
+              type: object
+              additionalProperties:
+                type: array
+                items:
+                  type: string
+
+    HealthResponse:
+      type: object
+      required: [status, version, timestamp, checks]
+      properties:
+        status:
+          type: string
+          enum: [ok, degraded]
+        version:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        checks:
+          type: object
+          properties:
+            database:
+              type: boolean
+            git:
+              type: boolean
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        avatarUrl:
+          type: string
+          nullable: true
+
+    AuthSuccessResponse:
+      type: object
+      required: [success, data]
+      properties:
+        success:
+          type: boolean
+          enum: [true]
+        data:
+          type: object
+          properties:
+            user:
+              $ref: '#/components/schemas/User'
+            accessToken:
+              type: string
+            refreshToken:
+              type: string
+
+    ProjectRole:
+      type: string
+      enum: [owner, admin, editor, viewer]
+
+    ContentTypeInput:
+      type: object
+      required: [name, plural, label, labelPlural, fields]
+      properties:
+        name:
+          type: string
+        plural:
+          type: string
+        label:
+          type: string
+        labelPlural:
+          type: string
+        description:
+          type: string
+        fields:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+
+    CollectionConfig:
+      type: object
+      required: [id, label, contentType, path]
+      properties:
+        id:
+          type: string
+        label:
+          type: string
+        contentType:
+          type: string
+        path:
+          type: string
+        routing:
+          type: object
+          additionalProperties: true
+
+    LockResourceType:
+      type: string
+      enum:
+        - schema
+        - contentType
+        - collectionConfig
+        - branchPromotion
+        - entry
+        - bulkMutation
+        - assetMetadata
+        - projectSettings
+        - members
+        - agentConfig
+
+    LockAcquireRequest:
+      type: object
+      required: [resourceType, resourceId, mode, reason]
+      properties:
+        resourceType:
+          $ref: '#/components/schemas/LockResourceType'
+        resourceId:
+          type: string
+        branch:
+          type: string
+          nullable: true
+        mode:
+          type: string
+          enum: [hard, soft]
+        reason:
+          type: string
+          enum: [editing, deleting, promoting, configuring, bulk-mutation]
+
+    AgentPreflightRequest:
+      type: object
+      required: [action, collectionName]
+      properties:
+        action:
+          type: string
+          enum: [create, update, delete, transition]
+        collectionName:
+          type: string
+        entryId:
+          type: string
+        branch:
+          type: string
+        baseRevision:
+          type: string
+        targetStatus:
+          type: string
+          enum: [draft, published]
+        data:
+          type: object
+          additionalProperties: true

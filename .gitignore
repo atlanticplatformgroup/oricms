@@ -1,0 +1,45 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.claude/
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Environment files
+.env
+.env.local
+.env.*.local
+.env
+.env.*
+!.env.example
+
+# Local managed project data / runtime artifacts
+.oricms/
+packages/api/.oricms/
+packages/api/prisma/dev.db
+packages/web/playwright-report/
+packages/web/test-results/
+history-audit.json
+history-full.png
+
+# Local workspace data (project repos, global assets)
+.workspace/
