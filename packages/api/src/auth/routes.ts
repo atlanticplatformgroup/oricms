@@ -27,7 +27,7 @@ import {
 const router = Router();
 
 const refreshTokenSchema = z.object({
-  refreshToken: z.string().min(1, 'refreshToken is required'),
+  refreshToken: z.string().uuid('refreshToken must be a valid UUID'),
 });
 
 router.post(
