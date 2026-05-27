@@ -60,6 +60,10 @@ async function main(): Promise<void> {
 
 void main().catch(async (error) => {
   logger.error({ msg: 'Ori CMS API failed to start', error });
-  await prisma.$disconnect().catch(() => undefined);
+  try {
+    await prisma.$disconnect();
+  } catch {
+    // no-op: disconnect failure during shutdown is acceptable
+  }
   process.exit(1);
 });
