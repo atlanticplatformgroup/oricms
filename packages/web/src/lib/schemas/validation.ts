@@ -1,6 +1,6 @@
 import type { ComponentSchema, ContentType } from '@ori/shared';
 
-export interface SchemaValidationResult {
+interface SchemaValidationResult {
   schemaIssues: string[];
   fieldIssuesByKey: Record<string, string[]>;
   issueCount: number;
