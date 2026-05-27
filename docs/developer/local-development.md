@@ -4,7 +4,7 @@ Use this guide when you are setting up a new OriCMS worktree or returning to loc
 
 ## Runtime Requirements
 
-- Node.js 20+
+- Node.js 20+ (use `.nvmrc` if you use nvm)
 - npm 10+
 - Docker
 - Git

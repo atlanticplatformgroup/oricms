@@ -27,6 +27,16 @@ const args = new Set(process.argv.slice(2));
 const SKIP_DOCKER = args.has("--skip-docker");
 const RESET_DB = args.has("--reset-db");
 
+// Detect available docker compose command (v2 plugin vs legacy)
+const DOCKER_COMPOSE = await (async () => {
+  try {
+    await run("docker", ["compose", "version"], { silent: true, ignoreError: false });
+    return ["docker", "compose"];
+  } catch {
+    return ["docker-compose"];
+  }
+})();
+
 function log(msg) {
   console.log(msg);
 }
@@ -169,6 +179,37 @@ async function copyEnvFiles() {
   }
 }
 
+function isValidHexKey(key, length) {
+  return typeof key === "string" && key.length === length && /^[0-9a-fA-F]+$/.test(key);
+}
+
+async function validateEnvFiles() {
+  const rootEnvPath = ".env";
+  const apiEnvPath = "packages/api/.env";
+
+  for (const envPath of [rootEnvPath, apiEnvPath]) {
+    if (!existsSync(envPath)) continue;
+
+    const content = (await import("node:fs")).readFileSync(envPath, "utf-8");
+    const lines = content.split("\n");
+    const vars = {};
+    for (const line of lines) {
+      const match = line.match(/^([A-Za-z0-9_]+)=(.*)$/);
+      if (match) vars[match[1]] = match[2];
+    }
+
+    const jwt = vars.JWT_SECRET;
+    if (!jwt || jwt.length < 32 || jwt.includes("change") || jwt.includes("your-")) {
+      warn(`${envPath}: JWT_SECRET is missing or looks like a placeholder`);
+    }
+
+    const enc = vars.ENCRYPTION_KEY;
+    if (!isValidHexKey(enc, 64)) {
+      warn(`${envPath}: ENCRYPTION_KEY is missing or not a 64-character hex string`);
+    }
+  }
+}
+
 async function startPostgres() {
   if (SKIP_DOCKER) {
     info("Skipping Postgres startup (--skip-docker)");
@@ -176,6 +217,31 @@ async function startPostgres() {
   }
 
   info("Starting Postgres via Docker...");
+
+  // Check for existing container from a previous run or different worktree
+  try {
+    const { stdout } = await run(
+      "docker",
+      ["ps", "-a", "--filter", "name=^/oricms-postgres$", "--format", "{{.Names}}"],
+      { silent: true, ignoreError: true }
+    );
+    if (stdout.trim() === "oricms-postgres") {
+      const { stdout: status } = await run(
+        "docker",
+        ["inspect", "--format", "{{.State.Status}}", "oricms-postgres"],
+        { silent: true }
+      );
+      if (status.trim() === "running" && !RESET_DB) {
+        info("Existing oricms-postgres container is already running; reusing it");
+        success("Postgres is ready");
+        return;
+      }
+      info("Removing existing oricms-postgres container...");
+      await run("docker", ["rm", "-f", "oricms-postgres"], { silent: true, ignoreError: true });
+    }
+  } catch {
+    // ignore — proceed to normal startup
+  }
 
   if (RESET_DB) {
     info("Removing existing database container (--reset-db)...");
@@ -186,7 +252,7 @@ async function startPostgres() {
     }
   }
 
-  await run("docker-compose", ["up", "-d", "postgres"]);
+  await run(DOCKER_COMPOSE[0], [...DOCKER_COMPOSE.slice(1), "up", "-d", "postgres"]);
 
   // Wait for Postgres to be ready
   info("Waiting for Postgres to be ready...");
@@ -258,6 +324,7 @@ async function main() {
 
   step(++currentStep, TOTAL_STEPS, "Copying environment files");
   await copyEnvFiles();
+  await validateEnvFiles();
 
   step(++currentStep, TOTAL_STEPS, "Starting Postgres");
   await startPostgres();
