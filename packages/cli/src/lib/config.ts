@@ -39,10 +39,12 @@ export interface ProjectConfig {
 
 /**
  * Load global CLI config
+ * @param configDir - Optional custom config directory (defaults to ~/.oricms)
  */
-export async function loadConfig(): Promise<CLIConfig> {
+export async function loadConfig(configDir?: string): Promise<CLIConfig> {
+  const configFile = configDir ? path.join(configDir, 'config.json') : CONFIG_FILE;
   try {
-    const data = await fs.readFile(CONFIG_FILE, 'utf-8');
+    const data = await fs.readFile(configFile, 'utf-8');
     return JSON.parse(data);
   } catch {
     return {};
@@ -51,18 +53,23 @@ export async function loadConfig(): Promise<CLIConfig> {
 
 /**
  * Save global CLI config
+ * @param configDir - Optional custom config directory (defaults to ~/.oricms)
  */
-export async function saveConfig(config: CLIConfig): Promise<void> {
-  await fs.mkdir(CONFIG_DIR, { recursive: true });
-  await fs.writeFile(CONFIG_FILE, JSON.stringify(config, null, 2), 'utf-8');
+export async function saveConfig(config: CLIConfig, configDir?: string): Promise<void> {
+  const targetDir = configDir || CONFIG_DIR;
+  const configFile = configDir ? path.join(configDir, 'config.json') : CONFIG_FILE;
+  await fs.mkdir(targetDir, { recursive: true });
+  await fs.writeFile(configFile, JSON.stringify(config, null, 2), 'utf-8');
 }
 
 /**
  * Clear global CLI config (logout)
+ * @param configDir - Optional custom config directory (defaults to ~/.oricms)
  */
-export async function clearConfig(): Promise<void> {
+export async function clearConfig(configDir?: string): Promise<void> {
+  const configFile = configDir ? path.join(configDir, 'config.json') : CONFIG_FILE;
   try {
-    await fs.unlink(CONFIG_FILE);
+    await fs.unlink(configFile);
   } catch {
     // File doesn't exist, that's fine
   }
@@ -92,8 +99,8 @@ export async function saveProjectConfig(config: ProjectConfig, cwd: string = pro
 /**
  * Check if user is logged in
  */
-export async function isLoggedIn(): Promise<boolean> {
-  const config = await loadConfig();
+export async function isLoggedIn(configDir?: string): Promise<boolean> {
+  const config = await loadConfig(configDir);
   return !!(config.accessToken && config.apiUrl);
 }
 
