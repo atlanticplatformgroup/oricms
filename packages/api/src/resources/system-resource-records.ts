@@ -44,13 +44,21 @@ export async function listSystemRecords(
   }
 
   if (resourceCollectionId === RESOURCE_COLLECTION_IDS.members) {
-    const members = await prisma.projectMember.findMany({
-      where: { projectId: context.projectId },
-      include: {
-        user: { select: { id: true, name: true, email: true, type: true } },
-      },
-      orderBy: { createdAt: 'desc' },
-    });
+    const page = Math.max(options.page ?? 1, 1);
+    const limit = Math.min(options.limit ?? 50, 100);
+    const skip = (page - 1) * limit;
+    const [members, total] = await Promise.all([
+      prisma.projectMember.findMany({
+        where: { projectId: context.projectId },
+        include: {
+          user: { select: { id: true, name: true, email: true, type: true } },
+        },
+        orderBy: { createdAt: 'desc' },
+        take: limit,
+        skip,
+      }),
+      prisma.projectMember.count({ where: { projectId: context.projectId } }),
+    ]);
     return {
       records: members.map((member) => ({
         id: member.userId,
@@ -59,7 +67,7 @@ export async function listSystemRecords(
         description: member.role,
         createdAt: member.createdAt.toISOString(),
       })),
-      total: members.length,
+      total,
     };
   }
 
@@ -111,24 +119,34 @@ export async function listSystemRecords(
   }
 
   if (resourceCollectionId === RESOURCE_COLLECTION_IDS.schemaTypes) {
-    const records = await readJsonFiles<ContentType>(path.join(context.workspacePath, 'schemas', 'types'));
+    const page = Math.max(options.page ?? 1, 1);
+    const limit = Math.min(options.limit ?? 50, 100);
+    const allRecords = await readJsonFiles<ContentType>(path.join(context.workspacePath, 'schemas', 'types'));
+    const total = allRecords.length;
+    const start = (page - 1) * limit;
+    const records = allRecords.slice(start, start + limit);
     return {
       records: records.map((schema) => ({
         id: schema.$id,
         label: schema.label,
         description: schema.description,
       })),
-      total: records.length,
+      total,
     };
   }
 
   if (resourceCollectionId === RESOURCE_COLLECTION_IDS.schemaComponents) {
-    const records = await readJsonFiles<Record<string, unknown>>(
+    const page = Math.max(options.page ?? 1, 1);
+    const limit = Math.min(options.limit ?? 50, 100);
+    const allRecords = await readJsonFiles<Record<string, unknown>>(
       path.join(context.workspacePath, 'schemas', 'components'),
     );
+    const total = allRecords.length;
+    const start = (page - 1) * limit;
+    const records = allRecords.slice(start, start + limit);
     return {
       records: records.map(toComponentSchemaSummary),
-      total: records.length,
+      total,
     };
   }
 

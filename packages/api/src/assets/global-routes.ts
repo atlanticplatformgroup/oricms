@@ -1,4 +1,4 @@
-import { Router, type Request } from 'express';
+import { Router, type Request, type Response } from 'express';
 import { normalizeAssetMetadata } from '@ori/shared';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -7,6 +7,7 @@ import { requirePermission } from '../permissions/middleware';
 import { logger } from '../middleware/logger';
 import { badRequest, created, internalError, notFound, ok, unauthorized } from '../lib/responses';
 import { GlobalAssetService } from './global-service';
+import { query, validationResult } from 'express-validator';
 
 const router = Router({ mergeParams: true });
 const globalAssetService = new GlobalAssetService();
@@ -24,7 +25,7 @@ function getCommitAuthor(req: Request) {
 router.get(
   '/raw/:assetId(*)',
   requirePermission('assets', 'read'),
-  async (req, res) => {
+  async (req: Request, res: Response) => {
     try {
       const { projectId } = req.params;
       const assetId = req.params.assetId;
@@ -51,11 +52,30 @@ router.get(
 router.get(
   '/',
   requirePermission('assets', 'read'),
-  async (req, res) => {
+  [
+    query('page').optional().isInt({ min: 1 }).toInt(),
+    query('limit').optional().isInt({ min: 1, max: 100 }).toInt(),
+  ],
+  async (req: Request, res: Response) => {
     try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        badRequest(res, 'Invalid pagination parameters', 'INVALID_PARAMS');
+        return;
+      }
+
       const { projectId } = req.params;
-      const result = await globalAssetService.listAssets(projectId);
-      ok(res, result);
+      const page = typeof req.query.page === 'number' ? req.query.page : 1;
+      const limit = Math.min(typeof req.query.limit === 'number' ? req.query.limit : 50, 100);
+      const { assets: allAssets } = await globalAssetService.listAssets(projectId);
+      const total = allAssets.length;
+      const start = (page - 1) * limit;
+      const assets = allAssets.slice(start, start + limit);
+
+      ok(res, {
+        assets,
+        pagination: { page, limit, total, pageCount: Math.ceil(total / limit) },
+      });
     } catch (error) {
       logger.error({ msg: 'List global assets error', error });
       internalError(res, 'Failed to list global assets', 'ASSET_ERROR');
@@ -66,7 +86,7 @@ router.get(
 router.post(
   '/upload',
   requirePermission('assets', 'create'),
-  async (req, res) => {
+  async (req: Request, res: Response) => {
     try {
       const { projectId } = req.params;
       const { filename, content, folder = 'images', virtualFolder, tags } = req.body;
@@ -120,7 +140,7 @@ router.post(
 router.put(
   '/metadata/:assetId(*)',
   requirePermission('assets', 'update'),
-  async (req, res) => {
+  async (req: Request, res: Response) => {
     try {
       const { projectId } = req.params;
       const assetId = req.params.assetId;
@@ -146,7 +166,7 @@ router.put(
 router.get(
   '/:assetId(*)',
   requirePermission('assets', 'read'),
-  async (req, res) => {
+  async (req: Request, res: Response) => {
     try {
       const { projectId } = req.params;
       const assetId = req.params.assetId;
@@ -168,7 +188,7 @@ router.get(
 router.delete(
   '/:assetId(*)',
   requirePermission('assets', 'delete'),
-  async (req, res) => {
+  async (req: Request, res: Response) => {
     try {
       const { projectId } = req.params;
       const assetId = req.params.assetId;
