@@ -1,6 +1,6 @@
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { glob } from 'glob';
+import { glob } from 'fast-glob';
 import { getPreferredFieldKey, normalizeAssetReference, resolveFieldCapability } from '@ori/shared';
 import type {
   AssetMetadata,
@@ -156,7 +156,7 @@ export async function getAssetUsageIndex(options: {
     const entriesDir = path.join(options.workspacePath, contentRoot, collection.path);
     let files: string[] = [];
     try {
-      files = await glob('*.json', { cwd: entriesDir, absolute: true });
+      files = await glob('*.json', { cwd: entriesDir, absolute: true, onlyFiles: true });
     } catch {
       continue;
     }

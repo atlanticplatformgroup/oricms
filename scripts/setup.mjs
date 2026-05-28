@@ -175,6 +175,20 @@ async function copyEnvFiles() {
   }
 
   if (created > 0) {
+    // Generate a valid 64-character hex encryption key for local dev
+    const crypto = await import("node:crypto");
+    const devKey = crypto.randomBytes(32).toString("hex");
+
+    for (const envPath of [".env", "packages/api/.env"]) {
+      if (!existsSync(envPath)) continue;
+      let content = (await import("node:fs")).readFileSync(envPath, "utf-8");
+      content = content.replace(
+        /ENCRYPTION_KEY=REPLACE_ME_64_HEX_CHARS_REQUIRED_FOR_DEVELOPMENT_ONLY/g,
+        `ENCRYPTION_KEY=${devKey}`
+      );
+      (await import("node:fs")).writeFileSync(envPath, content);
+    }
+
     warn("Please review the generated .env files and set secure secrets before deploying.");
   }
 }
@@ -287,13 +301,17 @@ async function buildShared() {
 
 async function generatePrisma() {
   info("Generating Prisma client...");
-  await run("npm", ["run", "db:generate", "-w", "@ori/api"]);
+  await run("npm", ["run", "db:generate", "-w", "@ori/api"], {
+    env: { PRISMA_HIDE_UPDATE_MESSAGE: "1" },
+  });
   success("Prisma client generated");
 }
 
 async function runMigrations() {
   info("Running database migrations...");
-  await run("npm", ["run", "db:migrate", "-w", "@ori/api"]);
+  await run("npm", ["run", "db:migrate", "-w", "@ori/api"], {
+    env: { PRISMA_HIDE_UPDATE_MESSAGE: "1" },
+  });
   success("Migrations complete");
 }
 
@@ -303,7 +321,8 @@ async function verifyMigrations() {
     await run("npm", ["run", "db:verify-migrations", "-w", "@ori/api"]);
     success("Migrations verified");
   } catch {
-    warn("Migration verification skipped (no PostgreSQL in environment)");
+    warn("Migration verification failed — this is usually a credentials issue.");
+    warn("If Postgres is running and migrations applied successfully, you can ignore this.");
   }
 }
 
