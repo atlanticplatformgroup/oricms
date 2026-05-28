@@ -4,7 +4,7 @@ Use this guide when you are setting up a new OriCMS worktree or returning to loc
 
 ## Runtime Requirements
 
-- Node.js 20+ (use `.nvmrc` if you use nvm)
+- Node.js 20+ (`.nvmrc` is present if you use nvm or a compatible version manager)
 - npm 10+
 - Docker
 - Git
@@ -26,7 +26,6 @@ Current package layout:
 From the repo root:
 
 ```bash
-nvm use
 npm install
 cp .env.example .env
 cp packages/api/.env.example packages/api/.env
@@ -78,7 +77,6 @@ For a fresh worktree, expect to restore:
 Minimum recovery steps for a fresh worktree:
 
 ```bash
-nvm use
 npm install
 npm run build -w @ori/shared
 npm run db:generate -w @ori/api

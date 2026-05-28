@@ -47,7 +47,7 @@ examples/             Runnable and copyable examples
 
 Requirements:
 
-- Node.js 20+ (use `.nvmrc` if you use nvm)
+- Node.js 20+ (`.nvmrc` is present if you use nvm or a compatible version manager)
 - npm 10+
 - Docker
 - Git
@@ -55,7 +55,6 @@ Requirements:
 Setup:
 
 ```bash
-nvm use
 node scripts/setup.mjs
 ```
 
