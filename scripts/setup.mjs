@@ -320,9 +320,23 @@ async function verifyMigrations() {
   try {
     await run("npm", ["run", "db:verify-migrations", "-w", "@ori/api"]);
     success("Migrations verified");
-  } catch {
-    warn("Migration verification failed — this is usually a credentials issue.");
-    warn("If Postgres is running and migrations applied successfully, you can ignore this.");
+  } catch (err) {
+    error("Migration verification failed");
+    log("");
+    log("  This usually means the Postgres admin credentials are incorrect.");
+    log("  The verification script needs superuser access to create and drop");
+    log("  a temporary database to validate migration integrity.");
+    log("");
+    log("  Check that POSTGRES_ADMIN_URL in your .env files points to the");
+    log("  'postgres' database with valid superuser credentials:");
+    log(`  ${DIM}  POSTGRES_ADMIN_URL=postgresql://postgres:YOUR_PASSWORD@localhost:5432/postgres${RESET}`);
+    log("");
+    log("  If you just created a fresh .env, the container may have been");
+    log("  initialized with a different password. Remove it and retry:");
+    log(`  ${DIM}  docker rm -f oricms-postgres${RESET}`);
+    log(`  ${DIM}  node scripts/setup.mjs${RESET}`);
+    log("");
+    process.exit(1);
   }
 }
 

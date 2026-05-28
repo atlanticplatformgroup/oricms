@@ -2,7 +2,11 @@ import { spawnSync } from 'node:child_process';
 
 const schemaPath = 'prisma/schema.prisma';
 const migrationsPath = 'prisma/migrations';
-const baseUrl = process.env.MIGRATION_DATABASE_URL
+
+// Prefer explicit admin URL for superuser operations (create/drop temp databases).
+// Falls back to deriving from DATABASE_URL, then a hardcoded default.
+const baseUrl = process.env.POSTGRES_ADMIN_URL
+  || process.env.MIGRATION_DATABASE_URL
   || process.env.TEST_DATABASE_URL
   || (() => {
     // Derive admin URL from DATABASE_URL if available
@@ -14,7 +18,7 @@ const baseUrl = process.env.MIGRATION_DATABASE_URL
       url.pathname = '/postgres';
       return url.toString();
     }
-    return 'postgresql://postgres:***@localhost:5432/oricms_test';
+    return 'postgresql://postgres:***@localhost:5432/postgres';
   })();
 
 const tempDatabaseName = `oricms_migration_check_${process.pid}_${Date.now()}`;

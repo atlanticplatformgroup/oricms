@@ -130,5 +130,5 @@ include the projectId in the delivery base URL.
 
 - Keep PRs focused on one concern
 - Use the PR description to explain the *why*, not just the *what*
-- Squash merge via GitHub UI
+- Squash merge (external contributors: via GitHub UI; maintainers: direct push or `git merge --squash`)
 - Delete the branch after merge
