@@ -4,7 +4,18 @@ const schemaPath = 'prisma/schema.prisma';
 const migrationsPath = 'prisma/migrations';
 const baseUrl = process.env.MIGRATION_DATABASE_URL
   || process.env.TEST_DATABASE_URL
-  || 'postgresql://postgres:postgres@localhost:5432/oricms_test';
+  || (() => {
+    // Derive admin URL from DATABASE_URL if available
+    const dbUrl = process.env.DATABASE_URL;
+    if (dbUrl) {
+      const url = new URL(dbUrl);
+      // Use the same host/port but connect to the 'postgres' database
+      // with the same credentials for admin operations
+      url.pathname = '/postgres';
+      return url.toString();
+    }
+    return 'postgresql://postgres:***@localhost:5432/oricms_test';
+  })();
 
 const tempDatabaseName = `oricms_migration_check_${process.pid}_${Date.now()}`;
 
