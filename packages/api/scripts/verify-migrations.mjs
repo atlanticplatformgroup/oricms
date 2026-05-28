@@ -1,4 +1,20 @@
 import { spawnSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
+
+// Load .env manually since Prisma auto-loads it but this script doesn't.
+// We need DATABASE_URL and POSTGRES_ADMIN_URL to be available.
+const envPath = '.env';
+try {
+  const content = readFileSync(envPath, 'utf-8');
+  for (const line of content.split('\n')) {
+    const match = line.match(/^([A-Za-z0-9_]+)=(.*)$/);
+    if (match && !process.env[match[1]]) {
+      process.env[match[1]] = match[2];
+    }
+  }
+} catch {
+  // .env doesn't exist — rely on existing env vars
+}
 
 const schemaPath = 'prisma/schema.prisma';
 const migrationsPath = 'prisma/migrations';
