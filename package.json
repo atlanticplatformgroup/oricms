@@ -24,7 +24,7 @@
     "dev:api": "npm run dev -w @ori/api"
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "^4.2.1",
+    "@vitejs/plugin-react": "^4.7.0",
     "tsx": "^4.21.0",
     "typescript": "~5.9.3",
     "vitest": "^4.1.7"
