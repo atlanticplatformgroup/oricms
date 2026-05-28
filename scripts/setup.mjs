@@ -165,7 +165,9 @@ async function checkGit() {
 
 async function installDeps() {
   info("Installing dependencies (this may take a minute)...");
-  await run("npm", ["install"]);
+  // Force dev dependencies even when NODE_ENV=production is set in the shell.
+  // Local development requires tsx, vite, vitest, prisma, etc.
+  await run("npm", ["install", "--include=dev"]);
   success("Dependencies installed");
 }
 
