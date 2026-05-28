@@ -104,6 +104,20 @@ async function checkNode() {
   success(`Node.js ${version}`);
 }
 
+async function checkNodeEnv() {
+  if (process.env.NODE_ENV === "production") {
+    warn("NODE_ENV is set to 'production' in your shell.");
+    log("");
+    log("  This will break local dev (the API requires Redis in production mode).");
+    log("  The dev script now forces NODE_ENV=development, but other tools may still");
+    log("  behave differently. Consider unsetting it for local development:");
+    log(`  ${DIM}  unset NODE_ENV${RESET}`);
+    log("");
+  } else {
+    success(`NODE_ENV is ${process.env.NODE_ENV || "unset"} (ok for local dev)`);
+  }
+}
+
 async function checkNpm() {
   try {
     const { stdout } = await run("npm", ["--version"], { silent: true });
@@ -343,11 +357,12 @@ async function verifyMigrations() {
 async function main() {
   log(`${BOLD}OriCMS Setup${RESET}\n`);
 
-  const TOTAL_STEPS = 8;
+  const TOTAL_STEPS = 9;
   let currentStep = 0;
 
   step(++currentStep, TOTAL_STEPS, "Checking prerequisites");
   await checkNode();
+  await checkNodeEnv();
   await checkNpm();
   await checkDocker();
   await checkGit();
